@@ -28,9 +28,10 @@ Only the capability-gated TypeSec vault may reveal or mutate protected memory.
 Cognition proposes, indexes rank, and stores persist; none of them is an
 authorization authority.
 
-Cognee is inspiration only. An optional Cognee-shaped facade may lower into
-Marciana's native four verbs, but Marciana does not depend on Cognee's runtime,
-adapters, stores, or completeness model.
+Cognee is inspiration only, not a compatibility target. Marciana's baseline is
+complete against its native four verbs and does not depend on Cognee's runtime,
+adapters, stores, API shape, or completeness model. A future edge adapter would
+require a separate decision and could only lower into the native contract.
 
 ## Repository contracts
 

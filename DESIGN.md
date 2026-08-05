@@ -12,9 +12,10 @@ storage, catalog, or compute substrate.
 
 The native API is `remember`, `recall`, `improve`, and `forget`. Marciana owns
 their orchestration, durable cognition jobs, memory-specific schemas and
-adapters, receipts, recovery, and compatibility. Cognee may inspire an
-optional edge facade, but it is never a runtime, store, adapter, or product
-completeness dependency.
+adapters, receipts, recovery, and compatibility. Cognee is design inspiration,
+not an API compatibility target, runtime, store, adapter, or product
+completeness dependency. A Cognee-shaped edge facade is outside the baseline
+and requires a separate future decision.
 
 ## Dependency direction
 
@@ -41,6 +42,24 @@ remotely reachable revision.
 | LakeCat | Iceberg catalog state and governed-scan proof | Required for catalog-backed governed cognition; feature-isolated for local-only use |
 | QueryGraph | Navigator, QGLake, semantic models, governed answers | Consume Marciana through a thin integration |
 | Marciana | Four verbs, jobs, memory ledger, cognition, adapters, recovery, compatibility | Own and version product behavior |
+
+## Semantic ownership and DRY
+
+Cross-stack evidence and state rules have one authoritative implementation:
+
+- TypeSec canonicalizes capability-bound source manifests, cognition bindings,
+  proposals, prepared commits, and security receipts.
+- LakeCat canonicalizes governed scan proofs and catalog authorization evidence.
+- Grust canonicalizes generic guarded-commit requests and backend receipts.
+- Marciana canonicalizes its signed four-verb intents, job transitions, public
+  wire values, and product-level receipt projection.
+
+Adapters translate owned values and delegate validation; they do not reproduce
+another layer's digest profile, state machine, retry rule, or policy check.
+Shared Marciana semantics live in small domain modules and are reused by the
+embedded API, workers, HTTP service, and QueryGraph integration. A convenience
+API is rejected if it creates a second mutation, recovery, or authorization
+path.
 
 ## Security invariant
 

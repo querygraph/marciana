@@ -8,9 +8,10 @@
   LakeCat must not depend on Marciana.
 - Only TypeSec's capability-gated `MemoryVault` may reveal or mutate protected
   memory. Stores persist, indexes rank, and cognition proposes.
-- Cognee is inspiration only. Any optional compatibility facade lowers into
-  Marciana's native four verbs and must not import Cognee runtime, storage, or
-  adapter behavior.
+- Cognee is inspiration only. No Cognee-shaped facade is part of the baseline
+  or its completeness criteria. A separately approved future edge adapter
+  must lower into Marciana's native four verbs and must not import Cognee
+  runtime, storage, or adapter behavior.
 - Preserve route, wire, durable identifier, and database compatibility during
   extraction. Change them only with an explicit versioned migration.
 
