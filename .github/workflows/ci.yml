@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.96.0 --profile minimal --component clippy,rustfmt
+      - name: Validate repository contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s AGENTS.md
+          test -s CHANGELOG.md
+          test -s COMPATIBILITY.md
+          test -s DESIGN.md
+          test -s compat/sail-revision.txt
+          grep -Fq "Cognee is inspiration only" README.md
+          grep -Fq "TypeSec, Grust, Sail, and LakeCat must never depend on Marciana" DESIGN.md
+      - name: Inspect workspace
+        id: workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo metadata --no-deps --format-version 1 > metadata.json
+          if jq -e '.packages | length > 0' metadata.json >/dev/null; then
+            echo "has_packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check formatting
+        if: steps.workspace.outputs.has_packages == 'true'
+        run: cargo fmt --all -- --check
+      - name: Run strict lints
+        if: steps.workspace.outputs.has_packages == 'true'
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: Run workspace tests
+        if: steps.workspace.outputs.has_packages == 'true'
+        run: cargo test --workspace --all-features

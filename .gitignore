@@ -1,0 +1,14 @@
+/target/
+.DS_Store
+.env
+.env.*
+!.env.example
+.direnv/
+.idea/
+.vscode/
+*.db
+*.db-*
+*.log
+*.profraw
+*.swp
+*~

@@ -1,0 +1,6 @@
+# Pin the workspace toolchain so lint results and canonical fixtures are
+# reproducible. Upgrade deliberately in a standalone compatibility change.
+[toolchain]
+channel = "1.96.0"
+components = ["clippy", "rustfmt"]
+profile = "minimal"
