@@ -63,4 +63,6 @@ The current smoke run (1,000 repeats, 504 records) reaches 100% case accuracy
 with zero redaction leaks. The indexed path measured about 5.3 µs p50 versus
 421 µs for the linear path in the local run; these are harness diagnostics,
 not a hosted-system claim. The JSON report emits p50/p95/p99 speedups,
-environment metadata, and a machine-checkable `indexed_faster` gate.
+required model/provider/embedding/prompt/profile/hardware/revision metadata,
+and a machine-checkable `indexed_faster` gate. Override metadata with the
+corresponding CLI options; empty or overlong values are rejected.

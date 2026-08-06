@@ -1,6 +1,7 @@
 import unittest
 
 from metrics import CaseResult, percentile, summarize
+from metadata import BenchmarkMetadata
 
 
 class MetricsTests(unittest.TestCase):
@@ -17,6 +18,12 @@ class MetricsTests(unittest.TestCase):
 
     def test_percentile_empty_is_safe(self) -> None:
         self.assertEqual(percentile([], 95), 0.0)
+
+    def test_benchmark_metadata_is_strict_and_serializable(self) -> None:
+        metadata = BenchmarkMetadata("model", "local", "none", "none", "profile", "arm64", "rev")
+        self.assertEqual(metadata.as_dict()["revision"], "rev")
+        with self.assertRaises(ValueError):
+            BenchmarkMetadata("", "local", "none", "none", "profile", "arm64", "rev")
 
 
 if __name__ == "__main__":

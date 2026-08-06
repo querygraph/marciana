@@ -14,6 +14,7 @@ from datetime import date
 from pathlib import Path
 
 from metrics import CaseResult, summarize
+from metadata import BenchmarkMetadata
 from smoke_backend import IndexedBackend, LinearBackend, Record
 
 
@@ -64,9 +65,24 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repeats", type=int, default=1_000)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--model", default="reference-smoke-v1")
+    parser.add_argument("--provider", default="local")
+    parser.add_argument("--embedding", default="none")
+    parser.add_argument("--prompt", default="none")
+    parser.add_argument("--profile", default="smoke-v1")
+    parser.add_argument("--revision", default="working-tree")
     args = parser.parse_args()
     if args.repeats < 1:
         raise SystemExit("--repeats must be positive")
+    metadata = BenchmarkMetadata(
+        model=args.model,
+        provider=args.provider,
+        embedding=args.embedding,
+        prompt=args.prompt,
+        profile=args.profile,
+        hardware=platform.platform(),
+        revision=args.revision,
+    )
     linear = run_cases(LinearBackend(RECORDS), args.repeats)
     indexed = run_cases(IndexedBackend(RECORDS), args.repeats)
     report = {
@@ -90,6 +106,7 @@ def main() -> None:
             "records": len(RECORDS),
             "repeats": args.repeats,
         },
+        "metadata": metadata.as_dict(),
     }
     output = json.dumps(report, indent=2, sort_keys=True)
     print(output if args.json else output)
