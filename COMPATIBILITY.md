@@ -22,7 +22,7 @@ baseline, not yet a versioned crate release.
 | QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `efd6245` consumes standalone Marciana; a fresh clone passes its active 71-test suite, doctests, and strict Clippy |
 | Clients | Rust/Python/JavaScript fixture versions | Shared `compat/fixtures/api_remember_v1.json`, Python client `0.1.0` (Pydantic `>=2.7,<3`), and TypeScript client `0.1.0` (Node ESM, TypeScript `^5.7`) are independently buildable; coordinated release publication remains pending |
 
-The linked Sail pin records upstream merge `2c1b2e45`. PR
+The linked Sail pin records upstream merge `d8280bf4`. PR
 [lakehq/sail#2374](https://github.com/lakehq/sail/pull/2374) is merged; the
 explicit binary remains subject to the same `grust-sail` and live cognition
 gate, which must be rerun for this refreshed baseline.
