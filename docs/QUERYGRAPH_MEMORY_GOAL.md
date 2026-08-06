@@ -1,11 +1,13 @@
 # QueryGraph Memory Goal
 
-Status: durable memory v1 is consumed by qg-rust. The generic governed
-cognition substrate is implemented in Grust and under final local verification
-as of 2026-08-05; standalone Marciana orchestration and the qg-rust cognition
-cutover remain pending.
+Status: archived Grust-side snapshot. Durable memory v1 is consumed by
+qg-rust, and the standalone Marciana orchestration and qg-rust cognition
+cutover recorded as pending below are now complete: qg-rust consumes the
+native Marciana governed application at `efd6245` (see MARCIANA.md and
+COMPATIBILITY.md). Later sections keep their original 2026-08-05 wording as
+historical context.
 
-This document is the Grust-side source of truth for `querygraph-memory`. It
+This document was the Grust-side source of truth for `querygraph-memory`. It
 separates the TypeSec storage contract and delivered application wiring from
 later scale optimizations that require new backend surfaces or services.
 
@@ -44,7 +46,7 @@ batch size, or journal mode explicitly.
 | Durable cognition application substrate | Implemented on guarded Turso | Leased digest-only jobs, exact source CAS, typed memory effect, exact ID-only index outbox, versioned audit and outcome evidence, and job completion share one transaction; no-change commits durable evidence without fabricating a mutation or outbox row |
 | Cognition retry and recovery substrate | Implemented in Grust | Concurrent apply, commit-response-loss, retry, and reopen tests recover one cross-validated byte-stable outcome without a probe write or duplicate mutation |
 | Bounded Spark execution | Implemented in Grust | Shared 16 MiB Arrow payload/17 MiB Spark message limit, row/work limits, finite operation/abort/cleanup deadlines, and preflight before Arrow allocation |
-| QueryGraph runtime/API wiring | Memory v1 complete; cognition cutover pending | Signed-only remember/recall/forget routes, exact `did:key` RBAC, body-subject spoof test, and server reopen proof are present; native `improve` moves through standalone Marciana after extraction |
+| QueryGraph runtime/API wiring | Memory v1 complete; cognition cutover since completed at qg-rust `efd6245` | Signed-only remember/recall/forget routes, exact `did:key` RBAC, body-subject spoof test, and server reopen proof are present; native `improve` now moves through standalone Marciana |
 
 The sibling qg-rust application opens this store behind TypeSec's
 `ToolCallGuard`, `MemoryToolRouter`, and `MemoryVault`. qg-python's Pydantic AI

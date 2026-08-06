@@ -25,18 +25,21 @@ places Marciana beside the other QueryGraph repositories. The final chapters
 describe ontology-driven cognition and the implemented Apache Ossie integration
 aligned with the semantic Croissant vocabulary.
 
-The word *possible* matters in that last sentence. Marciana's ledger,
+The word *implemented* matters in that last sentence. Marciana's ledger,
 TypeSec boundary, Grust projections, Sail integration, and benchmark harness
-are implemented. Ossie is an external semantic specification and a thin,
+are implemented, not aspirational. Ossie is an external semantic specification and a thin,
 tested Marciana adapter, not a memory store or an authority boundary. The
 adapter accepts a bounded Ossie JSON model, lowers it into Marciana's
 operator-owned ontology, and emits a deterministic content-free query plan.
 
 ## How to read this book
 
-Readers who build agents can begin with Chapters 1, 3, and 11. Readers who
-operate data platforms should start with Chapters 4, 6, and 13. Readers who
-want the Rust contracts can read Chapters 5–10 with the source tree open. Each
+Readers who build agents can begin with "From context windows to durable
+belief," "Where Marciana lives," and "Building a disciplined adapter
+ecosystem." Readers who operate data platforms should start with "Marciana in
+the enterprise semantic layer," "Benchmarking memory systems," and "Failure,
+recovery, and deletion." Readers who want the Rust contracts can read Parts
+III and IV with the source tree open. Each
 chapter names its boundary: what the layer owns, what it must never own, and
 what evidence crosses the boundary.
 
@@ -342,10 +345,9 @@ governed draft be bound to a commit.
 
 ```python
 request = RememberRequest(
-    space="coffee-honduras",
+    space_id="coffee-honduras",
+    text="Honduras coffee price is 4.20 USD/kg (dataverse:coffee:2026-01-10:sps)",
     purpose="market-research",
-    source_id="dataverse:coffee:2026-01-10:sps",
-    draft=MemoryDraft(text="4.20 USD/kg", label="internal"),
 )
 receipt = client.remember(request)
 assert receipt.operation == "remember"
@@ -659,7 +661,7 @@ license/usage constraints, and the as-of boundary.
 
 ### The implemented Apache Ossie adapter
 
-Apache Ossie (formerly Open Semantic Interchange) defines a vendor-neutral
+Apache Ossie (Open Semantic Interchange) defines a vendor-neutral
 semantic model for metrics, dimensions, relationships, and ontology metadata.
 Marciana now has a real thin integration in
 `crates/marciana-cognition/src/ossie.rs`. It accepts a bounded JSON document,
@@ -877,15 +879,16 @@ MCP, LangGraph, Letta, Ossie, and Croissant adapters belong at the edge; the
 Ossie adapter is now the first implemented semantic-model example of that rule.
 
 ```python
-class MemoryToolRegistry:
-    def remember(self, payload: dict) -> dict:
-        request = RememberRequest.model_validate(payload)
-        return self.transport.execute("remember", request.model_dump())
+adapter = McpMemoryAdapter(client)
+receipt = adapter.call(
+    "marciana_remember",
+    {"space_id": "coffee-honduras", "text": "4.20 USD/kg", "purpose": "market-research"},
+)
 ```
 
-The registry validates and dispatches. The injected transport owns the trust
-boundary. The same principle applies to the TypeScript client and MCP tool
-surface.
+The adapter validates the payload against the typed request models and
+dispatches through the existing client. The injected transport owns the trust
+boundary. The same principle applies to the TypeScript client.
 
 ## A release checklist
 
@@ -943,8 +946,8 @@ unrelated utilities in one large module.
 | `crates/marciana-cognition` | Profiles, providers, leases, budgets, evaluation, SLOs | Restart and release-gate tests |
 | `clients/python/marciana_client` | Validation-only wire and MCP translation | Separate Python tests |
 | `clients/typescript` | Independently buildable wire client | Fixture conformance tests |
-| `benchmarks` | Content-free corpus, adapters, latency and safety metrics | Nine dependency-free tests |
-| `examples/coffee_market_demo` | Dataverse/Sail/Pydantic AI v2 example | Four lifecycle tests |
+| `benchmarks` | Content-free corpus, adapters, latency and safety metrics | Dependency-free smoke and adversarial test suites |
+| `examples/coffee_market_demo` | Dataverse/Sail/Pydantic AI v2 example | Lifecycle regression tests |
 | `compat` | Sail revision and compatibility fixtures | Pinned merged upstream hash |
 | `docs/book` | This source-owned manuscript and FirstPair assets | Build and rendered checks |
 
@@ -1003,18 +1006,16 @@ summary of protected content.
 ### A.3 Python boundary excerpt
 
 ```python
-class Transport(Protocol):
-    def execute(self, operation: str, payload: dict[str, object]) -> dict[str, object]: ...
+class MemoryTransport(Protocol):
+    def post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]: ...
 
 
 class MarcianaClient:
-    def __init__(self, transport: Transport) -> None:
+    def __init__(self, transport: MemoryTransport) -> None:
         self._transport = transport
 
-    def recall(self, request: RecallRequest) -> RecallReceipt:
-        payload = request.model_dump(mode="json")
-        result = self._transport.execute("recall", payload)
-        return RecallReceipt.model_validate(result)
+    def recall(self, request: RecallRequest) -> MemoryReceipt:
+        return self._call("/v1/memory/recall", request, "recall")
 ```
 
 The client is deliberately boring. It validates, delegates, and validates the
@@ -1105,17 +1106,16 @@ a stale semantic result cannot silently overwrite a newer assertion.
 
 ```json
 {
-  "name": "recall",
+  "name": "marciana_recall",
   "arguments": {
-    "space": "coffee-honduras",
+    "space_id": "coffee-honduras",
     "purpose": "market-research",
-    "query": "latest price at San Pedro Sula",
-    "as_of": "2026-02-10"
+    "query": "latest price at San Pedro Sula"
   }
 }
 ```
 
-MCP is a transport and tool-discovery convention. The MCP registry validates
+MCP is a transport and tool-discovery convention. The MCP adapter validates
 the arguments and invokes the injected client transport; it must not become a
 second implementation of TypeSec or the planner.
 

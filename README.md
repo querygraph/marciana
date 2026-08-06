@@ -10,9 +10,11 @@ a native four-verb API:
   guarded commit; and
 - `forget` performs scoped, audited removal or retraction.
 
-The project is currently in its repository-extraction phase. The initial
-`querygraph-memory` transplant will preserve behavior, durable identifiers, and
-tests before the workspace is split into smaller product and adapter crates.
+The repository is an extracted, verified baseline. The `querygraph-memory`
+transplant preserved behavior, durable identifiers, and tests, and the
+workspace is now split into four product and adapter crates:
+`marciana-ledger`, `marciana-cognition`, `marciana-memory`, and
+`marciana-catalog`.
 
 ## Trust boundary
 
@@ -42,12 +44,12 @@ require a separate decision and could only lower into the native contract.
 - [CHANGELOG.md](CHANGELOG.md) records every user-visible logical change.
 - [AGENTS.md](AGENTS.md) defines contribution and delivery rules.
 
-The pre-crate scaffold can be validated with:
+The workspace can be inspected with:
 
 ```sh
 cargo metadata --no-deps --format-version 1
 ```
 
-Once the transplant lands, CI additionally requires formatting, lint,
-workspace tests, conformance tests, and a live Sail gate built from the exact
-recorded upstream revision.
+CI requires formatting, lint, workspace tests, conformance tests, the
+dependency-free Python benchmark suite, and a live Sail gate built from the
+exact recorded upstream revision.

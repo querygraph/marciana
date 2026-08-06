@@ -25,6 +25,12 @@ All notable changes to Marciana are documented in this file.
 - Print a human smoke-benchmark summary without `--json`, share one scoring
   helper across smoke backends with sorted redactions, and cap corpus query
   length in the strict loader.
+- Correct stale documentation: present-tense extracted-baseline framing in
+  the README, the TypeSec pin row, the archived QueryGraph memory-goal
+  status, book excerpts aligned to the real client API and wire, chapter
+  references by name, consistent Ossie naming and book-title citations,
+  canonical smoke-benchmark numbers, demo prerequisite ordering, and merged
+  duplicate unreleased changelog date headings.
 - Deliver the MARCIANA-ADVERSARIAL-v1 benchmark: an eighteen-case adversarial
   corpus with a versioned manifest, a deterministic policy-aware reference
   backend with durable replay protection and idempotent receipts, hard-gate

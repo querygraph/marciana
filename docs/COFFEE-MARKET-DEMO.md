@@ -112,13 +112,16 @@ asserts the complete action sequence:
 
 ## Run it
 
+First install the required Python dependencies (pydantic and Pydantic AI v2)
+from [`../examples/coffee_market_demo/requirements.txt`](../examples/coffee_market_demo/requirements.txt);
+the tests and demo fail with `ModuleNotFoundError` without them:
+
 ```bash
+pip install -r examples/coffee_market_demo/requirements.txt
 python3 -m unittest discover \
   -s examples/coffee_market_demo/tests -q
 python3 -m examples.coffee_market_demo.demo
 ```
 
-Install the optional Python dependencies from
-`../examples/coffee_market_demo/requirements.txt` for Pydantic AI v2. Use
-`--live --live-model <provider:model>` only when the external services and
+Use `--live --live-model <provider:model>` only when the external services and
 credentials are configured.

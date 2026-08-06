@@ -175,9 +175,11 @@ improves the newer San Pedro Sula price, recalls the revised context, and
 forgets only the obsolete observation. Historical provenance remains visible in
 the receipts; private signing material never enters the model context.
 
-Run the separate test suite and demo with:
+First install the demo's required Python dependencies, then run the separate
+test suite and demo:
 
 ```bash
+pip install -r examples/coffee_market_demo/requirements.txt
 python3 -m unittest discover -s examples/coffee_market_demo/tests -q
 python3 -m examples.coffee_market_demo.demo
 ```
@@ -186,8 +188,8 @@ The complete walkthrough is in the [Honduras coffee-market demo guide](../../COF
 
 ## Read the book
 
-Marciana 2 is developed in the open alongside [*Marciana: Governed Cognition
-for the QueryGraph Stack*](https://firstpair.org/read/marciana/). The book
+Marciana 2 is developed in the open alongside [*Marciana: Governed Memory for
+the QueryGraph Semantic Stack*](https://firstpair.org/read/marciana/). The book
 starts from first principles of AI memory, compares the systems that preceded
 this design, and then follows the code boundary through TypeDID, TypeSec,
 Grust, Sail, LakeCat, Semantic Croissant, Ossie, Pydantic AI v2, benchmarks,

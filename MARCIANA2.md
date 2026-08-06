@@ -168,7 +168,8 @@ through typed agent tools while preserving historical price observations.
 The demo now has a key-free deterministic TestModel path and a regression test
 for the complete report → learn → recall → improve → recall → forget lifecycle;
 the structured decision action is always derived from the governed tool that
-actually ran. This keeps the example executable in clean environments while
+actually ran. This keeps the example executable without provider keys once
+the optional demo requirements (pydantic, pydantic-ai) are installed, while
 leaving live provider credentials and transport outside the repository.
 The first thin Python client boundary now lives under
 `clients/python/marciana_client`; it validates four-verb request/receipt wire
@@ -554,9 +555,10 @@ and temporal corpus.
 The repository now includes a dependency-free benchmark harness under
 `benchmarks/`. It exercises current versus historical recall, abstention,
 redaction safety, deterministic ranking, context-token accounting, and
-p50/p95/p99 latency for linear versus indexed retrieval. A 1,000-repeat local
-run over 504 records reached 100% smoke accuracy with zero redaction leaks and
-reduced p50 lookup time from roughly 421 µs to 5.3 µs. These figures are engineering
+p50/p95/p99 latency for linear versus indexed retrieval. The recorded
+2026-08-06 1,000-repeat run over 504 records reached 100% smoke accuracy with
+zero redaction leaks and reduced p50 lookup time from 572.52 µs to
+7.03 µs. These figures are engineering
 diagnostics, not a claim against the published vendor results; pinned adapters
 for LoCoMo and LongMemEval now normalize authorized local fixtures at exact
 source revisions. BEAM and BEAM-10M Parquet source revisions are also pinned;
