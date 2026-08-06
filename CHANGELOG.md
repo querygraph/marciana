@@ -14,6 +14,10 @@ All notable changes to Marciana are documented in this file.
   history-preserving extraction baseline and its explicit clean-clone and
   remotely-reachable dependency limitations.
 
+- Recorded QueryGraph's opaque `improve` containment step: callers no longer
+  receive a governed cognition proposal while the behavior-preserving
+  composition is prepared for its later move into Marciana.
+
 ### 2026-08-06
 
 - Transplanted `querygraph-memory` into standalone Marciana with preserved
