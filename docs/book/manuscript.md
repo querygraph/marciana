@@ -22,14 +22,15 @@ event through the stack. It compares Marciana with Mem0, Graphiti, Zep,
 Cognee, Letta, and LangMem; describes the Rust implementation and its Python
 surface; walks through benchmarks and a Honduras coffee-market example; and
 places Marciana beside the other QueryGraph repositories. The final chapters
-look forward to ontology-driven cognition and a possible Apache Ossie
-integration aligned with the semantic Croissant vocabulary.
+describe ontology-driven cognition and the implemented Apache Ossie integration
+aligned with the semantic Croissant vocabulary.
 
 The word *possible* matters in that last sentence. Marciana's ledger,
 TypeSec boundary, Grust projections, Sail integration, and benchmark harness
-are implemented. Ossie is treated here as an emerging interoperability target:
-an architectural fit to be verified against its released specification, not a
-claim that an unconfirmed external feature already exists.
+are implemented. Ossie is an external semantic specification and a thin,
+tested Marciana adapter, not a memory store or an authority boundary. The
+adapter accepts a bounded Ossie JSON model, lowers it into Marciana's
+operator-owned ontology, and emits a deterministic content-free query plan.
 
 ## How to read this book
 
@@ -283,7 +284,7 @@ QueryGraph is a stack, not a single database. Each layer has a narrow contract:
 | Grust | Durable graph/storage, leases, guarded idempotency | Semantic truth or model choice |
 | LakeCat | Catalog, datasets, governance metadata | Agent authority or memory mutation |
 | Sail | Distributed relational/semantic execution | Private memory policy |
-| Fluree | Semantic ledger/query projection where deployed | TypeSec capability minting |
+| Akka + Fluree | Comparative semantic-ledger/query role in the reviewed Akka port | Marciana uses TypeDID → TypeSec → Grust/Sail/LakeCat instead |
 | Marciana | Memory verbs, cognition proposals, context products | Foundational stores or generic Sail behavior |
 | Agents/clients | Translation, orchestration, user experience | Reimplementing authorization |
 
@@ -297,14 +298,14 @@ flowchart TB
   G[Grust durable graph and guarded commit]
   L[LakeCat catalog and datasets]
   S[Sail execution]
-  F[Fluree semantic projection]
+  A[Akka + Fluree role in the comparative port]
   U --> C --> M
   M --> T
   M --> D
   M --> G
   M --> L
   M --> S
-  M --> F
+  M -. comparative role only .-> A
   T --> G
   L --> S
 ```
@@ -355,7 +356,7 @@ authorization, and storage to an injected transport. This keeps SDK code thin
 and makes it impossible for a convenience adapter to become a hidden policy
 engine.
 
-## Grust, LakeCat, Sail, and Fluree
+## Grust, LakeCat, Sail—and the Akka/Fluree comparison
 
 ### Grust: the durable substrate
 
@@ -410,13 +411,23 @@ The supported baseline records the merged upstream Sail PR #2374 revision in
 `compat/sail-revision.txt`. The explicit binary remains subject to the live
 gate; a random executable on `PATH` is not proof of compatibility.
 
-### Fluree: semantic projection
+### The Akka/Fluree role and Marciana's replacement boundary
 
-Fluree can provide a semantic ledger and query surface for graph-shaped data.
-Marciana's rule is projection, not duplication: the memory ledger remains the
-logical authority, while a Fluree view may answer semantic queries or feed a
-formation proposal. A projection must carry the source assertion IDs and
-revision so it can be rebuilt and compared.
+The reviewed Akka implementation uses Fluree as its semantic-ledger and query
+projection: it gives an Akka service a graph-shaped semantic surface and a
+commit history. That role is comparative input, not a Marciana dependency.
+Marciana places a stronger identity and authorization boundary before the
+corresponding semantic work:
+
+```text
+TypeDID identity → TypeSec capability/vault → Marciana ledger → Grust
+                                             ↘ Sail/LakeCat projections
+```
+
+If a deployment later consumes a Fluree view, it is an ordinary external
+projection adapter. The view must carry source assertion IDs and revision, and
+it must return candidates to the same RecallIntent or formation path. It cannot
+mint TypeSec capabilities, write the ledger, or replace Grust's guarded commit.
 
 # Part IV — The memory engine
 
@@ -646,16 +657,22 @@ license/usage constraints, and the as-of boundary.
 | Distribution | Sail/warehouse adapter |
 | Provenance | Digest-only lineage graph |
 
-### Apache Ossie as a future adapter target
+### The implemented Apache Ossie adapter
 
-If the new Apache Ossie project provides an ontology-aware semantic execution
-or cognition surface aligned with Croissant, it is a natural peer integration:
-Ossie can resolve concepts and transformations; Marciana can govern memory
-formation and context. The safe adapter shape is:
+Apache Ossie (formerly Open Semantic Interchange) defines a vendor-neutral
+semantic model for metrics, dimensions, relationships, and ontology metadata.
+Marciana now has a real thin integration in
+`crates/marciana-cognition/src/ossie.rs`. It accepts a bounded JSON document,
+validates names and limits, lowers metrics and dimensions into the existing
+operator-owned `SchemaDefinition`, binds the result to a LakeCat-style source
+manifest, and produces a deterministic semantic query plan. The adapter does
+not add an Ossie runtime dependency and does not give Ossie mutation authority.
+
+The implementation follows the same peer-integration shape:
 
 ```mermaid
 flowchart LR
-  O[Ossie ontology/query plan] --> A[Thin Marciana adapter]
+  O[Ossie JSON semantic model] --> A[OssieAdapter]
   A --> I[Closed formation or recall intent]
   I --> P[Marciana planner/proposal]
   P --> S[TypeSec authorization]
@@ -663,11 +680,16 @@ flowchart LR
   G --> O
 ```
 
-The adapter must not import Ossie's store as Marciana's authority, accept
-model-chosen operations, or bypass TypeSec. It should translate typed ontology
-IDs, schema versions, source manifests, and bounded result sets. Until Ossie's
-released contracts are verified, this chapter is an integration design and a
-test plan—not a compatibility claim.
+The adapter must not import an Ossie store as Marciana's authority, accept
+model-chosen operations, or bypass TypeSec. It translates typed ontology IDs,
+schema versions, source manifests, and bounded result sets. Its contract is
+covered by `crates/marciana-cognition/tests/ossie.rs`: imports are
+order-independent, duplicate names fail closed, unknown metrics/dimensions are
+rejected, and query plans bind to the imported model digest.
+
+The upstream specification and incubator proposal are linked from the project
+documentation: [Apache Ossie](https://github.com/apache/ossie) and the
+[Ossie proposal](https://cwiki.apache.org/confluence/spaces/INCUBATOR/pages/430408796/OssieProposal).
 
 ### Ontology-aware cognition
 
@@ -851,7 +873,8 @@ receipt back. It should not duplicate:
 - backup, audit, and quota policy.
 
 This is why Cognee remains inspiration rather than a dependency, and why
-future MCP, LangGraph, Letta, Ossie, or Croissant adapters belong at the edge.
+MCP, LangGraph, Letta, Ossie, and Croissant adapters belong at the edge; the
+Ossie adapter is now the first implemented semantic-model example of that rule.
 
 ```python
 class MemoryToolRegistry:
@@ -893,11 +916,13 @@ authority, and explanation remain connected as data moves across services.
 
 Marciana's contribution is to make memory a governed QueryGraph product. It
 uses TypeDID for identity, TypeSec for authority, Grust for durable guarded
-state, LakeCat for cataloged data, Sail and Fluree for execution and semantic
-projection, and thin clients for agents. Cognition can be ambitious because
+state, LakeCat for cataloged data, Sail for execution, and thin clients for
+agents. The Akka/Fluree semantic-ledger role is comparative; Marciana places
+TypeDID and TypeSec before the corresponding semantic projections. Cognition can be ambitious because
 the commit boundary is conservative. Ontologies can be rich because they do
-not become permission tokens. A future Ossie integration can be powerful
-because its adapter can remain thin and its semantic plans can be verified.
+not become permission tokens. The implemented Ossie integration remains
+powerful precisely because its adapter is thin and its semantic plans are
+verified before entering the normal memory paths.
 
 The design is intentionally unglamorous at the point where trust matters:
 typed requests, bounded plans, deterministic digests, explicit receipts, and
@@ -1060,19 +1085,21 @@ The manifest fixes relation identity, schema revision, ownership, and usage
 constraints. Sail executes the plan; it does not become the memory policy
 engine.
 
-### B.5 Fluree → semantic query
+### B.5 Akka/Fluree semantic role → Marciana boundary
 
 ```text
-semantic_view = fluree.query(
+semantic_view = external_semantic_projection.query(
   "?observation a qg:CoffeeObservation; qg:market ?market; "
   "qg:price ?price; qg:observedOn ?date",
   revision=projection_revision,
 )
 ```
 
-The returned IDs are candidates for a governed recall or formation operation.
-The view must expose its revision and source lineage so a stale semantic result
-cannot silently overwrite a newer assertion.
+This is the role played by Fluree in the reviewed Akka port, not a Marciana
+runtime call. In Marciana, the returned IDs are candidates for a governed
+recall or formation operation only after a TypeDID-authenticated request and
+TypeSec authorization. The view must expose its revision and source lineage so
+a stale semantic result cannot silently overwrite a newer assertion.
 
 ### B.6 Agent → MCP → Marciana
 
@@ -1192,9 +1219,9 @@ ledger and a bounded ID-only repair batch.
 
 ## Appendix E — Ossie/Croissant conformance checklist
 
-This checklist turns the future integration into an executable design review.
-It should be completed against the exact Apache Ossie release and Croissant
-schema revision selected by a deployment.
+This checklist documents the implemented integration and the remaining
+deployment-specific checks. It should be completed against the exact Apache
+Ossie release and Croissant schema revision selected by a deployment.
 
 | Check | Question | Marciana action |
 | --- | --- | --- |
@@ -1235,8 +1262,8 @@ TypeSec authorization of the exact draft and request digest.
 **Lineage digest** — A content-free identity that links a result to its source
 and processing stages without exposing protected plaintext.
 
-**Projection** — A rebuildable representation such as a vector index, Fluree
-view, or Sail table derived from the logical ledger.
+**Projection** — A rebuildable representation such as a vector index, external
+semantic view, or Sail table derived from the logical ledger.
 
 **Proposal** — Transient cognition output that has not yet become authoritative
 memory.

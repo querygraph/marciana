@@ -16,6 +16,9 @@ All notable changes to Marciana are documented in this file.
   edition.
 - Add the tracked QueryGraph blog headboard to the FirstPair book configuration.
 - Register the Marciana slug and QueryGraph shelf in the source FirstPair contract.
+- Add a tested Apache Ossie JSON importer and deterministic ontology/query-plan adapter.
+- Clarify Fluree as the semantic-ledger/query role in the comparative Akka port,
+  with TypeDID and TypeSec preceding Marciana projections.
 - Advance the Sail compatibility pin to the merged upstream baseline.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
 - Persist and recover vector manifests through guarded Grust commits.
