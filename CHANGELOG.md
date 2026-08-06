@@ -12,6 +12,7 @@ All notable changes to Marciana are documented in this file.
   and forbidden-ID leakage.
 - Add bounded ordered evaluation corpora and stable aggregate summaries.
 - Add evaluator-bound receipts for reproducible context-evaluation releases.
+- Add bounded content-free P50/P95/P99 latency percentile snapshots.
 - Add a capability-bound facade path for session-scoped context planning.
 - Add bounded session metadata that binds session, space, and recall-policy
   identity into recall planning without changing authorization semantics.

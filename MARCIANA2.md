@@ -184,6 +184,8 @@ operator/readiness integrations; it reports only bounded component names,
 revisions, and states.
 It also exposes bounded content-free operation metrics for verb counts,
 denials, and latency accounting; hosts own persistence and dashboard export.
+The cognition layer also exposes bounded nearest-rank P50/P95/P99 latency
+percentiles with a content-free digest for reproducible evaluation runs.
 The context layer now also exposes a deterministic, content-free evaluation
 contract measuring relevance precision/recall, token utility, and forbidden-ID
 leakage against a verified plan; bounded corpora aggregate those measurements

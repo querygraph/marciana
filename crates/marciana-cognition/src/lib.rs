@@ -10,6 +10,7 @@ mod formation_explanation;
 mod formation_profile;
 mod governed;
 mod health;
+mod latency;
 mod learning;
 mod lineage;
 mod memory_error;
@@ -54,6 +55,7 @@ pub use governed::{
     CONTEXT_REQUEST_DIGEST, CONTEXT_SUBJECT, PrimedAuthorityVerifier, current_policy_decision_id,
 };
 pub use health::{ComponentHealth, ComponentState, HealthError, HealthSnapshot};
+pub use latency::{LatencyError, LatencyPercentiles, LatencySamples};
 pub use learning::{
     EvaluationReport, FeedbackDataset, FeedbackRecord, LearningError, Observation,
     ObservationStatus, Procedure, ProcedureStatus,
