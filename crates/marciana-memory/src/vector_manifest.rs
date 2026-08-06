@@ -5,7 +5,7 @@ use std::collections::BTreeSet;
 use sha2::{Digest, Sha256};
 use typesec_memory::MemoryId;
 
-use crate::vector::{TenantIndexError, VectorIndexScope};
+use crate::vector::VectorIndexScope;
 
 const MAX_MANIFEST_IDS: usize = 100_000;
 
@@ -34,8 +34,6 @@ pub struct VectorRepairBatch {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
 pub enum VectorManifestError {
-    #[error("vector manifest scope is invalid")]
-    InvalidScope,
     #[error("vector manifest is full")]
     Capacity,
     #[error("vector repair scope does not match")]
@@ -148,11 +146,5 @@ impl VectorRepairBatch {
     #[must_use]
     pub fn operations(&self) -> &[VectorRepairOperation] {
         &self.operations
-    }
-}
-
-impl From<TenantIndexError> for VectorManifestError {
-    fn from(_: TenantIndexError) -> Self {
-        Self::InvalidScope
     }
 }
