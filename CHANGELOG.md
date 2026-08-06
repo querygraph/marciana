@@ -11,6 +11,8 @@ All notable changes to Marciana are documented in this file.
   workspace over the current Grust and TypeSec checkouts.
 - Matched the preserved crate's `0.12.0` compatibility line so QueryGraph can
   switch to the standalone path without changing its existing package contract.
+- Switched the local qg-rust consumer to the standalone Marciana crate and
+  re-ran its 100-test cognition/application suite successfully.
 
 ### 2026-08-05
 
