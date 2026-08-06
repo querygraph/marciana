@@ -6,6 +6,9 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-05
 
+- Established `MARCIANA.md` as the canonical active delivery record for the
+  standalone extraction, current cross-stack status, execution order, and
+  acceptance gates.
 - Added the reviewed Marciana 2 plan, comparing leading AI-memory systems and
   prioritizing governed context assembly, assertion-safe temporal memory,
   durable formation, and proposal-based agent learning.
