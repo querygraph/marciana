@@ -10,6 +10,10 @@ All notable changes to Marciana are documented in this file.
   adapter. It preserves LakeCat ownership of proof validation while moving the
   memory-product translation out of QueryGraph.
 
+- Added Marciana-owned cognition proof-boundary validation, including the
+  configured-catalog check and the stricter flattened table-identity budget
+  required before a LakeCat proof can reach a cognition engine.
+
 - Replaced Marciana's TypeSec and Grust sibling paths with exact reachable
   Git revisions, allowing its workspace to build and test independently of the
   local QueryGraph checkout layout.
