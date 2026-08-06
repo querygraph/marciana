@@ -26,6 +26,8 @@ All notable changes to Marciana are documented in this file.
   seam for the forthcoming optional Parquet normalizer.
 - Added the lazy optional-PyArrow BEAM normalizer with bounded conversation-ID
   targets and explicit abstention handling.
+- Added a transport-neutral typed Python client boundary for remember, recall,
+  improve, and forget, with strict Pydantic v2 wire models and tests.
 
 ### 2026-08-06
 

@@ -84,6 +84,10 @@ coffee-market demonstration under `examples/coffee_market_demo`. It loads a
 Dataverse-shaped Honduras fixture (or a configured native Dataverse dataset),
 can write/query Sail over Spark Connect, and exercises governed memory verbs
 through typed agent tools while preserving historical price observations.
+The first thin Python client boundary now lives under
+`clients/python/marciana_client`; it validates four-verb request/receipt wire
+shapes while leaving signing, authorization, and storage to the injected
+transport.
 
 ## Executive judgment
 

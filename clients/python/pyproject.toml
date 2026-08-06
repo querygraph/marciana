@@ -1,0 +1,6 @@
+[project]
+name = "marciana-client"
+version = "0.1.0"
+description = "Typed transport-neutral Python client for Marciana memory verbs"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2.7,<3"]
