@@ -47,6 +47,10 @@ All notable changes to Marciana are documented in this file.
   relation projections. It reports only a migration count and uses fixed
   diagnostics, keeping protected source values out of migration results.
 
+- Verified that assertion migration preserves the established legacy graph
+  neighborhood read behavior, allowing mixed-version deployment before the
+  assertion-aware recall API is introduced.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

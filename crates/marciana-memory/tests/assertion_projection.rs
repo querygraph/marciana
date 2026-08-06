@@ -6,7 +6,7 @@ use querygraph_memory::{
     GraphStoreMemoryStore,
     assertion_projection::{project_assertion, project_legacy_relation},
 };
-use typesec_memory::{MemoryStore, StoredRecord};
+use typesec_memory::{EntityRef, MemoryStore, StoredRecord};
 
 fn assertion() -> Assertion {
     let at = Utc.with_ymd_and_hms(2026, 8, 6, 12, 0, 0).unwrap();
@@ -115,12 +115,23 @@ fn legacy_relation_migration_is_retry_stable_and_preserves_half_open_validity() 
 #[test]
 fn storage_migration_is_idempotent() {
     let store = GraphStoreMemoryStore::new(MemoryGraphStore::default());
-    let source = record();
+    let mut source = record();
+    source
+        .entities
+        .push(EntityRef::new("account:acme", "account"));
     store.put(source.clone()).unwrap();
     store
         .link("account:acme", "locatedIn", "place:venice", &source.id)
         .unwrap();
 
+    assert_eq!(
+        store.neighborhood("account:acme", 1).unwrap(),
+        vec![source.id.clone()]
+    );
     assert_eq!(store.migrate_legacy_assertions().unwrap().migrated, 1);
     assert_eq!(store.migrate_legacy_assertions().unwrap().migrated, 0);
+    assert_eq!(
+        store.neighborhood("account:acme", 1).unwrap(),
+        vec![source.id]
+    );
 }
