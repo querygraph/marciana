@@ -22,6 +22,8 @@ All notable changes to Marciana are documented in this file.
   and preprocessing changes cannot silently reuse incompatible vectors.
 - Added local LoCoMo and LongMemEval adapters pinned to exact repository
   revisions; BEAM remains explicitly unconfigured pending a verified source.
+- Recorded exact BEAM and BEAM-10M dataset revisions, with a tested source-pin
+  seam for the forthcoming optional Parquet normalizer.
 
 ### 2026-08-06
 

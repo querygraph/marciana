@@ -20,6 +20,18 @@ LONGMEMEVAL_SOURCE = SourcePin(
     "98d7416c24c778c2fee6e6f3006e7a073259d48f",
     "longmemeval-question-v1",
 )
+BEAM_SOURCE = SourcePin(
+    "beam",
+    "https://huggingface.co/datasets/Mohammadta/BEAM",
+    "3205395e897e7318c7b094ef4e6047b9b82dbb03",
+    "beam-parquet-v1",
+)
+BEAM_10M_SOURCE = SourcePin(
+    "beam-10m",
+    "https://huggingface.co/datasets/Mohammadta/BEAM-10M",
+    "9b2096193fe74e2837e4713e483351e19817773c",
+    "beam-parquet-v1",
+)
 
 
 def load_locomo(path: Path, as_of: date = date.max) -> tuple[EvaluationCase, ...]:

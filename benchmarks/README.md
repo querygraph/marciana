@@ -55,7 +55,9 @@ local-only and rejects malformed, duplicate, empty, or oversized corpora.
 published data revisions (`3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376` and
 `98d7416c24c778c2fee6e6f3006e7a073259d48f`); it never downloads data or sends question,
 answer, or evidence text to a service. BEAM remains pending a verified public
-source layout and exact revision.
+normalizer, but its 100K/500K/1M and 10M Parquet dataset revisions are now
+recorded and tested in `adapters.py`. Loading those large files is an optional
+PyArrow adapter unit, not part of the dependency-free smoke harness.
 
 The current smoke run (1,000 repeats, 504 records) reaches 100% case accuracy
 with zero redaction leaks. The indexed path measured about 5.3 µs p50 versus

@@ -426,8 +426,9 @@ run over 504 records reached 100% smoke accuracy with zero redaction leaks and
 reduced p50 lookup time from roughly 421 µs to 5.3 µs. These figures are engineering
 diagnostics, not a claim against the published vendor results; pinned adapters
 for LoCoMo and LongMemEval now normalize authorized local fixtures at exact
-source revisions. A BEAM adapter remains pending a verified public source
-layout and revision.
+source revisions. BEAM and BEAM-10M Parquet source revisions are also pinned;
+their optional PyArrow normalizer remains separate from the dependency-free
+smoke harness.
 
 ## Priority decisions
 

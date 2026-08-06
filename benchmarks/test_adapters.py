@@ -4,10 +4,21 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from adapters import LONGMEMEVAL_SOURCE, LOCOMO_SOURCE, load_locomo, load_longmemeval
+from adapters import (
+    BEAM_10M_SOURCE,
+    BEAM_SOURCE,
+    LONGMEMEVAL_SOURCE,
+    LOCOMO_SOURCE,
+    load_locomo,
+    load_longmemeval,
+)
 
 
 class AdapterTests(unittest.TestCase):
+    def test_beam_dataset_pins_are_exact_even_before_optional_parquet_loading(self) -> None:
+        BEAM_SOURCE.validate()
+        BEAM_10M_SOURCE.validate()
+
     def test_pins_are_exact_and_locomo_evidence_is_normalized(self) -> None:
         LOCOMO_SOURCE.validate()
         with tempfile.TemporaryDirectory() as directory:
