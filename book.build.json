@@ -21,7 +21,7 @@
   "pandoc": {
     "reader": "markdown+smart",
     "tocDepth": 2,
-    "resourcePaths": ["${repoRoot}", "${tmpDir}", "${tmpDir}/diagrams"],
+    "resourcePaths": ["${repoRoot}", "${repoRoot}/docs/book", "${tmpDir}", "${tmpDir}/diagrams"],
     "commonArgs": ["--lua-filter", "${repoRoot}/docs/book/mermaid.lua"]
   },
   "pdf": {

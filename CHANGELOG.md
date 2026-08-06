@@ -7,6 +7,8 @@ All notable changes to Marciana are documented in this file.
 - Add the source-owned Marciana book manuscript, FirstPair build contract,
   diagrams, benchmark chapter, enterprise semantic-layer discussion, and
   publisher-mark-matched cover assets.
+- Include the book root in HTML resource resolution so cover assets embed in
+  single-file and chapter readers.
 - Advance the Sail compatibility pin to the merged upstream baseline.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
 - Persist and recover vector manifests through guarded Grust commits.
