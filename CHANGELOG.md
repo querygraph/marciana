@@ -6,6 +6,14 @@ All notable changes to Marciana are documented in this file.
 
 - Track TypeSec main for active QueryGraph integration so qg-rust and Marciana
   share one TypeSec dependency universe during development.
+- Add the adversarial-benchmark blog headboard — Venetian galleys racing
+  toward Rovinj led by the Bucintoro under the banner of St Mark, with
+  Marciana on the flagship's side — rendered reproducibly from a committed
+  SVG-composition script.
+- Cover MARCIANA-ADVERSARIAL-v1 in the book: the delivered adversarial
+  release corpus replaces the aspirational one, a new appendix section pairs
+  the adversarial gate suite with the context-evaluation protocol, and the
+  release checklist requires a passing run with every hard gate at zero.
 - Preserve vector manifest membership when re-indexing an existing record
   fails; rollback now removes only newly inserted members.
 - Bind Ossie metric expressions and labeled, count-prefixed sections into

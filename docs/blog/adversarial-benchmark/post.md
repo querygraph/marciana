@@ -1,5 +1,7 @@
 # MARCIANA-ADVERSARIAL-v1: benchmarking cognition under attack
 
+![Venetian galleys race across the evening Adriatic toward Rovinj, led by the Bucintoro flying the banner of St Mark with Marciana lettered on its side.](headboard.png)
+
 Every memory benchmark we could find asks some version of the same
 question: *did the system remember the right thing?* LoCoMo asks it across
 long conversations, LongMemEval across sessions and knowledge updates, BEAM

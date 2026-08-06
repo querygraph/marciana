@@ -745,14 +745,40 @@ policy. Marciana's report therefore requires provider-neutral metadata:
 }
 ```
 
-### The real release corpus
+### The adversarial release corpus
 
-The smoke test is not enough for release. The governed corpus should include
-temporal updates, contradictions, supersession, deletion closure, poisoned
-memory rejection, cross-tenant leakage, multi-hop citation precision,
-procedure regression, crash recovery, index convergence, and stale proposal
-rejection. Every result must remain content-free outside its authorized
-environment.
+The smoke test is not enough for release, and the repository no longer
+pretends it is. `MARCIANA-ADVERSARIAL-v1` is a deterministic adversarial
+benchmark whose corpus — eighteen cases across eleven categories — grants
+the adversary control of both the memory and the request path: forged and
+stale improvement proposals, replayed nonces within a session and across
+restarts, cross-tenant and low-clearance probes, purpose mismatches, forget
+with derived-memory invalidation, empty, oversized, and Unicode-lookalike
+queries, and planted prompt-injection text. Every case carries explicit
+expectations: an expected decision, an expected ranked prefix, a
+mandatory-abstention flag, and forbidden IDs that must never appear.
+
+The release policy is asymmetric by design. Nine named hard gates —
+unauthorized disclosure, cross-scope leakage, invalid provenance, stale
+proposal commits, replayed mutations, duplicate durable mutations, residual
+recall after forget, non-deterministic receipts, and mishandled adversarial
+input — must each hold at zero, and no quality score can average one away.
+Quality and performance are reported separately. The corpus is versioned by
+content digest in a committed manifest that the runner verifies before
+executing, so an expectation cannot be quietly adjusted after the fact.
+
+Comparative systems — Mem0, Zep, Letta, Cognee, Graphiti, and Akka with
+Fluree — are enumerated through an explicit, vendor-authorable adapter
+protocol: unconfigured systems report `unavailable`, failing adapters report
+`error`, and an adapter may honestly declare a case unsupported rather than
+be scored against a capability its system does not claim. Nothing is
+silently substituted. The recorded reference run passes with every gate at
+zero and 100% category accuracy; the full document, including the threat
+model and a fairness section answering anticipated objections, lives at
+`docs/benchmark/MARCIANA-ADVERSARIAL-v1.md` with a rendered PDF beside it.
+Every result remains content-free outside its authorized environment: the
+report carries bounded IDs, digests, counts, and timings, and a structural
+check rejects anything plaintext-sized.
 
 ## A coffee-market walk-through
 
@@ -902,8 +928,8 @@ Before a release candidate:
 4. Recompute benchmark metadata and reject incomplete reports.
 5. Compare context evaluation reports and latency percentiles to the prior
    release.
-6. Run adversarial multi-tenant, purpose, clearance, quarantine, and inference
-   leakage tests.
+6. Run `MARCIANA-ADVERSARIAL-v1` and require status `pass` with every hard
+   gate at zero; a nonzero gate is a release blocker, never a deduction.
 7. Build PDF, EPUB, HTML, and chapter artifacts through FirstPair; inspect
    rendered pages and validate links and metadata.
 8. Commit and push the source handoff before any publisher dry-run.
@@ -1162,6 +1188,18 @@ if p95_latency > slo.p95: warn_or_reject_by_policy
 
 The release receipt is bound to the evaluator identity and the exact corpus
 summary. A later model cannot reuse an old green receipt for a changed corpus.
+
+### C.4 The adversarial gate suite
+
+The context-evaluation protocol above measures what a governed context is
+worth; `MARCIANA-ADVERSARIAL-v1` measures whether the boundary around it
+survives hostility. The two are complementary and both release-blocking:
+context evaluation rejects low-utility or leaking plans, while the
+adversarial suite holds its nine hard gates at zero against forged
+provenance, replay, residual recall, and injection. Its case design follows
+the same discipline as C.1 — explicit expected and forbidden sets, an as-of
+qualifier, and content-free reporting — and its corpus is pinned by digest
+exactly as release receipts are bound to corpus summaries in C.3.
 
 ## Appendix D — Enterprise deployment patterns
 
