@@ -93,13 +93,17 @@ impl CognitionEngineBinding {
         Self { engine, family }
     }
 
-    #[cfg(test)]
-    pub(crate) fn test_reference(engine: Arc<dyn CognitionEngine>) -> Self {
+    /// Bind a test double to the reference profile.
+    #[cfg(any(test, feature = "test-support"))]
+    #[doc(hidden)]
+    pub fn test_reference(engine: Arc<dyn CognitionEngine>) -> Self {
         Self::bind(engine, NativeEngineFamily::Reference)
     }
 
-    #[cfg(test)]
-    pub(crate) fn test_sail(engine: Arc<dyn CognitionEngine>) -> Self {
+    /// Bind a test double to the Sail profile.
+    #[cfg(any(test, feature = "test-support"))]
+    #[doc(hidden)]
+    pub fn test_sail(engine: Arc<dyn CognitionEngine>) -> Self {
         Self::bind(engine, NativeEngineFamily::Sail)
     }
 }
