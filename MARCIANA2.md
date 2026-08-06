@@ -47,13 +47,11 @@ to durable job state. The profile-runner surface now has durable, lease-bound
 progress. Progress is closed-phase, bounded, timestamp-monotonic, and stores
 only optional SHA-256 detail identities; job schema v3 preserves it through
 restart without persisting worker or model text. Existing cancellation and
-bounded retry semantics remain unchanged. The next Phase 2 unit is a
-declarative profile-runner/provider registry with explicit capability and
-resource budgets; the first registry contract now resolves each profile to a
-trusted Reference or Sail provider with fixed schema versions and record
-ceilings. The reference vector index now records a bounded embedding-space
-identity, preventing incompatible model or preprocessing vectors from being
-treated as one index.
+bounded retry semantics remain unchanged. The declarative profile-runner/
+provider registry resolves each profile to a trusted Reference or Sail provider
+with fixed schema versions and record ceilings. The reference vector index
+records a bounded embedding-space identity, preventing incompatible model or
+preprocessing vectors from being treated as one index.
 The registry now exposes that closed provider/profile resolution as a typed
 surface, including explicit native capabilities and inclusive source/output
 record ceilings; no model- or payload-defined provider registration is
