@@ -15,6 +15,7 @@ All notable changes to Marciana are documented in this file.
 - Let Pandoc provide the single canonical heading-numbering scheme in every
   edition.
 - Add the tracked QueryGraph blog headboard to the FirstPair book configuration.
+- Register the Marciana slug and QueryGraph shelf in the source FirstPair contract.
 - Advance the Sail compatibility pin to the merged upstream baseline.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
 - Persist and recover vector manifests through guarded Grust commits.

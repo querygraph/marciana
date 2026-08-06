@@ -1,4 +1,8 @@
-# FirstPair book delivery
+# FirstPair Library Contract
+
+slug: marciana
+shelf: querygraph
+default_edition: full
 
 Marciana's manuscript and book assets are owned by this repository. FirstPair
 provides the shared build, artifact verification, reader routes, and catalog
