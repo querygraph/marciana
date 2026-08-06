@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Recorded the draft canonical Sail upstream path for the reviewed generic
+  Delta `MERGE` correction; release remains pending its merge and exact-source
+  validation.
+
 - Recorded the bounded Grust Sail harness and its terminal executor, backend,
   and cognition parity/secrecy results against the local Sail binary.
 
