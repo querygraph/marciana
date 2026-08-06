@@ -145,10 +145,11 @@ fn evidence_is_canonical_and_requires_both_causes_and_digests() {
 }
 
 #[test]
-fn temporal_intervals_are_inclusive_and_reject_reversal() {
+fn temporal_intervals_are_half_open_and_reject_reversal() {
     let interval = TemporalInterval::new(at(2), Some(at(4))).unwrap();
     assert!(interval.contains(at(2)));
-    assert!(interval.contains(at(4)));
+    assert!(interval.contains(at(3)));
+    assert!(!interval.contains(at(4)));
     assert!(!interval.contains(at(5)));
     assert_eq!(
         TemporalInterval::new(at(4), Some(at(2))),

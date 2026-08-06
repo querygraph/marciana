@@ -27,6 +27,10 @@ All notable changes to Marciana are documented in this file.
 - Rejected assertion transitions dated before the assertion was ingested,
   closing a temporal-history construction gap in persisted ledger recovery.
 
+- Aligned assertion validity with TypeSec's existing half-open invalidation
+  semantics, preventing an assertion from appearing current at its exact
+  invalidation instant during migration or as-of recall.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

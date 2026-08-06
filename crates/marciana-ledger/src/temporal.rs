@@ -3,8 +3,9 @@ use serde::{Deserialize, Deserializer, Serialize, de};
 
 use crate::LedgerError;
 
-/// The period in which an assertion is believed to hold. A missing end is
-/// open-ended rather than a sentinel timestamp.
+/// The period in which an assertion is believed to hold. Intervals are
+/// half-open (`[valid_from, valid_to)`); a missing end is open-ended rather
+/// than a sentinel timestamp.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct TemporalInterval {
@@ -52,7 +53,7 @@ impl TemporalInterval {
         self.valid_from
     }
 
-    /// End of the interval, inclusive when present.
+    /// End of the interval, exclusive when present.
     #[must_use]
     pub fn valid_to(&self) -> Option<DateTime<Utc>> {
         self.valid_to
@@ -61,6 +62,6 @@ impl TemporalInterval {
     /// Whether a point in time is in the interval.
     #[must_use]
     pub fn contains(&self, at: DateTime<Utc>) -> bool {
-        at >= self.valid_from && self.valid_to.is_none_or(|end| at <= end)
+        at >= self.valid_from && self.valid_to.is_none_or(|end| at < end)
     }
 }
