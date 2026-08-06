@@ -55,6 +55,8 @@ All notable changes to Marciana are documented in this file.
   it no longer reduces `improve` to an unrelated `remember` call.
 - Aligned TypeScript wire fields with the shared Rust/Python snake_case
   contract for memory IDs and receipts.
+- Added strict serde derives and a checked-in Rust four-verb wire fixture with
+  unknown-field rejection.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

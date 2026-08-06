@@ -1,5 +1,6 @@
 //! Stable validation-only request contracts for Marciana's four verbs.
 
+use serde::{Deserialize, Serialize};
 use typesec_memory::{
     ForgetSelector, MemoryContent, MemoryDraft, MemoryKind, Provenance, RecallQuery,
 };
@@ -8,7 +9,8 @@ const MAX_ID: usize = 256;
 const MAX_TEXT: usize = 16 * 1024;
 
 /// The four authoritative memory lifecycle verbs.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum MemoryVerb {
     Remember,
     Recall,
@@ -16,28 +18,32 @@ pub enum MemoryVerb {
     Forget,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RememberRequest {
     pub space_id: String,
     pub text: String,
     pub purpose: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RecallRequest {
     pub space_id: String,
     pub query: String,
     pub purpose: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ImproveRequest {
     pub space_id: String,
     pub memory_id: String,
     pub replacement: RememberRequest,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ForgetRequest {
     pub space_id: String,
     pub memory_ids: Vec<String>,
