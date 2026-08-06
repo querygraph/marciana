@@ -136,3 +136,11 @@ fn remove_prunes_vectors_and_entities() {
     index.remove(&id("m1")).unwrap();
     assert!(index.search("venice", 10).unwrap().is_empty());
 }
+
+#[test]
+fn embedding_space_identity_is_explicit_and_bounded() {
+    let index = VectorIndex::with_embedding_space(BagEmbedder::new(true), "model-v2:384")
+        .expect("canonical embedding space");
+    assert_eq!(index.embedding_space(), "model-v2:384");
+    assert!(VectorIndex::with_embedding_space(BagEmbedder::new(true), "model v2").is_err());
+}

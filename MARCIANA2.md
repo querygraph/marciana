@@ -51,7 +51,9 @@ bounded retry semantics remain unchanged. The next Phase 2 unit is a
 declarative profile-runner/provider registry with explicit capability and
 resource budgets; the first registry contract now resolves each profile to a
 trusted Reference or Sail provider with fixed schema versions and record
-ceilings.
+ceilings. The reference vector index now records a bounded embedding-space
+identity, preventing incompatible model or preprocessing vectors from being
+treated as one index.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

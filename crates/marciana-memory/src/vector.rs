@@ -41,6 +41,7 @@ pub trait Embedder: Send + Sync {
 /// A cosine-similarity vector index over an [`Embedder`].
 pub struct VectorIndex<E: Embedder> {
     embedder: E,
+    embedding_space: String,
     vectors: RwLock<HashMap<MemoryId, Vec<f32>>>,
     // id -> entity names it mentions, for the optional hybrid graph re-rank.
     entities: RwLock<HashMap<MemoryId, Vec<String>>>,
@@ -49,11 +50,42 @@ pub struct VectorIndex<E: Embedder> {
 impl<E: Embedder> VectorIndex<E> {
     /// Build a vector index over `embedder`.
     pub fn new(embedder: E) -> Self {
-        Self {
+        Self::with_embedding_space(embedder, "marciana-reference-embedding-v1")
+            .expect("built-in embedding space is canonical")
+    }
+
+    /// Build an index with an explicit embedding-space identity.
+    ///
+    /// Reusing vectors across model, dimension, or preprocessing changes is
+    /// unsafe. Callers therefore persist and compare this identity alongside
+    /// the index rather than treating all vectors as interchangeable.
+    pub fn with_embedding_space(
+        embedder: E,
+        embedding_space: impl Into<String>,
+    ) -> Result<Self, IndexError> {
+        let embedding_space = embedding_space.into();
+        if embedding_space.is_empty()
+            || embedding_space.len() > 128
+            || !embedding_space
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || b"._:-".contains(&byte))
+        {
+            return Err(IndexError::Backend(
+                "invalid embedding-space identity".into(),
+            ));
+        }
+        Ok(Self {
             embedder,
+            embedding_space,
             vectors: RwLock::new(HashMap::new()),
             entities: RwLock::new(HashMap::new()),
-        }
+        })
+    }
+
+    /// Stable identity that must accompany persisted vectors and repair work.
+    #[must_use]
+    pub fn embedding_space(&self) -> &str {
+        &self.embedding_space
     }
 
     /// Record which entities `id` mentions, enabling the hybrid graph re-rank

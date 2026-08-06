@@ -18,6 +18,8 @@ All notable changes to Marciana are documented in this file.
   LongMemEval, and BEAM adapters.
 - Added closed conversation, document, JSON-event, and raw formation profiles;
   each is bound to an existing native cognition operation.
+- Added explicit bounded embedding-space identity to vector indexes so model
+  and preprocessing changes cannot silently reuse incompatible vectors.
 
 ### 2026-08-06
 
