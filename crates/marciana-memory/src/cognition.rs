@@ -21,6 +21,7 @@ mod lease;
 mod operation;
 mod outbox;
 mod profile;
+mod progress;
 #[cfg(feature = "sail")]
 mod sail;
 mod snapshot;
@@ -42,6 +43,7 @@ pub use operation::{
 };
 pub use outbox::{CognitionOutboxClaim, MAX_COGNITION_OUTBOX_CLAIM, MAX_COGNITION_OUTBOX_ENTRIES};
 pub use profile::CognitionEngineProfile;
+pub use progress::{CognitionProgress, CognitionProgressPhase, MAX_COGNITION_PROGRESS_UNITS};
 #[cfg(feature = "sail")]
 pub use sail::LiveSailCognitionExecutor;
 pub use snapshot::{CognitionFieldMapping, GovernedLakeCatSnapshot};
