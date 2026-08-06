@@ -20,6 +20,9 @@ All notable changes to Marciana are documented in this file.
   candidate recall, preserving redacted metadata and plan identity without a
   parallel content path.
 
+- Added deterministic citations plus bounded text and XML renderers for
+  authorized context bundles; redacted candidates remain metadata-only.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

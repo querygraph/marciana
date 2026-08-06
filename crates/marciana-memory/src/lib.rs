@@ -507,6 +507,7 @@ pub mod assertion_projection;
 pub mod assertion_recall;
 pub mod cognition;
 pub mod context;
+pub mod context_render;
 #[cfg(feature = "turso")]
 pub mod turso;
 pub mod vector;

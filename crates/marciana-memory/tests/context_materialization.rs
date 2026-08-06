@@ -4,6 +4,7 @@ use querygraph_memory::GraphStoreMemoryStore;
 use querygraph_memory::context::{
     ContextCandidate, ContextView, RecallIntent, materialize_context_plan, plan_context,
 };
+use querygraph_memory::context_render::{render_text, render_xml};
 use sha2::Digest;
 use typesec_core::policy::{MintOptions, RequestContext, mint_capability_for_id};
 use typesec_core::{CanRead, Capability, Resource};
@@ -76,6 +77,10 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     assert_eq!(bundle.memories.len(), 1);
     assert_eq!(bundle.redacted.len(), 1);
     assert_eq!(bundle.memories[0].content.text, "public fact");
+    assert!(render_text(&bundle).unwrap().contains("public fact"));
+    assert!(render_text(&bundle).unwrap().contains("<redacted>"));
+    assert!(render_xml(&bundle).unwrap().contains("redacted=\"true\""));
+    assert_eq!(bundle.citations().len(), 2);
 }
 
 fn support_record(id: &str, text: &str, label: &str) -> typesec_memory::StoredRecord {

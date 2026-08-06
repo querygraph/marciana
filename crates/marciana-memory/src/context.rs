@@ -55,6 +55,45 @@ pub struct ContextBundle {
     pub redacted: Vec<RedactedHit>,
 }
 
+/// Traceability metadata for one visible or redacted candidate.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContextCitation {
+    pub id: MemoryId,
+    pub valid_from: Option<DateTime<Utc>>,
+    pub provenance_digest: Option<String>,
+    pub redacted: bool,
+}
+
+impl ContextBundle {
+    /// Return stable citations without exposing a redacted candidate's content.
+    #[must_use]
+    pub fn citations(&self) -> Vec<ContextCitation> {
+        let mut citations = self
+            .memories
+            .iter()
+            .map(|memory| ContextCitation {
+                id: memory.id.clone(),
+                valid_from: Some(memory.valid_from),
+                provenance_digest: Some(digest_serialized(&memory.provenance)),
+                redacted: false,
+            })
+            .chain(self.redacted.iter().map(|memory| ContextCitation {
+                id: memory.id.clone(),
+                valid_from: None,
+                provenance_digest: None,
+                redacted: true,
+            }))
+            .collect::<Vec<_>>();
+        citations.sort_by(|left, right| left.id.cmp(&right.id));
+        citations
+    }
+}
+
+fn digest_serialized<T: serde::Serialize>(value: &T) -> String {
+    let bytes = serde_json::to_vec(value).expect("provenance is serializable");
+    format!("sha256:{:x}", Sha256::digest(bytes))
+}
+
 impl RecallIntent {
     pub fn validate(&self) -> Result<(), &'static str> {
         if !self.query_digest.starts_with("sha256:") || self.query_digest.len() != 71 {

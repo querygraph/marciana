@@ -58,7 +58,8 @@ selection and plan digest. It does not materialize content or replace the
 TypeSec vault gate. The first materializer now returns a typed bundle
 containing visible memories, redacted candidates, the selected token estimate,
 and the immutable plan digest. Citations and renderers remain the next context
-unit.
+unit. The bundle now also exposes stable provenance citations and bounded text
+and XML views; redacted candidates render as metadata-only markers.
 
 ## Executive judgment
 
