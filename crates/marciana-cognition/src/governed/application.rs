@@ -67,12 +67,11 @@ pub struct GovernedCognitionResult {
 
 impl fmt::Debug for GovernedCognitionResult {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter
-            .debug_struct("GovernedCognitionResult")
-            .field("status", &self.outcome.status)
-            .field("effect", &self.outcome.effect)
-            .field("evidence", &"<redacted>")
-            .finish_non_exhaustive()
+        write!(
+            formatter,
+            "GovernedCognitionResult {{ status: {:?}, effect: {:?}, evidence: \"<redacted>\" }}",
+            self.outcome.status, self.outcome.effect
+        )
     }
 }
 
