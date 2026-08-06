@@ -1,5 +1,7 @@
 use chrono::{TimeZone, Utc};
-use querygraph_memory::context::{ContextCandidate, ContextView, RecallIntent, plan_context};
+use querygraph_memory::context::{
+    ContextCandidate, ContextRecipe, ContextView, RecallIntent, plan_context,
+};
 use typesec_memory::MemoryId;
 
 fn digest(label: &str) -> String {
@@ -11,6 +13,7 @@ fn planning_is_deterministic_and_content_free() {
     let intent = RecallIntent {
         query_digest: digest("query"),
         view: ContextView::Assertions,
+        recipe: ContextRecipe::CurrentAssertions,
         as_of: Utc.timestamp_opt(10, 0).unwrap(),
         token_budget: 5,
     };

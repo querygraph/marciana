@@ -23,6 +23,9 @@ All notable changes to Marciana are documented in this file.
 - Added deterministic citations plus bounded text and XML renderers for
   authorized context bundles; redacted candidates remain metadata-only.
 
+- Added a closed retrieval-recipe identity to context intent and plan
+  digests, keeping ranking policy deployment-owned and reproducible.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

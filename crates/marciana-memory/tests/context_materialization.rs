@@ -2,7 +2,8 @@ use chrono::Utc;
 use grust_memory::MemoryGraphStore;
 use querygraph_memory::GraphStoreMemoryStore;
 use querygraph_memory::context::{
-    ContextCandidate, ContextView, RecallIntent, materialize_context_plan, plan_context,
+    ContextCandidate, ContextRecipe, ContextView, RecallIntent, materialize_context_plan,
+    plan_context,
 };
 use querygraph_memory::context_render::{render_text, render_xml};
 use sha2::Digest;
@@ -45,6 +46,7 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
         RecallIntent {
             query_digest: digest("query"),
             view: ContextView::Episodes,
+            recipe: ContextRecipe::Ranked,
             as_of: Utc::now(),
             token_budget: 20,
         },

@@ -19,11 +19,20 @@ pub enum ContextView {
     Summaries,
 }
 
+/// Closed retrieval policies; ranking implementations remain deployment-owned.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd)]
+pub enum ContextRecipe {
+    Ranked,
+    Recent,
+    CurrentAssertions,
+}
+
 /// Caller intent that is safe to hash and bind to a materialization receipt.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RecallIntent {
     pub query_digest: String,
     pub view: ContextView,
+    pub recipe: ContextRecipe,
     pub as_of: DateTime<Utc>,
     pub token_budget: u32,
 }
@@ -139,7 +148,13 @@ pub fn plan_context(
     let mut hasher = Sha256::new();
     hasher.update(b"querygraph.marciana.context-plan.v1\0");
     hasher.update(intent.query_digest.as_bytes());
-    hasher.update(format!("{:?}|{}|{}", intent.view, intent.as_of, used).as_bytes());
+    hasher.update(
+        format!(
+            "{:?}|{:?}|{}|{}",
+            intent.view, intent.recipe, intent.as_of, used
+        )
+        .as_bytes(),
+    );
     for candidate in &candidates {
         hasher.update(candidate.id.as_str().as_bytes());
         hasher.update(candidate.score_basis_points.to_be_bytes());

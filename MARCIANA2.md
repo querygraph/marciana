@@ -60,6 +60,8 @@ containing visible memories, redacted candidates, the selected token estimate,
 and the immutable plan digest. Citations and renderers remain the next context
 unit. The bundle now also exposes stable provenance citations and bounded text
 and XML views; redacted candidates render as metadata-only markers.
+Context intents now also carry a closed retrieval-recipe identity, which is
+included in the deterministic plan digest.
 
 ## Executive judgment
 
