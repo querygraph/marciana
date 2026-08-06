@@ -9,6 +9,8 @@ All notable changes to Marciana are documented in this file.
 - Transplanted `querygraph-memory` into standalone Marciana with preserved
   commit history, modular cognition modules, separate tests, and a compiling
   workspace over the current Grust and TypeSec checkouts.
+- Matched the preserved crate's `0.12.0` compatibility line so QueryGraph can
+  switch to the standalone path without changing its existing package contract.
 
 ### 2026-08-05
 
