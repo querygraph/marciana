@@ -57,7 +57,8 @@ published data revisions (`3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376` and
 answer, or evidence text to a service. BEAM remains pending a verified public
 normalizer, but its 100K/500K/1M and 10M Parquet dataset revisions are now
 recorded and tested in `adapters.py`. Loading those large files is an optional
-PyArrow adapter unit, not part of the dependency-free smoke harness.
+PyArrow adapter unit; it keeps only question text, category, and conversation
+ID, not the long chat, and is not part of the dependency-free smoke harness.
 
 The current smoke run (1,000 repeats, 504 records) reaches 100% case accuracy
 with zero redaction leaks. The indexed path measured about 5.3 µs p50 versus

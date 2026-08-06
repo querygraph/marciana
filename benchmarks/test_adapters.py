@@ -11,6 +11,7 @@ from adapters import (
     LOCOMO_SOURCE,
     load_locomo,
     load_longmemeval,
+    normalize_beam_row,
 )
 
 
@@ -49,6 +50,21 @@ class AdapterTests(unittest.TestCase):
             cases = load_longmemeval(path)
         self.assertTrue(cases[0].abstain)
         self.assertEqual(cases[0].as_of, date(2025, 4, 3))
+
+    def test_beam_normalizer_keeps_only_bounded_question_targets(self) -> None:
+        cases = normalize_beam_row(
+            {
+                "conversation_id": "beam-1",
+                "probing_questions": repr(
+                    {
+                        "information_extraction": [{"question": "Which tool?"}],
+                        "abstention": [{"question": "Unknown?"}],
+                    }
+                ),
+            }
+        )
+        self.assertEqual(cases[0].expected_ids, ("beam-1",))
+        self.assertTrue(cases[1].abstain)
 
 
 if __name__ == "__main__":

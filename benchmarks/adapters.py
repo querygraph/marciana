@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import ast
 from datetime import date
 from pathlib import Path
 
@@ -77,3 +78,47 @@ def load_longmemeval(path: Path) -> tuple[EvaluationCase, ...]:
     if not cases:
         raise ValueError("LongMemEval corpus is empty")
     return tuple(cases)
+
+
+def normalize_beam_row(row: dict[str, object]) -> tuple[EvaluationCase, ...]:
+    """Normalize one BEAM row without retaining the long conversation text.
+
+    BEAM questions do not expose a canonical as-of field or per-answer source
+    IDs. The conversation ID is therefore the bounded retrieval target and
+    ``date.max`` is used explicitly for the as-of value.
+    """
+
+    conversation_id = str(row["conversation_id"])
+    encoded = row.get("probing_questions", "")
+    questions = ast.literal_eval(encoded) if isinstance(encoded, str) else encoded
+    cases: list[EvaluationCase] = []
+    for category, entries in (questions or {}).items():
+        for index, entry in enumerate(entries or ()):
+            if not isinstance(entry, dict) or not entry.get("question"):
+                continue
+            cases.append(
+                EvaluationCase(
+                    case_id=f"beam:{conversation_id}:{category}:{index}",
+                    query=str(entry["question"]),
+                    as_of=date.max,
+                    expected_ids=(conversation_id,),
+                    abstain=str(category).lower() == "abstention",
+                )
+            )
+    if not cases:
+        raise ValueError("BEAM row has no probing questions")
+    return tuple(cases)
+
+
+def load_beam_parquet(path: Path) -> tuple[EvaluationCase, ...]:
+    """Load BEAM Parquet through optional PyArrow, kept out of core deps."""
+
+    try:
+        import pyarrow.parquet as parquet
+    except ImportError as error:
+        raise RuntimeError("BEAM Parquet loading requires the optional pyarrow dependency") from error
+    table = parquet.read_table(path, columns=["conversation_id", "probing_questions"])
+    cases = tuple(case for row in table.to_pylist() for case in normalize_beam_row(row))
+    if not cases:
+        raise ValueError("BEAM corpus is empty")
+    return cases

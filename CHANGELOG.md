@@ -24,6 +24,8 @@ All notable changes to Marciana are documented in this file.
   revisions; BEAM remains explicitly unconfigured pending a verified source.
 - Recorded exact BEAM and BEAM-10M dataset revisions, with a tested source-pin
   seam for the forthcoming optional Parquet normalizer.
+- Added the lazy optional-PyArrow BEAM normalizer with bounded conversation-ID
+  targets and explicit abstention handling.
 
 ### 2026-08-06
 
