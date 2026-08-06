@@ -16,3 +16,4 @@ the client independently from the Rust workspace.
 
 `marciana_client.mcp` provides a thin MCP tool registry and dispatcher over the
 same client. A host still owns MCP transport, credentials, and policy.
+Forget requests use the shared `memory_ids` field.

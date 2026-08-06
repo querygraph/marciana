@@ -36,7 +36,7 @@ class ImproveRequest(WireModel):
 
 class ForgetRequest(WireModel):
     space: str = Identity
-    ids: list[str] = Field(min_length=1, max_length=256)
+    memory_ids: list[str] = Field(min_length=1, max_length=256)
     purpose: str = Identity
     mode: Literal["erase", "retract"] = "retract"
 

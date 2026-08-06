@@ -25,7 +25,7 @@ export interface ImproveRequest {
 
 export interface ForgetRequest {
   space: string;
-  ids: string[];
+  memory_ids: string[];
   purpose: string;
   mode?: ForgetMode;
 }
@@ -48,5 +48,5 @@ export function validateRequest(request: RememberRequest | RecallRequest | Impro
   }
   const text = value.text ?? value.query;
   if (text !== undefined && (!text || text.length > 16384)) throw new Error("invalid memory text");
-  if ("ids" in request && (!request.ids.length || request.ids.length > 256)) throw new Error("invalid memory ids");
+  if ("memory_ids" in request && (!request.memory_ids.length || request.memory_ids.length > 256)) throw new Error("invalid memory ids");
 }

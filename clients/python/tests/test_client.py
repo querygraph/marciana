@@ -32,7 +32,7 @@ class ClientTests(unittest.TestCase):
         self.assertEqual(transport.calls[0][1]["kind"], "semantic")
         client.recall(RecallRequest(space="tenant/coffee", query="price", purpose="research"))
         client.forget(
-            ForgetRequest(space="tenant/coffee", ids=["m1"], purpose="research")
+            ForgetRequest(space="tenant/coffee", memory_ids=["m1"], purpose="research")
         )
         self.assertEqual([call[0] for call in transport.calls], [
             "/v1/memory/remember", "/v1/memory/recall", "/v1/memory/forget"
