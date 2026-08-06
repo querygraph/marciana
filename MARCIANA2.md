@@ -108,6 +108,9 @@ authorization, policy, and evidence stages without exposing protected values.
 Backup compatibility now also supports a bounded inclusive schema-family
 window, so deployment restore checks can accept a declared upgrade range
 without weakening the existing exact-schema validator.
+The cognition layer now also has an operator-owned immutable ontology registry
+for typed fields and edges; declarations are bounded, canonicalized, resolved
+by exact identity, and digest-bound before any formation integration.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

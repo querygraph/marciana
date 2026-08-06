@@ -13,6 +13,7 @@ mod learning;
 mod lineage;
 mod memory_error;
 mod metrics;
+mod ontology;
 mod procedure_rollout;
 mod quota;
 mod schema;
@@ -57,6 +58,10 @@ pub use learning::{
 pub use lineage::{LineageEdge, LineageError, LineageInspection, LineageNode, LineageNodeKind};
 pub use memory_error::CognitionMemoryError;
 pub use metrics::{MetricsSnapshot, OperationKind, OperationMetrics, OperationSample};
+pub use ontology::{
+    OntologyError, SchemaDefinition, SchemaEdge, SchemaField, SchemaFieldKind, SchemaIdentity,
+    SchemaRegistry,
+};
 pub use procedure_rollout::{ProcedureRollout, ProcedureRolloutError, ProcedureRolloutStatus};
 pub use quota::{QuotaError, QuotaLimits, QuotaSnapshot, TenantQuota};
 pub use schema::{SchemaWindow, SchemaWindowError};
