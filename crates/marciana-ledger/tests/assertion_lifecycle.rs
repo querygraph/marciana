@@ -78,6 +78,10 @@ fn lifecycle_preserves_dispute_then_current_resurrection_history() {
 
     assert_eq!(value.state(), AssertionState::Current);
     assert_eq!(value.transitions().len(), 3);
+    assert_eq!(value.state_at(at(2)), AssertionState::Current);
+    assert_eq!(value.state_at(at(3)), AssertionState::Disputed);
+    assert!(value.is_current_at(at(4)));
+    assert!(!value.is_current_at(at(3)));
 }
 
 #[test]

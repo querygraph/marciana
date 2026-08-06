@@ -20,6 +20,10 @@ All notable changes to Marciana are documented in this file.
   assertions. Distinct assertion and relationship identities preserve equal
   structural triplets without creating a second memory mutation path.
 
+- Added deterministic as-of assertion queries derived from the immutable
+  transition history, preserving the distinction between historical current,
+  disputed, and currently active beliefs.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

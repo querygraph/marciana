@@ -337,6 +337,22 @@ impl Assertion {
     pub fn state(&self) -> AssertionState {
         self.state
     }
+    /// Belief state at an instant, derived from the immutable transition log.
+    #[must_use]
+    pub fn state_at(&self, at: DateTime<Utc>) -> AssertionState {
+        self.transitions
+            .iter()
+            .take_while(|transition| transition.at() <= at)
+            .last()
+            .map_or(AssertionState::Proposed, AssertionTransition::to)
+    }
+
+    /// Whether this assertion was both valid and current at an instant.
+    #[must_use]
+    pub fn is_current_at(&self, at: DateTime<Utc>) -> bool {
+        self.validity.contains(at) && self.state_at(at) == AssertionState::Current
+    }
+
     #[must_use]
     pub fn transitions(&self) -> &[AssertionTransition] {
         &self.transitions
