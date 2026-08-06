@@ -4,7 +4,9 @@ use lakecat_core::governed_scan::{
     governed_policy_digest, governed_scan_digests,
 };
 use lakecat_core::{Namespace, TableIdent, TableName, WarehouseName};
-use marciana_catalog::governed_cognition_source;
+use marciana_catalog::{
+    LakeCatCognitionSourceError, governed_cognition_source, validate_governed_cognition_proof,
+};
 use serde_json::json;
 
 #[test]
@@ -28,6 +30,18 @@ fn translation_preserves_only_the_canonical_cognition_identity() {
     assert_eq!(source.snapshot_id, proof.snapshot_id());
     assert_eq!(source.effective_projection, projection);
     assert!(source.digest().is_ok());
+}
+
+#[test]
+fn validation_rejects_a_proof_from_another_catalog() {
+    let proof = proof();
+    let configured = GovernedScanCatalogIdentity::new("lakecat://another-catalog")
+        .expect("configured catalog identity");
+
+    assert!(matches!(
+        validate_governed_cognition_proof(&configured, &proof),
+        Err(LakeCatCognitionSourceError::CatalogMismatch)
+    ));
 }
 
 fn proof() -> GovernedScanProof {
