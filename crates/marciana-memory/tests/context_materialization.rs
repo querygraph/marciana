@@ -79,8 +79,14 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     assert_eq!(bundle.memories.len(), 1);
     assert_eq!(bundle.redacted.len(), 1);
     assert_eq!(bundle.memories[0].content.text, "public fact");
+    assert!(render_text(&bundle).unwrap().contains(&bundle.plan_digest));
     assert!(render_text(&bundle).unwrap().contains("public fact"));
     assert!(render_text(&bundle).unwrap().contains("<redacted>"));
+    assert!(
+        render_xml(&bundle)
+            .unwrap()
+            .contains(&format!("plan=\"{}\"", bundle.plan_digest))
+    );
     assert!(render_xml(&bundle).unwrap().contains("redacted=\"true\""));
     assert_eq!(bundle.citations().len(), 2);
 }

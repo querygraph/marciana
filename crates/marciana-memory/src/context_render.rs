@@ -18,7 +18,7 @@ pub enum ContextRenderError {
 
 /// Render visible memories with stable citation IDs; redacted items are metadata-only.
 pub fn render_text(bundle: &ContextBundle) -> Result<String, ContextRenderError> {
-    let mut output = String::new();
+    let mut output = format!("plan={}\n", bundle.plan_digest);
     for memory in &bundle.memories {
         writeln!(&mut output, "[{}] {}", memory.id, memory.content.text)
             .map_err(|_| ContextRenderError::Formatting)?;
@@ -32,7 +32,7 @@ pub fn render_text(bundle: &ContextBundle) -> Result<String, ContextRenderError>
 
 /// Render a minimal XML view with escaped authorized text and citation IDs.
 pub fn render_xml(bundle: &ContextBundle) -> Result<String, ContextRenderError> {
-    let mut output = String::from("<context>");
+    let mut output = format!("<context plan=\"{}\">", escape(&bundle.plan_digest));
     for memory in &bundle.memories {
         write!(
             &mut output,

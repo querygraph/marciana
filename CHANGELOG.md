@@ -26,6 +26,9 @@ All notable changes to Marciana are documented in this file.
 - Added a closed retrieval-recipe identity to context intent and plan
   digests, keeping ranking policy deployment-owned and reproducible.
 
+- Bound rendered context views to their plan digest so downstream consumers
+  retain the exact selection identity alongside visible content.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

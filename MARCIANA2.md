@@ -62,6 +62,7 @@ unit. The bundle now also exposes stable provenance citations and bounded text
 and XML views; redacted candidates render as metadata-only markers.
 Context intents now also carry a closed retrieval-recipe identity, which is
 included in the deterministic plan digest.
+Rendered text and XML views now carry that plan digest explicitly.
 
 ## Executive judgment
 
