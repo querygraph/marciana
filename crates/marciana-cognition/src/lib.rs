@@ -17,7 +17,7 @@ pub use governed::CognitionClock;
 pub use governed::intent_claim_limits_for_test;
 pub use governed::{
     CLAIM_ALGORITHM, CLAIM_ALGORITHM_VERSION, CLAIM_CATALOG_IDENTITY, CLAIM_FIELD_MAPPING_DIGEST,
-    CLAIM_GRANT_ID, CLAIM_INTENT_VERSION, CLAIM_JOB_ID, CLAIM_OPERATION,
+    CLAIM_FORMATION_PROFILE, CLAIM_GRANT_ID, CLAIM_INTENT_VERSION, CLAIM_JOB_ID, CLAIM_OPERATION,
     CLAIM_SOURCE_SELECTION_DIGEST, COGNITION_ACTION, COGNITION_INTENT_VERSION,
     CognitionApplicationError, FreshLakeCatAuthority, GovernedCognitionApplication,
     GovernedCognitionConfig, GovernedCognitionResult, LakeCatAuthorityError,

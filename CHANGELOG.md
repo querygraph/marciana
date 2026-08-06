@@ -10,6 +10,10 @@ All notable changes to Marciana are documented in this file.
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.
 
+- Bound formation profiles into TypeDID cognition intent v3 and the durable
+  verified request identity. Profile/config and profile/operation mismatches
+  now fail before governed source materialization.
+
 - Completed MARCIANA2 Phase 1's assertion-safe baseline: deterministic
   assertion candidates now materialize only through TypeSec's capability-gated
   ranked-ID recall, preserving purpose, validity, retention, quarantine, and

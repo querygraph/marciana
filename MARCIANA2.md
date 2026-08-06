@@ -38,8 +38,11 @@ than a parallel memory path.
 Phase 2 has started with a closed, versioned formation-profile registry.
 `background-deduplication-v1` and `background-reconciliation-v1` each select
 exactly one existing native cognition operation; no profile may supply a
-model-chosen operation or executor identity. The next unit binds that profile
-identity into signed TypeDID intent and the durable job contract.
+model-chosen operation or executor identity. The signed TypeDID cognition
+intent now requires the profile, validates its exact operation before source
+materialization, and carries it in the verified request digest already bound
+to durable job state. The next Phase 2 unit adds progress, cancellation, and
+bounded retry semantics to the profile-runner surface.
 
 ## Executive judgment
 

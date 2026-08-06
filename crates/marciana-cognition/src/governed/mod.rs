@@ -24,7 +24,7 @@ pub use authority::{FreshLakeCatAuthority, LakeCatAuthorityError, LakeCatCogniti
 pub use authority::{PrimedAuthorityVerifier, current_policy_decision_id};
 pub use intent::{
     CLAIM_ALGORITHM, CLAIM_ALGORITHM_VERSION, CLAIM_CATALOG_IDENTITY, CLAIM_FIELD_MAPPING_DIGEST,
-    CLAIM_GRANT_ID, CLAIM_INTENT_VERSION, CLAIM_JOB_ID, CLAIM_OPERATION,
+    CLAIM_FORMATION_PROFILE, CLAIM_GRANT_ID, CLAIM_INTENT_VERSION, CLAIM_JOB_ID, CLAIM_OPERATION,
     CLAIM_SOURCE_SELECTION_DIGEST, COGNITION_ACTION, COGNITION_INTENT_VERSION,
     cognition_field_mapping_digest, cognition_source_selection_digest,
 };

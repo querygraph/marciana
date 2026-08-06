@@ -16,6 +16,7 @@ use typesec_memory::{
 use super::governed_proof::validate_governed_proof;
 use super::intent::{CognitionIntent, IntentInputs, canonical_source_ids};
 use super::projection::{RequiredProjection, is_canonical_projection};
+use crate::FormationProfile;
 
 #[derive(Debug, Clone)]
 pub(crate) struct BindingBasis {
@@ -39,6 +40,7 @@ impl BindingBasis {
         proof: GovernedScanProof,
         source_ids: &[MemoryId],
         field_mapping: &CognitionFieldMapping,
+        formation_profile: FormationProfile,
         now: DateTime<Utc>,
     ) -> Result<Self, CognitionBindingError> {
         let digests = validate_governed_proof(catalog, &proof)?;
@@ -51,6 +53,7 @@ impl BindingBasis {
                 proof: &proof,
                 source_ids: &source_ids,
                 field_mapping,
+                formation_profile,
             },
             now,
         )?;

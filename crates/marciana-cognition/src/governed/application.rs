@@ -3,7 +3,9 @@
 use std::fmt;
 use std::sync::{Arc, OnceLock};
 
-use crate::{CognitionBindingError, CognitionEngineBinding, CognitionMemoryError};
+use crate::{
+    CognitionBindingError, CognitionEngineBinding, CognitionMemoryError, FormationProfile,
+};
 use chrono::TimeDelta;
 use lakecat_core::governed_scan::GovernedScanProof;
 use querygraph_memory::cognition::{CognitionError, CognitionFieldMapping, CognitionRequest};
@@ -89,6 +91,9 @@ pub struct GovernedCognitionConfig {
     pub source_ids: Vec<MemoryId>,
     /// Exact LakeCat columns staged as cognition ID, text, and validity time.
     pub field_mapping: CognitionFieldMapping,
+    /// Closed formation profile bound into the signed TypeDID request and
+    /// thereby the durable job's verified request digest.
+    pub formation_profile: FormationProfile,
     /// Maximum clearance granted by trusted deployment policy or credentials.
     /// The sender-signed privacy label may narrow, never widen, this ceiling.
     pub authorized_clearance: Label,
@@ -223,6 +228,7 @@ where
             config.proof,
             &config.source_ids,
             &config.field_mapping,
+            config.formation_profile,
             clock.now(),
         )?;
         if !engine

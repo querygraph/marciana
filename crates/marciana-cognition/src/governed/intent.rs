@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::CognitionBindingError;
+use crate::{CognitionBindingError, FormationProfile};
 use chrono::{DateTime, Utc};
 use lakecat_core::governed_scan::{GovernedScanProof, governed_evidence_digest};
 use querygraph_memory::cognition::{
@@ -19,13 +19,15 @@ use typesec_memory::{
 /// Exact signed action accepted by the Marciana cognition boundary.
 pub const COGNITION_ACTION: &str = "memory:improve";
 /// Canonical version value for the signed claim set.
-pub const COGNITION_INTENT_VERSION: &str = "marciana.cognition-intent.v2";
+pub const COGNITION_INTENT_VERSION: &str = "marciana.cognition-intent.v3";
 /// Required signed intent-version claim.
 pub const CLAIM_INTENT_VERSION: &str = "marciana.intent.version";
 /// Required signed durable job identity.
 pub const CLAIM_JOB_ID: &str = "marciana.job.id";
 /// Required signed native operation identity.
 pub const CLAIM_OPERATION: &str = "marciana.operation";
+/// Required signed versioned formation-profile identity.
+pub const CLAIM_FORMATION_PROFILE: &str = "marciana.formation-profile";
 /// Required signed native cognition algorithm identity.
 pub const CLAIM_ALGORITHM: &str = "marciana.algorithm";
 /// Required signed native cognition algorithm version.
@@ -55,10 +57,11 @@ pub(crate) const CONTEXT_REQUESTED_PRIVACY: &str = "marciana.requested-privacy";
 
 const MAX_COGNITION_INTENT_CLAIMS: usize = 64;
 const MAX_COGNITION_INTENT_CLAIM_BYTES: usize = 64 * 1024;
-pub(super) const POLICY_INTENT_CLAIMS: [&str; 9] = [
+pub(super) const POLICY_INTENT_CLAIMS: [&str; 10] = [
     CLAIM_INTENT_VERSION,
     CLAIM_JOB_ID,
     CLAIM_OPERATION,
+    CLAIM_FORMATION_PROFILE,
     CLAIM_ALGORITHM,
     CLAIM_ALGORITHM_VERSION,
     CLAIM_SOURCE_SELECTION_DIGEST,
@@ -88,6 +91,7 @@ pub(crate) struct IntentInputs<'a> {
     pub(crate) proof: &'a GovernedScanProof,
     pub(crate) source_ids: &'a [MemoryId],
     pub(crate) field_mapping: &'a CognitionFieldMapping,
+    pub(crate) formation_profile: FormationProfile,
 }
 
 impl CognitionIntent {
@@ -128,6 +132,17 @@ impl CognitionIntent {
         let operation: CognitionOperation = required_nonblank_claim(claims, CLAIM_OPERATION)?
             .parse()
             .map_err(|_| CognitionBindingError::InvalidOperation)?;
+        let formation_profile: FormationProfile =
+            required_nonblank_claim(claims, CLAIM_FORMATION_PROFILE)?
+                .parse()
+                .map_err(|_| CognitionBindingError::IntentClaimMismatch(CLAIM_FORMATION_PROFILE))?;
+        if formation_profile != inputs.formation_profile
+            || formation_profile.operation() != operation
+        {
+            return Err(CognitionBindingError::IntentClaimMismatch(
+                CLAIM_FORMATION_PROFILE,
+            ));
+        }
         let algorithm = required_nonblank_claim(claims, CLAIM_ALGORITHM)?;
         let algorithm_version = required_nonblank_claim(claims, CLAIM_ALGORITHM_VERSION)?;
         if !operation.is_native_algorithm(algorithm, algorithm_version) {
