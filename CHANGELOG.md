@@ -6,6 +6,11 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added Marciana-owned, fixed public errors for governed intent, proof,
+  projection, authority, and proposal binding failures. The stable categories
+  make the fail-closed composition boundary available without a QueryGraph
+  implementation dependency.
+
 - Added Marciana's fixed public mapping for TypeSec protected-memory failures.
   Callers receive stable, non-disclosing categories rather than policy details,
   record identifiers, or backend-controlled text.
