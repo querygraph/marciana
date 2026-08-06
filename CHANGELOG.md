@@ -20,6 +20,7 @@ All notable changes to Marciana are documented in this file.
 - Include materialization cutoffs in context explanations.
 - Correct benchmark documentation to reflect the implemented optional BEAM adapter.
 - Require provider-neutral model, embedding, prompt, profile, hardware, and revision metadata in benchmark reports.
+- Make coffee demo decisions report the explicitly executed governed tool action.
 - Add bounded content-free P50/P95/P99 latency percentile snapshots.
 - Add a capability-bound facade path for session-scoped context planning.
 - Add bounded session metadata that binds session, space, and recall-policy

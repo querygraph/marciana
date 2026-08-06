@@ -1,4 +1,5 @@
 from datetime import date
+import asyncio
 import unittest
 
 from examples.coffee_market_demo.memory import (
@@ -7,6 +8,8 @@ from examples.coffee_market_demo.memory import (
     deterministic_id,
 )
 from examples.coffee_market_demo.models import MemoryFact
+from examples.coffee_market_demo.agents import AgentDeps, build_agent, tool_turn
+from examples.coffee_market_demo.sail import SailWarehouse
 
 
 class DemoModelTests(unittest.TestCase):
@@ -52,3 +55,13 @@ class DemoModelTests(unittest.TestCase):
         self.assertEqual(receipt.memory_ids, ["old-id", "replacement-id"])
         self.assertEqual(calls[0][0], "/v1/memory/improve")
         self.assertEqual(calls[0][1]["memory_id"], "old-id")
+
+    def test_structured_turn_action_matches_governed_tool(self) -> None:
+        deps = AgentDeps(
+            name="test",
+            memory=LocalGovernedMemory(),
+            sail=SailWarehouse(None),
+            latest_rows=[],
+        )
+        decision = asyncio.run(tool_turn(build_agent(), deps, "forget", "forget the selected memory"))
+        self.assertEqual(decision.action, "forget")

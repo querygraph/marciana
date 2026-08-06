@@ -99,4 +99,12 @@ def build_agent(model: str | None = None) -> Agent[AgentDeps, AgentDecision]:
 
 async def tool_turn(agent: Agent[AgentDeps, AgentDecision], deps: AgentDeps, tool_name: str, prompt: str) -> AgentDecision:
     with agent.override(model=TestModel(call_tools=[tool_name])):
-        return (await agent.run(prompt, deps=deps)).output
+        decision = (await agent.run(prompt, deps=deps)).output
+    action = {
+        "query_sail": "report",
+        "remember": "learn",
+        "recall": "recall",
+        "improve": "improve",
+        "forget": "forget",
+    }.get(tool_name)
+    return decision.model_copy(update={"action": action}) if action else decision
