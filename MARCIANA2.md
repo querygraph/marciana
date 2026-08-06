@@ -65,6 +65,9 @@ Context materialization now verifies the planner's canonical candidate set,
 token accounting, and digest before invoking the TypeSec vault, preventing a
 caller-supplied plan from changing the authorized context under the same
 receipt identity.
+Graph/Sail-backed callers can now materialize a verified plan through
+`MemoryFacade::materialize_context`; this keeps the context product on the
+same capability-bound vault seam as remember, recall, improve, and forget.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

@@ -1,5 +1,6 @@
 //! Capability-bound execution of the validated four-verb API contracts.
 
+use grust_core::prelude::GraphMutationStore;
 use typesec_core::policy::RequestContext;
 use typesec_core::{CanDelete, CanRead, CanWrite, Capability, Resource};
 use typesec_memory::{
@@ -8,6 +9,8 @@ use typesec_memory::{
 };
 
 use crate::api::{ApiError, ForgetRequest, ImproveRequest, RecallRequest, RememberRequest};
+use crate::context::{ContextBundle, ContextError, ContextPlan};
+use crate::GraphStoreMemoryStore;
 
 /// Public facade failures keep validation separate from vault failures.
 #[derive(Debug, thiserror::Error)]
@@ -16,8 +19,33 @@ pub enum FacadeError {
     Validation(#[from] ApiError),
     #[error(transparent)]
     Vault(#[from] MemoryError),
+    #[error(transparent)]
+    Context(#[from] ContextError),
     #[error("memory request targets another space")]
     SpaceMismatch,
+}
+
+impl<'a, G> MemoryFacade<'a, GraphStoreMemoryStore<G>>
+where
+    G: GraphMutationStore,
+{
+    /// Materialize a verified context plan through the bound TypeSec vault.
+    ///
+    /// This method is available only for Marciana's Graph/Sail-backed store;
+    /// planning remains backend-independent and authorization remains owned by
+    /// [`MemoryVault`].
+    pub fn materialize_context(
+        &self,
+        cap: &Capability<CanRead, MemorySpace>,
+        plan: &ContextPlan,
+        ceiling: Label,
+        context: &RequestContext,
+    ) -> Result<ContextBundle, FacadeError> {
+        crate::context::materialize_context_plan(
+            self.vault, self.space, cap, plan, ceiling, context,
+        )
+        .map_err(FacadeError::Context)
+    }
 }
 
 /// Thin execution facade; all authority remains in [`MemoryVault`].

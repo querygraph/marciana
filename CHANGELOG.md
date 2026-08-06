@@ -69,6 +69,8 @@ All notable changes to Marciana are documented in this file.
   the governed cognition application boundary.
 - Added fail-closed context-plan verification for candidate identity, token
   accounting, ordering metadata, and plan-digest integrity before vault reads.
+- Added a Graph/Sail-backed `MemoryFacade::materialize_context` seam so typed
+  context bundles use the same capability-bound vault path as the four verbs.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb
