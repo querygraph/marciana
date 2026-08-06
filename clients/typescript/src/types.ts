@@ -19,7 +19,7 @@ export interface RecallRequest {
 
 export interface ImproveRequest {
   space: string;
-  memoryId: string;
+  memory_id: string;
   replacement: RememberRequest;
 }
 
@@ -33,15 +33,15 @@ export interface ForgetRequest {
 export interface MemoryReceipt {
   operation: Operation;
   allowed: boolean;
-  memoryIds: string[];
+  memory_ids: string[];
   detail?: string;
 }
 
 const identity = /^[A-Za-z0-9_:/.-]+$/;
 
 export function validateRequest(request: RememberRequest | RecallRequest | ImproveRequest | ForgetRequest): void {
-  const value = request as { space: string; purpose?: string; text?: string; query?: string; memoryId?: string };
-  for (const field of [value.space, value.purpose, value.memoryId]) {
+  const value = request as { space: string; purpose?: string; text?: string; query?: string; memory_id?: string };
+  for (const field of [value.space, value.purpose, value.memory_id]) {
     if (field !== undefined && (!field || field.length > 256 || !identity.test(field))) {
       throw new Error("invalid memory identity");
     }

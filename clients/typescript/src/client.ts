@@ -34,7 +34,7 @@ export class MarcianaClient {
   private async call(path: string, operation: Operation, request: RememberRequest | RecallRequest | ImproveRequest | ForgetRequest): Promise<MemoryReceipt> {
     validateRequest(request);
     const receipt = await this.transport.post(path, request);
-    if (receipt.operation !== operation || !Array.isArray(receipt.memoryIds)) throw new Error("invalid memory receipt");
+    if (receipt.operation !== operation || !Array.isArray(receipt.memory_ids)) throw new Error("invalid memory receipt");
     return receipt;
   }
 }

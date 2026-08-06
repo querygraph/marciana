@@ -53,6 +53,8 @@ All notable changes to Marciana are documented in this file.
   extended integration coverage to prove old history is replaced safely.
 - Aligned the coffee demo's QueryGraph adapter with the supersession endpoint;
   it no longer reduces `improve` to an unrelated `remember` call.
+- Aligned TypeScript wire fields with the shared Rust/Python snake_case
+  contract for memory IDs and receipts.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

@@ -7,11 +7,11 @@ test("routes a typed remember request through injected transport", async () => {
   const client = new MarcianaClient({
     async post(path, payload) {
       calls.push([path, payload]);
-      return { operation: "remember", allowed: true, memoryIds: ["m1"] };
+      return { operation: "remember", allowed: true, memory_ids: ["m1"] };
     },
   });
   const receipt = await client.remember({ space: "tenant/coffee", text: "price", purpose: "research" });
-  assert.deepEqual(receipt.memoryIds, ["m1"]);
+  assert.deepEqual(receipt.memory_ids, ["m1"]);
   assert.equal(calls[0][0], "/v1/memory/remember");
 });
 
