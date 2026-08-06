@@ -184,6 +184,9 @@ operator/readiness integrations; it reports only bounded component names,
 revisions, and states.
 It also exposes bounded content-free operation metrics for verb counts,
 denials, and latency accounting; hosts own persistence and dashboard export.
+The context layer now also exposes a deterministic, content-free evaluation
+contract measuring relevance precision/recall, token utility, and forbidden-ID
+leakage against a verified plan; protected text never enters the report.
 
 ## Executive judgment
 
@@ -282,7 +285,8 @@ developer-facing memory product. Its material gaps are:
 - no hot-path versus background formation policy;
 - no governed agent working-set or memory-block abstraction;
 - no safe prompt-learning lifecycle;
-- no end-to-end evaluation corpus, relevance telemetry, or explanation model;
+- no end-to-end evaluation corpus or hosted relevance telemetry beyond the
+  deterministic report contract;
   and
 - no hosted operational baseline for quotas, isolation, migrations,
   backup/restore, SLOs, and cost controls.

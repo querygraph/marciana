@@ -509,6 +509,7 @@ pub mod assertion_recall;
 pub mod cognition;
 pub mod context;
 pub mod context_render;
+pub mod evaluation;
 mod facade;
 pub mod session;
 #[cfg(feature = "turso")]
@@ -520,6 +521,7 @@ pub use api::{
     ApiError, ForgetRequest, ImproveRequest, MemoryVerb, RecallRequest, RememberRequest,
 };
 pub use facade::{FacadeError, MemoryFacade};
+pub use evaluation::{ContextEvaluationCase, ContextEvaluationReport, EvaluationError};
 pub use session::{SessionError, SessionMetadata};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;

@@ -8,6 +8,8 @@ All notable changes to Marciana are documented in this file.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
 - Persist and recover vector manifests through guarded Grust commits.
 - Revalidate decoded vector scope identities before manifest recovery.
+- Add deterministic content-free context evaluation for quality, token utility,
+  and forbidden-ID leakage.
 - Add a capability-bound facade path for session-scoped context planning.
 - Add bounded session metadata that binds session, space, and recall-policy
   identity into recall planning without changing authorization semantics.
