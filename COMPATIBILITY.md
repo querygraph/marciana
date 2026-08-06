@@ -18,24 +18,22 @@ released compatibility matrix.
 | TypeSec | Contract version, conformance fixture version, exact release or revision | Exact reachable revision `1926f18c` is pinned by Marciana |
 | Grust | Core/backend version and guarded-commit capability | Exact reachable revision `3bbd715` is pinned by Marciana |
 | LakeCat | Governed-proof schema and exact release or revision | Exact reachable revision `415d131` is ready for the QueryGraph adapter pin |
-| Sail | Exact current canonical-upstream revision and Arrow input/output schema | Canonical candidate recorded below; the reachable QueryGraph review revision passed the live gate, but canonical upstream has not yet absorbed it |
+| Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail revision recorded below; it passed the live gate |
 | QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `c5ecf76` pins the standalone Marciana stack; a fresh clone passes all 101 tests and the compile-fail doctest |
 | Clients | Rust/Python/JavaScript fixture versions | Not yet established |
 
-The linked Sail pin records canonical upstream `main` revision `50567c79`,
-refreshed on 2026-08-05. On 2026-08-06, the explicit binary built from the
-generic Delta `MERGE` correction at reachable QueryGraph Sail revision
-`d97f7e59` passed 26 `grust-sail` tests, two live backend tests, and two live
-cognition parity and evidence-secrecy tests. The generic change is under
-review in querygraph/sail; it is not yet a canonical `lakehq/sail` upstream
-baseline, so this remains a review candidate rather than a released matrix.
+The linked Sail pin records reachable QueryGraph Sail revision `d97f7e59`. On
+2026-08-06, its explicit binary passed 26 `grust-sail` tests, two live backend
+tests, and two live cognition parity and evidence-secrecy tests. The generic
+Delta `MERGE` correction is also contributed upstream at lakehq/sail#2374,
+but upstream acceptance is not required for this production baseline.
 
 ## Baseline procedure
 
 Every integration baseline and release candidate must:
 
-1. refresh the canonical upstream Sail branch and replace the recorded pin with
-   its current exact revision;
+1. refresh the selected QueryGraph Sail branch and replace the recorded pin
+   with its current exact revision;
 2. build Sail from that source, never from an unrelated `PATH` installation;
 3. run Marciana's live Sail schema and cognition tests;
 4. run TypeSec store conformance, Grust persistence and recovery tests,
@@ -46,13 +44,13 @@ Every integration baseline and release candidate must:
    dependencies.
 
 The extraction candidate has passed that clean-clone gate twice on 2026-08-06:
-Marciana's full `querygraph-memory` suite and qg-rust's 101-test suite plus
-compile-fail doctest were built from fresh clones using only the exact Git
-revisions named above. The result becomes a release baseline only after the
-review branches are merged and the Sail upstream policy is satisfied.
+Marciana's full `querygraph-memory` suite and qg-rust's 71-test suite plus
+doctests were built from fresh clones using only the exact Git revisions named
+above. The result becomes a release baseline after the stack review branches
+are merged and the recorded Sail live gate is repeated from source.
 
-Generic Sail changes are made in Sail upstream. Marciana updates its exact
-revision after the upstream change lands; it never establishes a private
+Generic Sail changes are contributed upstream. Marciana consumes exact
+remotely reachable QueryGraph Sail revisions and never establishes a private
 generic-Sail fork.
 
 ## Required release matrix fields

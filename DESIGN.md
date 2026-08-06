@@ -177,12 +177,13 @@ handle. Memory-specific Sail schemas, queries, and executors live in Marciana.
 Generic execution, Arrow staging, Spark Connect behavior, and engine fixes live
 in Sail or the generic Grust-to-Sail integration.
 
-## Sail upstream policy
+## Sail baseline policy
 
-Sail is refreshed from its canonical upstream source for every new Marciana
-integration baseline and release candidate. The baseline process is:
+Sail is refreshed from the supported QueryGraph Sail remote for every new
+Marciana integration baseline and release candidate. The baseline process is:
 
-1. fetch the current canonical upstream branch and select that current commit;
+1. fetch the selected remotely reachable QueryGraph Sail branch and record its
+   exact commit;
 2. record the exact commit in `compat/sail-revision.txt`;
 3. build Sail from that source checkout and invoke Marciana's live integration
    gate with the resulting explicit binary path; and
@@ -190,14 +191,15 @@ integration baseline and release candidate. The baseline process is:
    [COMPATIBILITY.md](COMPATIBILITY.md).
 
 A released baseline remains reproducible because it names an exact revision,
-but the next baseline starts by refreshing upstream instead of silently
-carrying the old pin. A generic defect or missing generic capability is fixed
-upstream in Sail and consumed by updating the recorded revision. Marciana must
-not fork, copy, or privately patch generic Sail behavior. Marciana-local code
-is limited to memory-specific schemas, proposal-producing computation, and the
-adapter boundary.
+but the next baseline starts by refreshing the supported remote instead of
+silently carrying the old pin. A generic defect or missing generic capability
+is contributed upstream in Sail and consumed from the verified QueryGraph
+revision while upstream review proceeds. Marciana must not fork, copy, or
+privately patch generic Sail behavior. Marciana-local code is limited to
+memory-specific schemas, proposal-producing computation, and the adapter
+boundary.
 
-CI verifies that the recorded revision is the fetched current upstream commit,
+CI verifies that the recorded revision is reachable from the selected remote,
 builds it from source, and, once crates exist, requires the live Marciana gate.
 Using an unrelated `sail` binary from `PATH` is not an integration proof.
 

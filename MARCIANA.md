@@ -44,9 +44,9 @@ authorization or mutation path.
 |---|---|---|
 | TypeSec and TypeDID | The cognition authority, exact governed-source scope, manifest-only reauthorization, prepared-commit and proposal-free recovery, versioned receipt evidence, and non-disclosing diagnostics are reachable as `1926f18` and pass the owning repository's release gates. | Retain these conformance gates in the cross-stack baseline. |
 | LakeCat | Owner-bound governed-scan proof v2, catalog identity, strict decoding, snapshot/source-scope digests, and opaque revalidation results are reachable as `415d131`; core and book gates pass. | Include the service API gate in the clean-clone matrix. |
-| Grust | Durable cognition scheduler/store, leases, guarded commit/recovery, ID-only outbox, typed no-change outcome, and Sail executor are reachable as `3bbd715`; the bounded Sail integration harness is reachable as `e20d69c`. The current local Sail binary passes all 26 executor tests, two live backend tests, and Marciana memory's two cognition parity/secrecy tests through that wrapper. | Select a canonical reachable Sail revision and repeat the bounded gate against it. |
+| Grust | Durable cognition scheduler/store, leases, guarded commit/recovery, ID-only outbox, typed no-change outcome, and Sail executor are reachable as `3bbd715`; the bounded Sail integration harness is reachable as `e20d69c`. The QueryGraph Sail baseline at `d97f7e59` passes all 26 executor tests, two live backend tests, and Marciana memory's two cognition parity/secrecy tests through that wrapper. | Retain the bounded gate in the release matrix. |
 | QueryGraph | qg-rust now consumes the native Marciana governed application and has removed all nine former production composition modules at `efd6245`. Its public cognition entry point remains one opaque `improve(read, write)` operation; explicit feature-gated Marciana test seams preserve focused adversarial checks. The active full suite passes 71 tests plus doctests and strict Clippy using exact reachable Git revisions. | Run the full compatibility and service-recovery matrix against the native crate. |
-| Sail | Canonical upstream is refreshed to `50567c79`; the generic Delta `MERGE` constraint correction is `d97f7e59`, with a draft canonical upstream PR at [lakehq/sail#2374](https://github.com/lakehq/sail/pull/2374). The bounded local gate passes from its explicit binary, but no merged canonical revision exists yet. | Merge the generic fix in canonical Sail, record its reachable revision, build that exact source, and rerun the live gate. |
+| Sail | The supported production baseline is remotely reachable QueryGraph Sail revision `d97f7e59`, recorded in `compat/sail-revision.txt`; its explicit binary passes the bounded live gate. The generic Delta `MERGE` correction remains contributed upstream at [lakehq/sail#2374](https://github.com/lakehq/sail/pull/2374), but upstream acceptance is not a delivery dependency. | Refresh and validate a newer QueryGraph Sail revision only as a new explicit baseline. |
 | Marciana | `querygraph-memory` has been transplanted with preserved Git history into `crates/marciana-memory`; its Grust and TypeSec dependencies now use exact reachable Git revisions. The native `marciana-catalog` crate owns LakeCat proof-to-cognition-source translation and cognition-specific catalog/table-identity validation; `marciana-cognition` owns the closed fixed-profile engine binding, non-disclosing error boundaries, complete opaque governed `improve` composition, and native intent-digest boundary tests at `08d2309`. The durable scheduler returns staged work only as its proposal digest, forbidding post-restart re-planning; focused native tests and strict Clippy checks pass. | Run the full compatibility and service-recovery matrix against the native crate. |
 
 No executable Marciana compatibility baseline is claimed yet. The status above
@@ -57,9 +57,9 @@ sibling checkout paths into released dependencies.
 
 1. Finish the Grust and qg-rust boundary reviews, tests, and logical commits;
    rerun the applicable TypeSec and LakeCat conformance gates.
-2. Land the generic Delta correction in canonical Sail, refresh Sail from its
-   current upstream source, record the exact revision, build that checkout,
-   and run the live integration proof using its explicit binary.
+2. Build the recorded reachable QueryGraph Sail revision, run the live
+   integration proof using its explicit binary, and contribute generic
+   corrections upstream without making upstream acceptance a delivery block.
 3. Transplant `querygraph-memory` from Grust into this repository with Git
    history and behavior intact. Preserve its crate name, routes, wire forms,
    database prefixes, durable identifiers, storage formats, and tests; do not
@@ -81,9 +81,9 @@ sibling checkout paths into released dependencies.
    [MARCIANA2.md](MARCIANA2.md).
 
 Sail is updated throughout this sequence, not treated as a one-time vendored
-dependency. Every integration baseline and release candidate starts by
-refreshing the current canonical Sail upstream, contributing generic fixes
-there, and recording the exact verified revision in this repository.
+dependency. Every integration baseline and release candidate records an exact
+remotely reachable QueryGraph Sail revision, builds that source, and
+contributes generic fixes upstream without blocking on upstream acceptance.
 
 ## Governed `improve` completion path
 
@@ -194,8 +194,8 @@ tests live in separate files or integration-test targets.
 ## Remote authorization gate
 
 An exact Git revision is acceptable only after it is reachable from the remote
-used by a clean clone. The current local-only Sail correction cannot satisfy
-that requirement. Any other selected local commits must meet the same rule.
+used by a clean clone. The selected QueryGraph Sail correction satisfies this
+requirement; any replacement must meet the same rule.
 
 Creating or changing remotes, pushing commits, publishing crates, and opening
 external changes require explicit authorization. Until an authorized operator
