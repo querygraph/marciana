@@ -22,11 +22,10 @@ baseline, not yet a versioned crate release.
 | QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `efd6245` consumes standalone Marciana; a fresh clone passes its active 71-test suite, doctests, and strict Clippy |
 | Clients | Rust/Python/JavaScript fixture versions | Not yet established |
 
-The linked Sail pin records reachable QueryGraph Sail revision `d97f7e59`. On
-2026-08-06, its explicit binary passed 26 `grust-sail` tests, two live backend
-tests, and two live cognition parity and evidence-secrecy tests. The generic
-Delta `MERGE` correction is also contributed upstream at lakehq/sail#2374,
-but upstream acceptance is not required for this production baseline.
+The linked Sail pin records upstream merge `2c1b2e45`. PR
+[lakehq/sail#2374](https://github.com/lakehq/sail/pull/2374) is merged; the
+explicit binary remains subject to the same `grust-sail` and live cognition
+gate, which must be rerun for this refreshed baseline.
 
 ## Baseline procedure
 
@@ -43,13 +42,13 @@ Every integration baseline and release candidate must:
 6. prove the declared setup from a clean clone without sibling path
    dependencies.
 
-The verified baseline passed the clean-clone gate on 2026-08-06: Marciana's
+The previous verified baseline passed the clean-clone gate on 2026-08-06: Marciana's
 full workspace (including 72 `querygraph-memory` unit tests, integration
 recovery/commit/outbox suites, doctests, and strict Clippy) and qg-rust's
 active 71-test suite plus doctests and strict Clippy were built from fresh
 clones using only the exact Git revisions named above. The recorded Sail live
-gate was run from the selected QueryGraph Sail source. Merge status and
-upstream Sail acceptance do not alter this baseline.
+gate was run from the selected QueryGraph Sail source. The refreshed upstream
+revision is recorded above and its live gate is pending rerun.
 
 Generic Sail changes are contributed upstream. Marciana consumes exact
 remotely reachable QueryGraph Sail revisions and never establishes a private

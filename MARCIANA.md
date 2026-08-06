@@ -59,7 +59,8 @@ revision; it does not depend on local branches or sibling checkout paths.
    rerun the applicable TypeSec and LakeCat conformance gates.
 2. Build the recorded reachable QueryGraph Sail revision, run the live
    integration proof using its explicit binary, and contribute generic
-   corrections upstream without making upstream acceptance a delivery block.
+   corrections upstream; merged generic fixes are consumed by refreshing the
+   recorded exact revision.
 3. Transplant `querygraph-memory` from Grust into this repository with Git
    history and behavior intact. Preserve its crate name, routes, wire forms,
    database prefixes, durable identifiers, storage formats, and tests; do not
@@ -82,7 +83,8 @@ revision; it does not depend on local branches or sibling checkout paths.
 Sail is updated throughout this sequence, not treated as a one-time vendored
 dependency. Every integration baseline and release candidate records an exact
 remotely reachable QueryGraph Sail revision, builds that source, and
-contributes generic fixes upstream without blocking on upstream acceptance.
+contributes generic fixes upstream and refreshes the recorded revision after
+upstream merges.
 
 ## Governed `improve` completion path
 
