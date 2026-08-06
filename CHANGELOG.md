@@ -41,6 +41,8 @@ All notable changes to Marciana are documented in this file.
   and TypeScript client baselines.
 - Added validation-only Rust request contracts for the four memory verbs;
   authorization and mutation remain behind the existing TypeSec boundary.
+- Added safe lowering from remember/recall requests into existing TypeSec draft
+  and query types, still before capability authorization.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local

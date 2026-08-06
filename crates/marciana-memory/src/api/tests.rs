@@ -11,6 +11,7 @@ fn remember() -> RememberRequest {
 #[test]
 fn public_requests_validate_without_performing_authorization() {
     assert!(remember().validate().is_ok());
+    assert!(remember().to_draft().is_ok());
     assert!(
         RecallRequest {
             space_id: "tenant/coffee".into(),
@@ -18,6 +19,15 @@ fn public_requests_validate_without_performing_authorization() {
             purpose: "research".into()
         }
         .validate()
+        .is_ok()
+    );
+    assert!(
+        RecallRequest {
+            space_id: "tenant/coffee".into(),
+            query: "price".into(),
+            purpose: "research".into()
+        }
+        .to_query()
         .is_ok()
     );
     assert!(

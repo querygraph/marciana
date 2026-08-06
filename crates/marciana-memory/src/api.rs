@@ -1,5 +1,7 @@
 //! Stable validation-only request contracts for Marciana's four verbs.
 
+use typesec_memory::{MemoryContent, MemoryDraft, MemoryKind, Provenance, RecallQuery};
+
 const MAX_ID: usize = 256;
 const MAX_TEXT: usize = 16 * 1024;
 
@@ -78,12 +80,29 @@ impl RememberRequest {
         identity(&self.purpose)?;
         text(&self.text)
     }
+
+    /// Lower into the existing TypeSec draft without authorizing it.
+    pub fn to_draft(&self) -> Result<MemoryDraft, ApiError> {
+        self.validate()?;
+        Ok(MemoryDraft::new(
+            MemoryKind::Semantic,
+            MemoryContent::text(&self.text),
+            Provenance::Operator,
+        )
+        .for_purposes([self.purpose.clone()]))
+    }
 }
 impl RecallRequest {
     pub fn validate(&self) -> Result<(), ApiError> {
         identity(&self.space_id)?;
         identity(&self.purpose)?;
         text(&self.query)
+    }
+
+    /// Lower into the existing TypeSec query without authorizing it.
+    pub fn to_query(&self) -> Result<RecallQuery, ApiError> {
+        self.validate()?;
+        Ok(RecallQuery::text(&self.query))
     }
 }
 impl ImproveRequest {
