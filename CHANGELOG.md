@@ -6,6 +6,11 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added Marciana's native governed cognition composition: verified TypeDID
+  intent binding, LakeCat revalidation, TypeSec authority priming and commit,
+  proposal validation, receipt signing, and the opaque `improve` operation now
+  live together in `marciana-cognition`.
+
 - Updated the delivery record to distinguish completed native error-boundary
   extraction from the still-required move of governed `improve` composition.
 
