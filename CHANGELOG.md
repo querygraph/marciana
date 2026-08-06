@@ -6,6 +6,12 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Recorded the passing focused local Sail integration gate for the Grust
+  cognition substrate while retaining the requirement for a remotely reachable
+  Sail revision before Marciana claims an executable compatibility baseline.
+
+### 2026-08-06
+
 - Transplanted `querygraph-memory` into standalone Marciana with preserved
   commit history, modular cognition modules, separate tests, and a compiling
   workspace over the current Grust and TypeSec checkouts.
