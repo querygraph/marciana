@@ -1193,9 +1193,9 @@ checksum = "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
 
 [[package]]
 name = "grust-core"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc1c028083618bd026cec4b46c87c0c98a02d065fa35f7c956227319a254b8bc"
+checksum = "65ae4a5b8dc7067bf0a3fc3af31f93f14c9eedc9492d368816dfcdd8e625b5b6"
 dependencies = [
  "async-trait",
  "quick-xml",
@@ -1207,9 +1207,9 @@ dependencies = [
 
 [[package]]
 name = "grust-cypher"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df43b945ea9d73b84c9450174ea11e80340d06eded3400c73702f1fd44b20d72"
+checksum = "5eb60a93989d00707d90d62ad6333a0649406417c5efe5a3c1fc675359a3a4fc"
 dependencies = [
  "async-trait",
  "grust-core",
@@ -1220,9 +1220,9 @@ dependencies = [
 
 [[package]]
 name = "grust-graph"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6a20f05378d04fb85355053ad1dd85469f22a201f9cc81e2f08d74d10f0b5f2"
+checksum = "615326122aa0c1a700ee4ac7eaf1987e026ebd593c15fe503770f729b89e36a9"
 dependencies = [
  "grust-core",
  "grust-cypher",
@@ -1232,9 +1232,9 @@ dependencies = [
 
 [[package]]
 name = "grust-memory"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bb4ff1089fab585e1271d3e087037b9eb8b7c0f5c25b557fadf07fa62bea43b"
+checksum = "29bb602232ca7e7cf935b688f4534431fcee88430093b917d5d90ea97e57e26f"
 dependencies = [
  "async-trait",
  "grust-core",
@@ -1242,9 +1242,9 @@ dependencies = [
 
 [[package]]
 name = "grust-sail"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88a7d03083baa0b5a29292bf4c71d915f40b54f0350e03c0d9aa229702b485ec"
+checksum = "d4ee1517059c57c1c89859f11b198333294d6719524688569e672e5e42d25af1"
 dependencies = [
  "arrow",
  "async-trait",
@@ -1262,9 +1262,9 @@ dependencies = [
 
 [[package]]
 name = "grust-sql-core"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "daf4d8b127e4c2c80768828cf0ee3957284e7a3d37554e0bc559c553fc682671"
+checksum = "845d6de7d8b84317354825ffbac1f10c68dc59499277620414cb30da3ed67125"
 dependencies = [
  "grust-core",
  "serde_json",
@@ -1272,14 +1272,17 @@ dependencies = [
 
 [[package]]
 name = "grust-turso"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3553ea1ea1601331df87273ead8ea7cde9c0838150e049e41ac2a5d3842722a"
+checksum = "cb70a74eb4033791ee3d24a3fc8d1859265a8cad065a1439d0fa73cd2d298aae"
 dependencies = [
  "async-trait",
+ "chrono",
  "grust-core",
+ "grust-cypher",
  "grust-sql-core",
  "serde_json",
+ "tokio",
  "turso",
 ]
 
@@ -1940,7 +1943,7 @@ dependencies = [
 
 [[package]]
 name = "marciana-catalog"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "lakecat-core",
  "querygraph-memory",
@@ -1950,7 +1953,7 @@ dependencies = [
 
 [[package]]
 name = "marciana-cognition"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1970,7 +1973,7 @@ dependencies = [
 
 [[package]]
 name = "marciana-ledger"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "chrono",
  "serde",
@@ -2347,7 +2350,7 @@ dependencies = [
 
 [[package]]
 name = "querygraph-memory"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "arrow",
  "async-trait",
@@ -2434,7 +2437,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3111,7 +3114,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.4",
  "windows-sys 0.61.2",
@@ -3649,12 +3652,13 @@ checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
 
 [[package]]
 name = "typesec-core"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b12b42a846f6020fef3586a1ab6ededbfa46f839086f70cac976977a5e20ca96"
+checksum = "b35b825ccb7481db6500ba6300666b30ee3f85c7c0428d3c80f2f0c719e5083f"
 dependencies = [
  "chrono",
  "glob",
+ "serde",
  "thiserror",
  "tracing",
  "web-time",
@@ -3663,9 +3667,9 @@ dependencies = [
 
 [[package]]
 name = "typesec-integrations"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8dc05a0aef81366ad54a81d0c2bee4940e8c3b0ba9eb4f6c070a1648d7f59b4"
+checksum = "c9bdf6295684553d1f8b1d6a56a5fd1c30236c63df515f6d8711a5d41cdd70d6"
 dependencies = [
  "base64",
  "chacha20poly1305",
@@ -3685,13 +3689,14 @@ dependencies = [
 
 [[package]]
 name = "typesec-memory"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebb8cbdbbda32322dbfbae3d921a61804ac3e2e331e038e6e5988014d2d7895e"
+checksum = "2de9eeaaef3f526dd9cc5f20a320db6cbf1471b590d58415c1ddab4f2be7cb9f"
 dependencies = [
  "chrono",
  "serde",
  "serde_json",
+ "sha2",
  "thiserror",
  "tracing",
  "typesec-core",
@@ -3699,9 +3704,9 @@ dependencies = [
 
 [[package]]
 name = "typesec-rbac"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55d2043b80ab11311889d9e89f5bd501ce3c6491b213bcf6b425bbf00eee213b"
+checksum = "e296ea4d688a53e41f61f3a350e8504ae39ab95c48f10016037d4117e14573ad"
 dependencies = [
  "garde",
  "glob",
