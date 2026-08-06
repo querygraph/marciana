@@ -35,6 +35,12 @@ Phase 1's ledger, migration, and authorized assertion recall baseline is
 complete; later phases extend it through formation and context products rather
 than a parallel memory path.
 
+Phase 2 has started with a closed, versioned formation-profile registry.
+`background-deduplication-v1` and `background-reconciliation-v1` each select
+exactly one existing native cognition operation; no profile may supply a
+model-chosen operation or executor identity. The next unit binds that profile
+identity into signed TypeDID intent and the durable job contract.
+
 ## Executive judgment
 
 Marciana should not become another memory extraction framework. Its defensible

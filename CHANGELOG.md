@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added the closed MARCIANA2 formation-profile registry. Versioned background
+  deduplication and reconciliation profiles select exactly one native
+  cognition operation and reject unrecognized profile identities.
+
 - Completed MARCIANA2 Phase 1's assertion-safe baseline: deterministic
   assertion candidates now materialize only through TypeSec's capability-gated
   ranked-ID recall, preserving purpose, validity, retention, quarantine, and
