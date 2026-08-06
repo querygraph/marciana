@@ -18,6 +18,7 @@ All notable changes to Marciana are documented in this file.
 - Add thread metadata and a shared thread/session context facade path.
 - Synchronize tenant vector membership manifests with index operations.
 - Include materialization cutoffs in context explanations.
+- Correct benchmark documentation to reflect the implemented optional BEAM adapter.
 - Add bounded content-free P50/P95/P99 latency percentile snapshots.
 - Add a capability-bound facade path for session-scoped context planning.
 - Add bounded session metadata that binds session, space, and recall-policy

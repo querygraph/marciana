@@ -547,8 +547,8 @@ reduced p50 lookup time from roughly 421 µs to 5.3 µs. These figures are engin
 diagnostics, not a claim against the published vendor results; pinned adapters
 for LoCoMo and LongMemEval now normalize authorized local fixtures at exact
 source revisions. BEAM and BEAM-10M Parquet source revisions are also pinned;
-their optional PyArrow normalizer remains separate from the dependency-free
-smoke harness.
+their optional PyArrow normalizer is implemented separately from the
+dependency-free smoke harness.
 
 ## Priority decisions
 
