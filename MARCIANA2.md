@@ -122,8 +122,9 @@ content-free scope digest binds that tenant to the embedding-space identity
 for durable manifests and repair work.
 The vector layer now also provides a content-free index manifest and bounded
 scope-bound repair batch; repairs are applied atomically to the manifest and
-carry only memory IDs, leaving embedding persistence and transaction storage
-host-owned.
+carry only memory IDs. Manifests can now be persisted and recovered through a
+guarded Grust commit; embedding computation and protected content remain
+outside the persistence boundary.
 Session metadata now provides a bounded, content-free product identity for a
 session, space, and recall-policy digest. Binding it changes the deterministic
 recall intent identity only; it does not mint capabilities or create an

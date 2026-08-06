@@ -2,6 +2,7 @@
 
 use std::collections::BTreeSet;
 
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use typesec_memory::MemoryId;
 
@@ -11,7 +12,7 @@ const MAX_MANIFEST_IDS: usize = 100_000;
 
 /// A host-persistable identity and membership manifest for one tenant index.
 /// It contains no embeddings or source content.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VectorIndexManifest {
     scope: VectorIndexScope,
     indexed_ids: BTreeSet<String>,
@@ -66,6 +67,27 @@ impl VectorIndexManifest {
     #[must_use]
     pub fn digest(&self) -> &str {
         &self.digest
+    }
+
+    /// Verify the persisted membership and digest identity.
+    pub fn validate(&self) -> Result<(), VectorManifestError> {
+        if self.indexed_ids.len() > MAX_MANIFEST_IDS
+            || self.indexed_ids.iter().any(|id| {
+                id.is_empty()
+                    || id.len() > 256
+                    || !id
+                        .bytes()
+                        .all(|byte| byte.is_ascii_alphanumeric() || b"_:/.-".contains(&byte))
+            })
+        {
+            return Err(VectorManifestError::InvalidBatch);
+        }
+        let mut copy = self.clone();
+        copy.refresh_digest();
+        if copy.digest != self.digest {
+            return Err(VectorManifestError::InvalidBatch);
+        }
+        Ok(())
     }
 
     /// Apply a repair batch atomically in memory. Hosts can persist the

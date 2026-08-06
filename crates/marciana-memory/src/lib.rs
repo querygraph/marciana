@@ -515,6 +515,7 @@ pub mod session;
 pub mod turso;
 pub mod vector;
 pub mod vector_manifest;
+mod vector_manifest_store;
 pub use api::{
     ApiError, ForgetRequest, ImproveRequest, MemoryVerb, RecallRequest, RememberRequest,
 };

@@ -23,6 +23,7 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
 
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use typesec_memory::{IndexError, Label, MemoryId, SemanticIndex};
 
@@ -53,7 +54,7 @@ pub struct VectorIndex<E: Embedder> {
 /// Tenant and embedding-space identity that must accompany a vector index.
 /// The digest is safe to persist as an index manifest; it contains no key or
 /// memory content.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VectorIndexScope {
     tenant_id: String,
     embedding_space: String,
