@@ -48,6 +48,9 @@ impl LegacyRelation {
         if !is_key(&key) {
             return Err(LedgerError::InvalidAssertionId);
         }
+        if !import_evidence.causing_assertions().is_empty() {
+            return Err(LedgerError::InvalidTransitionEvidence);
+        }
         Ok(Self {
             key,
             subject: subject.into(),

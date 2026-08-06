@@ -97,6 +97,27 @@ impl TransitionEvidence {
         })
     }
 
+    /// Creates canonical evidence for an initial import, which has source
+    /// evidence but no preceding assertion transition.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`LedgerError::InvalidTransitionEvidence`] without at least one
+    /// lowercase SHA-256 digest or when a digest is duplicated.
+    pub fn import(mut evidence_digests: Vec<String>) -> Result<Self, LedgerError> {
+        evidence_digests.sort();
+        if evidence_digests.is_empty()
+            || evidence_digests.windows(2).any(|pair| pair[0] == pair[1])
+            || evidence_digests.iter().any(|digest| !is_digest(digest))
+        {
+            return Err(LedgerError::InvalidTransitionEvidence);
+        }
+        Ok(Self {
+            causing_assertions: Vec::new(),
+            evidence_digests,
+        })
+    }
+
     /// Canonically ordered causal assertion identifiers.
     #[must_use]
     pub fn causing_assertions(&self) -> &[AssertionId] {
@@ -150,7 +171,10 @@ impl AssertionTransition {
         at: DateTime<Utc>,
         evidence: TransitionEvidence,
     ) -> Result<Self, LedgerError> {
-        if !from.may_transition_to(to) {
+        if !from.may_transition_to(to)
+            || (evidence.causing_assertions().is_empty()
+                && (from != AssertionState::Proposed || to != AssertionState::Current))
+        {
             return Err(LedgerError::InvalidTransition);
         }
         Ok(Self {

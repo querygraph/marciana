@@ -188,7 +188,7 @@ fn legacy_migration_is_retry_stable_and_keeps_ended_validity_historical() {
                 "assertion-v1",
             )
             .unwrap(),
-            evidence(),
+            TransitionEvidence::import(vec![DIGEST.into()]).unwrap(),
         )
         .unwrap()
     };
@@ -199,4 +199,31 @@ fn legacy_migration_is_retry_stable_and_keeps_ended_validity_historical() {
     assert_eq!(first.state(), AssertionState::Current);
     assert!(first.is_current_at(at(2)));
     assert!(!first.is_current_at(at(3)));
+}
+
+#[test]
+fn legacy_import_requires_source_evidence_without_fabricated_assertion_cause() {
+    let relation = LegacyRelation::new(
+        "legacy-edge:record-1:1",
+        "account:acme",
+        "locatedIn",
+        "place:venice",
+        Confidence::from_basis_points(10_000).unwrap(),
+        at(0),
+        at(1),
+        TemporalInterval::new(at(0), None).unwrap(),
+        AssertionLineage::new(
+            "episode:legacy-1",
+            "record:1",
+            "legacy-relates-v1",
+            "assertion-v1",
+        )
+        .unwrap(),
+        evidence(),
+    );
+
+    assert!(matches!(
+        relation,
+        Err(LedgerError::InvalidTransitionEvidence)
+    ));
 }
