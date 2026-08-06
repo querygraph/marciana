@@ -1,6 +1,6 @@
 # Marciana 2: A Governed Memory System Plan
 
-**Status:** Phase 2/3/4/5 implementation in progress; accepted design constraints preserved
+**Status:** Phase 2/3/4/5 implementation in progress; benchmark and coffee-demo gates complete
 
 **Reviewed:** 2026-08-05
 
@@ -165,6 +165,11 @@ coffee-market demonstration under `examples/coffee_market_demo`. It loads a
 Dataverse-shaped Honduras fixture (or a configured native Dataverse dataset),
 can write/query Sail over Spark Connect, and exercises governed memory verbs
 through typed agent tools while preserving historical price observations.
+The demo now has a key-free deterministic TestModel path and a regression test
+for the complete report → learn → recall → improve → recall → forget lifecycle;
+the structured decision action is always derived from the governed tool that
+actually ran. This keeps the example executable in clean environments while
+leaving live provider credentials and transport outside the repository.
 The first thin Python client boundary now lives under
 `clients/python/marciana_client`; it validates four-verb request/receipt wire
 shapes while leaving signing, authorization, and storage to the injected
@@ -199,6 +204,14 @@ report. Evaluation receipts bind a corpus summary to an evaluator identity for
 reproducible release comparisons without storing benchmark content; failed or
 leaking summaries cannot produce a release receipt. A checked-in content-free
 fixture provides the first versioned corpus input.
+
+The benchmark release gate now requires provider-neutral model, provider,
+embedding, prompt, profile, hardware, and source-revision metadata. The
+dependency-free smoke corpus validates temporal recall, abstention, redaction,
+token accounting, and P50/P95/P99 latency for linear versus indexed lookup;
+the latest local run passed all gates (100% accuracy, zero redaction leaks) and
+reported an approximately 81× indexed P50 speedup. LoCoMo, LongMemEval, BEAM,
+and BEAM-10M remain pinned optional adapters rather than release claims.
 Context bundles, citations, and text/XML renderers now also carry the verified
 point-in-time `as_of` cutoff used during materialization.
 Context explanations carry the same cutoff, keeping redaction and truncation
