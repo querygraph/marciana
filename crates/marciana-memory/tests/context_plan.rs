@@ -1,6 +1,6 @@
 use chrono::{TimeZone, Utc};
 use querygraph_memory::context::{
-    plan_context, ContextCandidate, ContextError, ContextRecipe, ContextView, RecallIntent,
+    ContextCandidate, ContextError, ContextRecipe, ContextView, RecallIntent, plan_context,
 };
 use typesec_memory::MemoryId;
 

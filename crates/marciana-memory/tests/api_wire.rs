@@ -2,9 +2,10 @@ use querygraph_memory::{ForgetRequest, ImproveRequest, RecallRequest, RememberRe
 
 #[test]
 fn four_verb_wire_fixture_is_strict_and_snake_case() {
-    let remember: RememberRequest =
-        serde_json::from_str(include_str!("../../../compat/fixtures/api_remember_v1.json"))
-            .expect("remember fixture");
+    let remember: RememberRequest = serde_json::from_str(include_str!(
+        "../../../compat/fixtures/api_remember_v1.json"
+    ))
+    .expect("remember fixture");
     assert_eq!(remember.space_id, "memory/user:alice/semantic");
     let encoded = serde_json::to_value(&remember).expect("serialize remember");
     assert!(encoded.get("space_id").is_some());
