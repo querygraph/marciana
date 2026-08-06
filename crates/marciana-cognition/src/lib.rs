@@ -13,7 +13,10 @@ mod metrics;
 pub use backup::{BackupManifest, RestoreError};
 pub use binding_error::CognitionBindingError;
 pub use engine_binding::CognitionEngineBinding;
-pub use formation_profile::{FormationBinding, FormationProfile, FormationProvider};
+pub use formation_profile::{
+    FormationBinding, FormationBudgetError, FormationCapability, FormationProfile,
+    FormationProvider, FormationRegistry, FormationRegistryError, FormationResourceBudget,
+};
 #[cfg(feature = "test-support")]
 #[doc(hidden)]
 pub use governed::CognitionClock;

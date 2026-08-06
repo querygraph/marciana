@@ -63,6 +63,8 @@ All notable changes to Marciana are documented in this file.
   wire field.
 - Added runtime Python/TypeScript tests that reject regression to the old
   `ids` forget field.
+- Added a closed formation registry with explicit provider capabilities and
+  source/output record budgets for Reference and Sail bindings.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

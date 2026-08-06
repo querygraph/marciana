@@ -29,6 +29,110 @@ pub enum FormationProvider {
     SailV1,
 }
 
+/// Native operation capability exposed by a trusted formation provider.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FormationCapability {
+    /// Exact duplicate consolidation.
+    Deduplicate,
+    /// Contradiction reconciliation.
+    Reconcile,
+}
+
+/// Bounded resources a provider may consume for one formation job.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FormationResourceBudget {
+    /// Maximum authorized source records.
+    pub max_source_records: u32,
+    /// Maximum proposed output records.
+    pub max_output_records: u32,
+}
+
+impl FormationResourceBudget {
+    const DEFAULT: Self = Self {
+        max_source_records: 10_000,
+        max_output_records: 10_000,
+    };
+
+    /// Check an authorized source selection before materialization.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FormationBudgetError::SourceRecords`] when `count` exceeds
+    /// the provider ceiling.
+    pub fn check_source_records(self, count: usize) -> Result<(), FormationBudgetError> {
+        if count > self.max_source_records as usize {
+            return Err(FormationBudgetError::SourceRecords {
+                limit: self.max_source_records,
+                actual: count,
+            });
+        }
+        Ok(())
+    }
+
+    /// Check an inert proposal before authoritative application.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FormationBudgetError::OutputRecords`] when `count` exceeds
+    /// the provider ceiling.
+    pub fn check_output_records(self, count: usize) -> Result<(), FormationBudgetError> {
+        if count > self.max_output_records as usize {
+            return Err(FormationBudgetError::OutputRecords {
+                limit: self.max_output_records,
+                actual: count,
+            });
+        }
+        Ok(())
+    }
+}
+
+/// Error returned when a formation resource ceiling is exceeded.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+pub enum FormationBudgetError {
+    #[error("formation source-record budget exceeded: limit {limit}, actual {actual}")]
+    SourceRecords { limit: u32, actual: usize },
+    #[error("formation output-record budget exceeded: limit {limit}, actual {actual}")]
+    OutputRecords { limit: u32, actual: usize },
+}
+
+/// Trusted provider/profile resolver. It contains no model- or payload-defined
+/// registration path; deployments compose only the closed native providers.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FormationRegistry;
+
+impl FormationRegistry {
+    /// Resolve a closed profile to a provider capability and fixed schemas.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FormationRegistryError::UnsupportedCapability`] if the
+    /// trusted provider does not expose the profile's native operation.
+    pub fn resolve(
+        self,
+        profile: FormationProfile,
+        provider: FormationProvider,
+    ) -> Result<FormationBinding, FormationRegistryError> {
+        let capability = profile.capability();
+        if !provider.supports(capability) {
+            return Err(FormationRegistryError::UnsupportedCapability {
+                provider,
+                capability,
+            });
+        }
+        Ok(profile.bind(provider))
+    }
+}
+
+/// Registry resolution failed closed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+pub enum FormationRegistryError {
+    #[error("formation provider does not support the selected capability")]
+    UnsupportedCapability {
+        provider: FormationProvider,
+        capability: FormationCapability,
+    },
+}
+
 /// Fully resolved, bounded formation contract.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FormationBinding {
@@ -39,6 +143,10 @@ pub struct FormationBinding {
     pub output_schema_version: &'static str,
     pub max_source_records: u32,
     pub max_output_records: u32,
+    /// Native operation capability selected by the profile.
+    pub capability: FormationCapability,
+    /// Explicit provider resource ceiling.
+    pub budget: FormationResourceBudget,
 }
 
 impl FormationProfile {
@@ -51,8 +159,10 @@ impl FormationProfile {
             operation: self.operation(),
             input_schema_version: "1",
             output_schema_version: "1",
-            max_source_records: 10_000,
-            max_output_records: 10_000,
+            max_source_records: FormationResourceBudget::DEFAULT.max_source_records,
+            max_output_records: FormationResourceBudget::DEFAULT.max_output_records,
+            capability: self.capability(),
+            budget: FormationResourceBudget::DEFAULT,
         }
     }
     /// Canonical profile identity for signed job bindings.
@@ -82,10 +192,38 @@ impl FormationProfile {
         }
     }
 
+    /// Native capability selected by this profile.
+    #[must_use]
+    pub const fn capability(self) -> FormationCapability {
+        match self.operation() {
+            CognitionOperation::Deduplicate => FormationCapability::Deduplicate,
+            CognitionOperation::Reconcile => FormationCapability::Reconcile,
+        }
+    }
+
     /// Stable schema version of the declarative profile contract.
     #[must_use]
     pub const fn schema_version(self) -> &'static str {
         "1"
+    }
+}
+
+impl FormationProvider {
+    /// Stable provider identity used by deployment composition.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::ReferenceV1 => "reference-v1",
+            Self::SailV1 => "sail-v1",
+        }
+    }
+
+    /// Whether this trusted provider supports a native capability.
+    #[must_use]
+    pub const fn supports(self, _capability: FormationCapability) -> bool {
+        match self {
+            Self::ReferenceV1 | Self::SailV1 => true,
+        }
     }
 }
 
