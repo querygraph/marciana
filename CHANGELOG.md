@@ -45,6 +45,8 @@ All notable changes to Marciana are documented in this file.
   and query types, still before capability authorization.
 - Completed safe lowering for improve replacement drafts and scoped forget ID
   selectors without acquiring capabilities or mutating storage.
+- Added a versioned content-free backup manifest and restore compatibility
+  validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local

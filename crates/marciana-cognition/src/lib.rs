@@ -1,5 +1,6 @@
 //! Marciana-owned cognition composition primitives.
 
+mod backup;
 mod binding_error;
 mod engine_binding;
 mod formation_profile;
@@ -9,6 +10,7 @@ mod learning;
 mod memory_error;
 mod metrics;
 
+pub use backup::{BackupManifest, RestoreError};
 pub use binding_error::CognitionBindingError;
 pub use engine_binding::CognitionEngineBinding;
 pub use formation_profile::{FormationBinding, FormationProfile, FormationProvider};

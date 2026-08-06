@@ -94,6 +94,9 @@ transport, credentials, and policy remain outside Marciana's adapter.
 The Rust memory crate now exposes validation-only request contracts for the
 same four verbs; execution still must enter through the TypeSec vault and
 guarded cognition commit path.
+The cognition crate also provides a content-free versioned backup manifest and
+restore compatibility validator; backup bytes and storage orchestration remain
+deployment-owned.
 The Sail-feature live cognition target also compiles against the pinned Grust
 bindings; execution remains an explicitly separate endpoint-gated acceptance
 step.
