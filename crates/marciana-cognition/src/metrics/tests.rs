@@ -18,13 +18,18 @@ fn metrics_are_verb_scoped_and_content_free() {
         allowed: true,
         latency_micros: 8,
     });
+    metrics.record(OperationSample {
+        operation: OperationKind::Context,
+        allowed: true,
+        latency_micros: 4,
+    });
     assert_eq!(
         metrics.snapshot(),
         MetricsSnapshot {
-            counts: [0, 2, 0, 1],
-            denials: [0, 1, 0, 0],
-            total_latency_micros: [0, 42, 0, 8],
-            max_latency_micros: [0, 30, 0, 8],
+            counts: [0, 2, 0, 1, 1],
+            denials: [0, 1, 0, 0, 0],
+            total_latency_micros: [0, 42, 0, 8, 4],
+            max_latency_micros: [0, 30, 0, 8, 4],
         }
     );
 }

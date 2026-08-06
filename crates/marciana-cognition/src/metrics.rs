@@ -7,15 +7,17 @@ pub enum OperationKind {
     Recall,
     Improve,
     Forget,
+    Context,
 }
 
 impl OperationKind {
-    const fn index(self) -> usize {
+    pub(crate) const fn index(self) -> usize {
         match self {
             Self::Remember => 0,
             Self::Recall => 1,
             Self::Improve => 2,
             Self::Forget => 3,
+            Self::Context => 4,
         }
     }
 }
@@ -31,19 +33,19 @@ pub struct OperationSample {
 /// Aggregated counters safe for operational export.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MetricsSnapshot {
-    pub counts: [u64; 4],
-    pub denials: [u64; 4],
-    pub total_latency_micros: [u128; 4],
-    pub max_latency_micros: [u64; 4],
+    pub counts: [u64; 5],
+    pub denials: [u64; 5],
+    pub total_latency_micros: [u128; 5],
+    pub max_latency_micros: [u64; 5],
 }
 
 /// In-process metrics collector. Persistence/export belongs to the host.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct OperationMetrics {
-    counts: [u64; 4],
-    denials: [u64; 4],
-    total_latency_micros: [u128; 4],
-    max_latency_micros: [u64; 4],
+    counts: [u64; 5],
+    denials: [u64; 5],
+    total_latency_micros: [u128; 5],
+    max_latency_micros: [u64; 5],
 }
 
 impl OperationMetrics {

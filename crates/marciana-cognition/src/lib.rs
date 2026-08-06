@@ -10,6 +10,7 @@ mod learning;
 mod memory_error;
 mod metrics;
 mod procedure_rollout;
+mod quota;
 mod working_set;
 
 pub use backup::{BackupManifest, RestoreError};
@@ -48,6 +49,7 @@ pub use metrics::{MetricsSnapshot, OperationKind, OperationMetrics, OperationSam
 pub use procedure_rollout::{
     ProcedureRollout, ProcedureRolloutError, ProcedureRolloutStatus,
 };
+pub use quota::{QuotaError, QuotaLimits, QuotaSnapshot, TenantQuota};
 pub use working_set::{
     WorkingSet, WorkingSetError, WorkingSetSlot, WorkingSetSource, WorkingSetStatus,
 };

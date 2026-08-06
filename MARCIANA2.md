@@ -85,6 +85,9 @@ candidates within the same deterministic token budget.
 Procedure learning now also has a digest-only cohort rollout policy with
 bounded traffic and trajectory-retention windows; rollout activation requires
 the exact evaluated procedure to be active and remains reversible.
+Phase 5 groundwork now includes fixed-array tenant quotas sharing the metrics
+operation taxonomy, with bounded windows and no request or memory content in
+quota state or exported snapshots.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

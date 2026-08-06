@@ -84,6 +84,8 @@ All notable changes to Marciana are documented in this file.
 - Added proposal-only procedure cohort rollouts with evaluated-procedure
   binding, bounded traffic and trajectory retention, approval, activation, and
   rollback.
+- Added content-free fixed-array tenant quotas with context-aware operation
+  accounting, exhaustion, clock, and window-reset checks.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb
