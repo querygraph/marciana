@@ -32,6 +32,10 @@ All notable changes to Marciana are documented in this file.
 - Added a content-free context explanation reporting selected, redacted, and
   budgeted candidate counts under the same plan identity.
 
+- Added governed learning artifacts: evidence-backed observation lifecycles,
+  bounded order-stable feedback datasets, and procedure activation gated by
+  evaluation and approval.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

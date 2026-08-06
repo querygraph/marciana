@@ -18,6 +18,7 @@ lakecat-core = { git = "https://github.com/querygraph/lakecat.git", rev = "415d1
 marciana-catalog = { path = "../marciana-catalog", version = "0.12.0" }
 querygraph-memory = { path = "../marciana-memory", version = "0.12.0", features = ["sail"] }
 serde_json = { workspace = true }
+sha2 = "0.10"
 tokio = { workspace = true }
 typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
 typesec-integrations = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }

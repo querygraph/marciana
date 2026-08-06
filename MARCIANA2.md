@@ -66,6 +66,12 @@ Rendered text and XML views now carry that plan digest explicitly.
 Bundles also expose a content-free explanation of selected, redacted, and
 budgeted candidates under that identity.
 
+Phase 4 groundwork now includes content-free observations with explicit
+evidence and lifecycle transitions, bounded feedback datasets with stable
+identity, and versioned procedures that cannot activate until evaluated and
+approved. These artifacts remain proposal metadata; they do not create a
+second memory mutation path.
+
 ## Executive judgment
 
 Marciana should not become another memory extraction framework. Its defensible

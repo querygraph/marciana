@@ -4,6 +4,7 @@ mod binding_error;
 mod engine_binding;
 mod formation_profile;
 mod governed;
+mod learning;
 mod memory_error;
 
 pub use binding_error::CognitionBindingError;
@@ -27,6 +28,10 @@ pub use governed::{
 #[doc(hidden)]
 pub use governed::{
     CONTEXT_REQUEST_DIGEST, CONTEXT_SUBJECT, PrimedAuthorityVerifier, current_policy_decision_id,
+};
+pub use learning::{
+    FeedbackDataset, FeedbackRecord, LearningError, Observation, ObservationStatus, Procedure,
+    ProcedureStatus,
 };
 pub use memory_error::CognitionMemoryError;
 
