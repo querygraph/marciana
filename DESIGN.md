@@ -51,8 +51,9 @@ Cross-stack evidence and state rules have one authoritative implementation:
   proposals, prepared commits, and security receipts.
 - LakeCat canonicalizes governed scan proofs and catalog authorization evidence.
 - Grust canonicalizes generic guarded-commit requests and backend receipts.
-- Marciana canonicalizes its signed four-verb intents, job transitions, public
-  wire values, and product-level receipt projection.
+- Marciana canonicalizes its signed four-verb intents, composite governed
+  source scope, job transitions, public wire values, and product-level receipt
+  projection.
 
 Adapters translate owned values and delegate validation; they do not reproduce
 another layer's digest profile, state machine, retry rule, or policy check.
@@ -79,9 +80,79 @@ source scope only after its host verifier consumes that binding. Public APIs
 must never accept a proof plus an independently supplied draft as equivalent
 evidence.
 
+The composite governed source scope is versioned and domain separated. It
+binds LakeCat's canonical source-scope digest to Marciana's exact field
+mapping, ingestion profile, and row-to-`MemoryDraft` transformation version.
+LakeCat remains authoritative for catalog proof, snapshot, and effective
+projection semantics. TypeSec accepts the composite digest as opaque context
+and attaches it only after its trusted verifier consumes the one-use draft
+binding. This prevents a valid scan proof from being replayed with different
+ingestion semantics without duplicating either owner's canonicalization.
+
 Queues, outboxes, audit records, and logs contain identifiers or digests, not
 memory plaintext, reusable authorization material, raw lease tokens, or raw
 worker and failure data.
+
+Public proposal and result diagnostics are deliberately redacted. A cognition
+proposal is transient internal data: it is neither a public QueryGraph value
+nor durable scheduler state. Recovery re-executes deterministic planning and
+requires the exact durably expected digest before any apply operation.
+
+## Cognition orchestration
+
+Marciana exposes `improve` as one authenticated operation. It does not expose a
+caller-driven plan/apply split. The worker owns this ordered state machine:
+
+```text
+authenticate + bind intent
+        -> persist/recover job + acquire renewable lease
+        -> TypeSec preauthorization + governed LakeCat scan
+        -> trusted mapped ingestion through TypeSec
+        -> fixed Sail engine execution
+        -> LakeCat grant/snapshot revalidation
+        -> TypeSec manifest-only reauthorization
+        -> exact proposal-digest stage
+        -> atomic guarded commit or typed no-change
+        -> durable recovery + commit-bound TypeDID receipt
+```
+
+No proposal-derived result becomes observable before both post-engine gates.
+The LakeCat observation time must remain attached to the revalidation evidence
+and be checked at the TypeSec apply boundary; it is not treated as a signed
+lease or an atomic catalog revision witness. The final guarded operation
+revalidates source revisions, binding, labels, authorization, projections, and
+proposal digest at the last available trusted boundary.
+
+Jobs are leased, idempotent, and restartable. Lease renewal has structured
+lifetime and stops when the owning operation completes or is cancelled. Lost
+responses recover the backend commit identity and stored terminal outcome;
+they do not replay an unchecked mutation. A valid proposal with no mutations
+commits a typed no-change terminal outcome atomically with its audit evidence,
+without a fabricated memory write or index-outbox entry.
+
+Blocking TypeSec vault and storage operations execute behind a narrow blocking
+adapter boundary. Async service and worker tasks await those adapters rather
+than blocking the Tokio executor. Capabilities remain non-cloneable and are
+moved into the exact authorized operation; convenience wrappers must not
+weaken that property.
+
+## Evidence and time semantics
+
+Cognition audit evidence and TypeDID receipts have explicit schema versions.
+They distinguish:
+
+- the LakeCat governed grant/source-scope digest from the catalog snapshot
+  digest;
+- Marciana's composite ingestion-scope digest from its constituent catalog
+  proof;
+- the authorized input-manifest digest, expected proposal digest, prepared
+  commit digest, and final committed-outcome digest; and
+- request, prepared, LakeCat-revalidated, backend-committed, recovered, and
+  receipt-issued times.
+
+One timestamp is never reused as evidence for a different phase. Receipt
+construction consumes a complete recovered durable outcome, so a caller cannot
+construct an apparently valid receipt and fill security-relevant fields later.
 
 ## Persistence and computation
 
@@ -90,6 +161,10 @@ Grust owns the physical transaction engine. A production apply operation must
 atomically check source revisions, claim idempotency, mutate the memory graph,
 write an ID-only index outbox, persist audit-safe evidence, and retain a
 recoverable backend commit identity.
+
+The same transaction records the terminal cognition outcome. The no-change
+variant follows the same job, idempotency, authority, audit, and recovery path,
+but has zero memory mutations and zero index work.
 
 Sail workers calculate proposals; they never receive an authoritative mutation
 handle. Memory-specific Sail schemas, queries, and executors live in Marciana.

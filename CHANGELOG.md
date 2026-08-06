@@ -6,6 +6,15 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-05
 
+- Refined governed cognition into one opaque, leased `improve` state machine
+  with post-engine LakeCat and TypeSec reauthorization, deterministic
+  digest-only recovery, typed no-change completion, and no public or durable
+  plaintext proposal.
+- Defined Marciana's versioned composite source scope over LakeCat evidence,
+  field mapping, ingestion profile, and row transformation, plus explicit
+  audit/receipt digest and timestamp semantics.
+- Corrected the delivery status to distinguish committed owner foundations
+  from the TypeSec and LakeCat hardening still under final verification.
 - Defined the governed-ingestion boundary: Marciana's trusted LakeCat adapter
   must derive and one-time bind exact drafts from an authorized scan, because a
   scan proof alone never authorizes independently supplied memory content.

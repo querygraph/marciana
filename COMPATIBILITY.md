@@ -12,7 +12,7 @@ baseline.
 
 | Component | Required compatibility datum | Current scaffold status |
 |---|---|---|
-| Marciana | API, wire schema, proposal/binding schema, database schema range | Pending the behavior-preserving transplant |
+| Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Pending the behavior-preserving transplant |
 | TypeSec | Contract version, conformance fixture version, exact release or revision | Pending owning-repository stabilization |
 | Grust | Core/backend version and guarded-commit capability | Pending owning-repository stabilization |
 | LakeCat | Governed-proof schema and exact release or revision | Required for catalog-backed cognition; pending owning-repository stabilization |
@@ -51,6 +51,8 @@ row containing:
 - Marciana release, four-verb API version, and wire-fixture version;
 - TypeSec release/revision, memory contract, and conformance-fixture version;
 - cognition proposal, binding, canonical-digest, and receipt schema versions;
+- composite governed-source, field-mapping, ingestion-profile, row-transform,
+  audit-evidence, durable-job, and terminal-outcome schema versions;
 - Grust release/revision, backend versions, and guarded-commit capability;
 - LakeCat release/revision and governed-proof schema for catalog-backed builds;
 - Sail exact upstream revision plus Arrow input/output schema versions;

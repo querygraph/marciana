@@ -42,8 +42,8 @@ authorization or mutation path.
 
 | Area | Status | Remaining delivery work |
 |---|---|---|
-| TypeSec and TypeDID | The cognition authority, bound-proposal, prepared-commit, receipt-recovery, and request-binding foundations are committed in their owning repository. | Finish the cross-stack baseline pin and rerun the owning repository's release gates against the selected revisions. |
-| LakeCat | Persisted governed-scan grants and proof foundations are committed in its owning repository. | Pin the selected remotely reachable revision and include its proof tests in the clean-clone gate. |
+| TypeSec and TypeDID | The cognition authority, bound-proposal, prepared-commit, receipt-recovery, and request-binding foundations are committed. Exact governed-source scope, manifest-only reauthorization, and receipt hardening are under final verification in their owning repository. | Finish and commit the governed boundary, version audit and receipt evidence, make proposal diagnostics non-disclosing, and rerun the owning repository's release gates against the selected revision. |
+| LakeCat | Persisted governed-scan grants and proof foundations are committed. Separate snapshot and source-scope digests, projection checks, and structural proof bounds are under final verification in their owning repository. | Finish and commit those owner-side invariants, pin the selected remotely reachable revision, and include its proof tests in the clean-clone gate. |
 | Grust | The durable cognition scheduler/store, leases, guarded commit and recovery, ID-only outbox, and Sail executor are under final verification in the owning repository. | Finish review and gates, commit the cohesive generic capabilities, and rebuild the owning documentation before selecting a revision. |
 | QueryGraph | The TypeDID/LakeCat cognition boundary is being hardened and is under final verification in qg-rust. | Finish the boundary gates, then switch the preserved integration from the Grust-hosted crate to standalone Marciana. |
 | Sail | A generic Delta `MERGE` constraint correction exists as a local commit and has live local proof. It is not remotely reachable and therefore is not a supported Marciana pin. | Land the generic fix in the canonical Sail source, refresh to the current upstream revision, build that exact source, and pass Marciana's live gate. |
@@ -82,6 +82,55 @@ dependency. Every integration baseline and release candidate starts by
 refreshing the current canonical Sail upstream, contributing generic fixes
 there, and recording the exact verified revision in this repository.
 
+## Governed `improve` completion path
+
+The public operation is one opaque Marciana command, not a public two-step
+plan/apply protocol. Its durable worker executes one state machine:
+
+1. authenticate the request and bind its TypeDID intent, tenant, subject,
+   labels, engine profile, operation, and idempotency key;
+2. persist or recover the job, acquire its lease, and renew the lease while
+   work continues;
+3. preauthorize TypeSec access and obtain LakeCat governed-scan evidence;
+4. have Marciana's trusted ingestion adapter scan the authorized rows, apply
+   the versioned field mapping and row transformation, and write the resulting
+   governed drafts through the TypeSec vault;
+5. execute the fixed cognition profile on Sail to produce an inert in-memory
+   proposal;
+6. before revealing any proposal-derived data, revalidate the LakeCat grant
+   and snapshot and perform TypeSec manifest-only reauthorization against the
+   exact current source scope;
+7. validate and stage the exact proposal digest, then either atomically apply
+   the prepared mutations, audit evidence, terminal job outcome, and ID-only
+   index outbox or atomically record a typed no-change outcome; and
+8. recover the backend commit identity when a response is lost and issue a
+   versioned, commit-bound TypeDID receipt from the durable outcome.
+
+The proposal is an internal transient value. Marciana never persists it,
+returns it to QueryGraph, places it in an outbox, or exposes it in logs or
+diagnostics. Restart recovery reruns deterministic planning and must match the
+durably expected digest before application. Revocation, projection change,
+snapshot change, scope change, lease loss, digest mismatch, or failed
+reauthorization closes the job without disclosing proposal content or
+partially mutating authoritative memory.
+
+Catalog source identity is a Marciana-owned composite scope, because Marciana
+alone knows the ingestion semantics. Its versioned digest binds LakeCat's
+source-scope digest to the exact field mapping, ingestion profile, and
+row-to-memory transformation version. The same opaque scope is attached by
+TypeSec during governed ingestion and is required by planning, post-engine
+reauthorization, proposal validation, audit evidence, and the final receipt.
+LakeCat remains the sole owner of catalog proof and projection
+canonicalization; TypeSec treats the composite scope as opaque security
+context.
+
+Prepared, revalidated, backend-committed, and receipt-issued times have
+distinct meanings and are never substituted for one another. Audit and
+receipt schemas explicitly version those meanings and carry separate input
+snapshot, governed grant/source-scope, proposal, and committed-outcome
+digests. The receipt is constructed complete from the recovered durable
+outcome; callers cannot assemble it by mutating a partially initialized value.
+
 ## Acceptance gates
 
 The active goal is complete only when all of these conditions hold:
@@ -94,17 +143,28 @@ The active goal is complete only when all of these conditions hold:
   database reopen, denial, receipt, retry, and recovery behavior;
 - all four native verbs share the same capability, policy, validation,
   mutation, and recovery authorities without alternate bypasses;
+- public `improve` is one authenticated durable operation: raw proposals and
+  worker state never cross the QueryGraph boundary, and retry or restart
+  re-planning must match the durably expected proposal digest;
 - catalog-backed cognition requires valid LakeCat governed-scan evidence, and
   Marciana's trusted adapter—not a caller—derives the exact governed drafts
   from that scan and binds each write once; a proof cannot bless independently
   supplied text, and local-only operation remains isolated behind its declared
   feature boundary;
+- the governed source scope binds LakeCat's source-scope digest, the exact
+  field mapping, ingestion profile, and row transformation version, and the
+  identical opaque scope is enforced from ingestion through receipt;
 - stale inputs, changed digests, revoked authority, label mismatches,
   idempotency collisions, malformed proposals, and provider failures fail
   closed without partial authoritative mutation;
 - create/close/reopen, crash, lease expiry, retry, concurrent claim, lost
   response, and proposal-free recovery tests prove exactly-once authoritative
   outcomes and an ID-only repair outbox;
+- no-change is a typed durable terminal outcome with no fabricated memory
+  mutation or index work, and cancellation cannot leave lease renewal running;
+- audit and receipt schemas are versioned, distinguish snapshot and grant
+  identity, distinguish prepared/revalidated/committed/issued times, and bind
+  the recovered backend commit identity;
 - the exact recorded Sail source is built and its explicit binary passes live
   memory-schema, Arrow, Delta, and cognition tests;
 - formatting, strict Clippy, all workspace tests, TypeSec conformance, Grust
