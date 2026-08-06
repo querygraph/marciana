@@ -68,6 +68,9 @@ receipt identity.
 Graph/Sail-backed callers can now materialize a verified plan through
 `MemoryFacade::materialize_context`; this keeps the context product on the
 same capability-bound vault seam as remember, recall, improve, and forget.
+Bundles now expose deterministic episodic, semantic, procedural, and profile
+sections over the authorized result set, including redacted metadata without
+moving content outside the vault gate.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

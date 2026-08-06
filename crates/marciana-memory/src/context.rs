@@ -6,7 +6,7 @@ use sha2::{Digest, Sha256};
 use typesec_core::policy::RequestContext;
 use typesec_core::{CanRead, Capability};
 use typesec_memory::{
-    Label, MemoryError, MemoryId, MemorySpace, MemoryVault, RecalledMemory, RedactedHit,
+    Label, MemoryError, MemoryId, MemoryKind, MemorySpace, MemoryVault, RecalledMemory, RedactedHit,
 };
 
 use crate::GraphStoreMemoryStore;
@@ -87,6 +87,17 @@ pub struct ContextExplanation {
     pub truncated: bool,
 }
 
+/// A deterministic, typed view over one memory kind in a context bundle.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContextSection {
+    /// TypeSec memory taxonomy for this section.
+    pub kind: MemoryKind,
+    /// Authorized records in this section.
+    pub memories: Vec<RecalledMemory>,
+    /// Metadata-only records withheld by the clearance ceiling.
+    pub redacted: Vec<RedactedHit>,
+}
+
 /// Fixed, non-content errors for context planning and plan verification.
 #[derive(Debug, thiserror::Error)]
 pub enum ContextError {
@@ -105,6 +116,37 @@ pub enum ContextError {
 }
 
 impl ContextBundle {
+    /// Group authorized and redacted results into stable TypeSec-kind sections.
+    ///
+    /// The fixed order is episodic, semantic, procedural, and profile. No
+    /// section contains content that was not already returned by the vault.
+    #[must_use]
+    pub fn sections(&self) -> Vec<ContextSection> {
+        [
+            MemoryKind::Episodic,
+            MemoryKind::Semantic,
+            MemoryKind::Procedural,
+            MemoryKind::Profile,
+        ]
+        .into_iter()
+        .map(|kind| ContextSection {
+            kind,
+            memories: self
+                .memories
+                .iter()
+                .filter(|memory| memory.kind == kind)
+                .cloned()
+                .collect(),
+            redacted: self
+                .redacted
+                .iter()
+                .filter(|memory| memory.kind == kind)
+                .cloned()
+                .collect(),
+        })
+        .collect()
+    }
+
     /// Return stable citations without exposing a redacted candidate's content.
     #[must_use]
     pub fn citations(&self) -> Vec<ContextCitation> {
