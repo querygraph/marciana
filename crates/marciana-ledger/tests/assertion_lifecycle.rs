@@ -119,6 +119,17 @@ fn invalid_edges_and_non_monotonic_history_fail_closed() {
         value.apply_transition(transition),
         Err(LedgerError::InvalidTransition)
     );
+    let too_early = AssertionTransition::new(
+        AssertionState::Current,
+        AssertionState::Disputed,
+        at(0),
+        evidence(),
+    )
+    .unwrap();
+    assert_eq!(
+        value.apply_transition(too_early),
+        Err(LedgerError::InvalidTransition)
+    );
 }
 
 #[test]

@@ -282,9 +282,10 @@ impl Assertion {
     /// # Errors
     ///
     /// Returns [`LedgerError::InvalidTransition`] if its source state differs
-    /// from the current state or its time regresses recorded history.
+    /// from the current state, precedes ingestion, or regresses history.
     pub fn apply_transition(&mut self, transition: AssertionTransition) -> Result<(), LedgerError> {
         if transition.from() != self.state
+            || transition.at() < self.ingested_at
             || self
                 .transitions
                 .last()

@@ -24,6 +24,9 @@ All notable changes to Marciana are documented in this file.
   transition history, preserving the distinction between historical current,
   disputed, and currently active beliefs.
 
+- Rejected assertion transitions dated before the assertion was ingested,
+  closing a temporal-history construction gap in persisted ledger recovery.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source
