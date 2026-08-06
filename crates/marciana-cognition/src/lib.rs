@@ -8,7 +8,7 @@ mod memory_error;
 
 pub use binding_error::CognitionBindingError;
 pub use engine_binding::CognitionEngineBinding;
-pub use formation_profile::FormationProfile;
+pub use formation_profile::{FormationBinding, FormationProfile, FormationProvider};
 #[cfg(feature = "test-support")]
 #[doc(hidden)]
 pub use governed::CognitionClock;

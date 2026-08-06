@@ -14,7 +14,39 @@ pub enum FormationProfile {
     BackgroundReconciliationV1,
 }
 
+/// Trusted executor family selected by deployment composition, never by a job payload.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FormationProvider {
+    ReferenceV1,
+    SailV1,
+}
+
+/// Fully resolved, bounded formation contract.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FormationBinding {
+    pub profile: FormationProfile,
+    pub provider: FormationProvider,
+    pub operation: CognitionOperation,
+    pub input_schema_version: &'static str,
+    pub output_schema_version: &'static str,
+    pub max_source_records: u32,
+    pub max_output_records: u32,
+}
+
 impl FormationProfile {
+    /// Resolve one closed profile against one trusted provider family.
+    #[must_use]
+    pub const fn bind(self, provider: FormationProvider) -> FormationBinding {
+        FormationBinding {
+            profile: self,
+            provider,
+            operation: self.operation(),
+            input_schema_version: "1",
+            output_schema_version: "1",
+            max_source_records: 10_000,
+            max_output_records: 10_000,
+        }
+    }
     /// Canonical profile identity for signed job bindings.
     #[must_use]
     pub const fn as_str(self) -> &'static str {

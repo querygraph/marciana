@@ -47,7 +47,9 @@ only optional SHA-256 detail identities; job schema v3 preserves it through
 restart without persisting worker or model text. Existing cancellation and
 bounded retry semantics remain unchanged. The next Phase 2 unit is a
 declarative profile-runner/provider registry with explicit capability and
-resource budgets.
+resource budgets; the first registry contract now resolves each profile to a
+trusted Reference or Sail provider with fixed schema versions and record
+ceilings.
 
 ## Executive judgment
 

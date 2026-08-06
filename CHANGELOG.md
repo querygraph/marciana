@@ -10,6 +10,9 @@ All notable changes to Marciana are documented in this file.
   Progress phases and counters are bounded, timestamp-monotonic, persisted
   under job schema v3, and never carry worker or model text.
 
+- Added a closed formation provider binding contract with explicit input/output
+  schema versions and fixed source/output record ceilings.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.
