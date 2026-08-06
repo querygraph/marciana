@@ -26,3 +26,16 @@ test("shared fixture uses the Rust/Python snake_case wire", async () => {
   assert.equal(fixture.space_id, "memory/user:alice/semantic");
   assert.equal(fixture.spaceId, undefined);
 });
+
+test("forget sends memory_ids on the shared wire", async () => {
+  let payload;
+  const client = new MarcianaClient({
+    async post(_path, body) {
+      payload = body;
+      return { operation: "forget", allowed: true, memory_ids: ["m1"] };
+    },
+  });
+  await client.forget({ space: "tenant/coffee", memory_ids: ["m1"], purpose: "research" });
+  assert.deepEqual(payload.memory_ids, ["m1"]);
+  assert.equal(payload.ids, undefined);
+});

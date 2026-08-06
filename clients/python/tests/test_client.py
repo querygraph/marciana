@@ -49,6 +49,11 @@ class ClientTests(unittest.TestCase):
         self.assertEqual(fixture["space_id"], "memory/user:alice/semantic")
         self.assertNotIn("spaceId", fixture)
 
+    def test_forget_model_uses_memory_ids(self) -> None:
+        request = ForgetRequest(space="tenant/coffee", memory_ids=["m1"], purpose="research")
+        self.assertEqual(request.model_dump()["memory_ids"], ["m1"])
+        self.assertNotIn("ids", request.model_dump())
+
 
 if __name__ == "__main__":
     unittest.main()
