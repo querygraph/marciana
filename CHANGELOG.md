@@ -9,6 +9,8 @@ All notable changes to Marciana are documented in this file.
   publisher-mark-matched cover assets.
 - Include the book root in HTML resource resolution so cover assets embed in
   single-file and chapter readers.
+- Expand the manuscript with repository boundary maps, enterprise deployment
+  patterns, evaluation protocol, and Ossie/Croissant conformance guidance.
 - Advance the Sail compatibility pin to the merged upstream baseline.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
 - Persist and recover vector manifests through guarded Grust commits.

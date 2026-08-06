@@ -902,3 +902,348 @@ because its adapter can remain thin and its semantic plans can be verified.
 The design is intentionally unglamorous at the point where trust matters:
 typed requests, bounded plans, deterministic digests, explicit receipts, and
 recoverable transitions. That is how an agent earns the right to remember.
+
+# Appendices
+
+## Appendix A — The repository as an executable argument
+
+A trustworthy architecture should be legible in its repository. Marciana's
+crate and client layout mirrors the conceptual layers rather than collecting
+unrelated utilities in one large module.
+
+| Path | Responsibility | Representative evidence |
+| --- | --- | --- |
+| `crates/marciana-ledger` | Assertion identity, lineage, intervals, lifecycle | Collision and migration tests |
+| `crates/marciana-memory` | Four-verb facade, planner, materializer, vector projection | Vault-bound integration tests |
+| `crates/marciana-cognition` | Profiles, providers, leases, budgets, evaluation, SLOs | Restart and release-gate tests |
+| `clients/python/marciana_client` | Validation-only wire and MCP translation | Separate Python tests |
+| `clients/typescript` | Independently buildable wire client | Fixture conformance tests |
+| `benchmarks` | Content-free corpus, adapters, latency and safety metrics | Nine dependency-free tests |
+| `examples/coffee_market_demo` | Dataverse/Sail/Pydantic AI v2 example | Four lifecycle tests |
+| `compat` | Sail revision and compatibility fixtures | Pinned merged upstream hash |
+| `docs/book` | This source-owned manuscript and FirstPair assets | Build and rendered checks |
+
+The small-file rule is a design constraint, not an aesthetic preference. A
+module with two responsibilities tends to acquire a third; a third
+responsibility creates a hidden authority boundary. Splitting files makes the
+boundary visible to reviewers and lets tests name the contract they protect.
+
+### A.1 One operation, end to end
+
+The following table traces a `remember` request without skipping the seams:
+
+| Stage | Input | Output | Content visibility |
+| --- | --- | --- | --- |
+| Client validation | JSON payload | Typed request | Caller-visible fields only |
+| TypeDID signing | Typed request | Signed digest | No store access |
+| TypeSec scan | Capability and digest | Authorized scope | Source material only inside vault |
+| Formation | Authorized rows | Inert proposal | Bounded, transient model input |
+| Ledger lowering | Proposal | ID-only graph mutations | Digest and lineage |
+| Guarded commit | Exact draft and capability | Receipt | Durable IDs, no arbitrary echo |
+| Projection | Receipt and IDs | Vector/semantic update | Projection-owned fields |
+| Recall | Intent and recipe | Context plan | Candidate IDs before materialization |
+
+This is the reason Marciana can support many front doors without multiplying
+trust decisions. Every front door converges on the same table.
+
+### A.2 Rust boundary excerpt
+
+```rust
+pub struct RecallIntent {
+    pub space: SpaceId,
+    pub purpose: Purpose,
+    pub policy: RecallPolicyId,
+    pub as_of: Timestamp,
+    pub recipe: RetrievalRecipeId,
+    pub token_budget: u32,
+}
+
+pub struct ContextPlan {
+    pub selected: Vec<MemoryId>,
+    pub redacted: Vec<MemoryId>,
+    pub plan_digest: Digest,
+    pub estimated_tokens: u32,
+}
+
+pub trait ContextPlanner {
+    fn plan(&self, intent: RecallIntent, ranked: &[RankedId])
+        -> Result<ContextPlan, PlanError>;
+}
+```
+
+The planner accepts ranked IDs, not raw text. This one signature prevents a
+caller from accidentally bypassing the vault by asking a “planner” to return a
+summary of protected content.
+
+### A.3 Python boundary excerpt
+
+```python
+class Transport(Protocol):
+    def execute(self, operation: str, payload: dict[str, object]) -> dict[str, object]: ...
+
+
+class MarcianaClient:
+    def __init__(self, transport: Transport) -> None:
+        self._transport = transport
+
+    def recall(self, request: RecallRequest) -> RecallReceipt:
+        payload = request.model_dump(mode="json")
+        result = self._transport.execute("recall", payload)
+        return RecallReceipt.model_validate(result)
+```
+
+The client is deliberately boring. It validates, delegates, and validates the
+receipt. It does not invent retries, inspect a database, or decide whether a
+label is safe.
+
+## Appendix B — QueryGraph boundary cookbook
+
+This appendix collects the practical rules for integrating each neighboring
+repository. The examples are intentionally schematic: deployments inject their
+own endpoints, credentials, and transport implementations.
+
+### B.1 TypeDID → Marciana
+
+```text
+signed_request = TypeDidAgent.sign(
+    verb="recall",
+    subject="coffee-research-agent",
+    digest=sha256(canonical_request),
+)
+```
+
+The signed digest is a provenance fact. Marciana still asks TypeSec whether the
+subject has a valid capability for the requested space, purpose, and time. A
+valid signature from a disallowed agent is a clean denial, not a partial read.
+
+### B.2 TypeSec → Marciana
+
+```text
+scope = vault.authorize(
+    capability,
+    purpose="market-research",
+    space="coffee-honduras",
+    clearance="internal",
+    as_of="2026-02-10",
+)
+```
+
+The scope is an authority object, not a bag of rows. The materializer consumes
+it once for the verified plan. A later plan with a different candidate digest
+must be reauthorized.
+
+### B.3 Marciana → Grust
+
+```text
+mutation = {
+  "assertion_id": "assertion:sha256:…",
+  "relationship_id": "rel:sha256:…",
+  "source_digest": "sha256:…",
+  "schema_version": 3,
+}
+grust.guarded_commit(request_digest, mutation, idempotency_key)
+```
+
+Grust receives an inert, bounded mutation. The mutation does not contain a
+model transcript. If the same idempotency key returns after a lost response,
+the receipt identity is stable.
+
+### B.4 LakeCat → Sail
+
+```text
+manifest = lakecat.resolve("agstack/coffee/honduras")
+query = sail.plan(manifest.relation, projection=SAFE_COLUMNS, as_of=cutoff)
+rows = sail.execute(query, limit=source_ceiling)
+```
+
+The manifest fixes relation identity, schema revision, ownership, and usage
+constraints. Sail executes the plan; it does not become the memory policy
+engine.
+
+### B.5 Fluree → semantic query
+
+```text
+semantic_view = fluree.query(
+  "?observation a qg:CoffeeObservation; qg:market ?market; "
+  "qg:price ?price; qg:observedOn ?date",
+  revision=projection_revision,
+)
+```
+
+The returned IDs are candidates for a governed recall or formation operation.
+The view must expose its revision and source lineage so a stale semantic result
+cannot silently overwrite a newer assertion.
+
+### B.6 Agent → MCP → Marciana
+
+```json
+{
+  "name": "recall",
+  "arguments": {
+    "space": "coffee-honduras",
+    "purpose": "market-research",
+    "query": "latest price at San Pedro Sula",
+    "as_of": "2026-02-10"
+  }
+}
+```
+
+MCP is a transport and tool-discovery convention. The MCP registry validates
+the arguments and invokes the injected client transport; it must not become a
+second implementation of TypeSec or the planner.
+
+## Appendix C — Evaluation protocol
+
+### C.1 Case design
+
+Each evaluation case has a digest-safe expected set, a forbidden set, a query
+intent, a token budget, and temporal qualifiers. The case never needs to store
+the protected answer in the release report.
+
+| Field | Example | Release use |
+| --- | --- | --- |
+| Case ID | `coffee-price-history-01` | Stable comparison key |
+| Expected IDs | `[m-jan, m-feb]` | Recall precision/recall |
+| Forbidden IDs | `[medical-17]` | Leakage gate |
+| As-of | `2026-01-31` | Temporal correctness |
+| Token budget | `128` | Utility and truncation |
+| Evaluator | `context-eval-v1` | Receipt binding |
+
+### C.2 Metrics
+
+For a selected set $S$ and expected set $E$:
+
+$$
+\operatorname{precision} = \frac{|S \cap E|}{|S|},\qquad
+\operatorname{recall} = \frac{|S \cap E|}{|E|}
+$$
+
+Forbidden leakage is binary and release-blocking. Token utility is reported as
+relevance per selected token, never as an excuse to trade away authorization.
+Latency uses a bounded nearest-rank digest for P50, P95, and P99 rather than an
+unbounded sample of request content.
+
+### C.3 Failure gates
+
+```text
+if forbidden_id in returned_ids: reject
+if plan_digest != receipt.plan_digest: reject
+if summary.evaluator != release_evaluator: reject
+if summary.schema_version outside restore_window: reject
+if p95_latency > slo.p95: warn_or_reject_by_policy
+```
+
+The release receipt is bound to the evaluator identity and the exact corpus
+summary. A later model cannot reuse an old green receipt for a changed corpus.
+
+## Appendix D — Enterprise deployment patterns
+
+### D.1 Embedded product
+
+An application can embed Marciana beside its domain service. This is the
+lowest-latency path and a good place to validate failure semantics. Grust and
+TypeSec remain local dependencies, while LakeCat and Sail are optional data
+planes.
+
+```mermaid
+flowchart LR
+  App[Domain service] --> Facade[MemoryFacade]
+  Facade --> Vault[TypeSec vault]
+  Facade --> Ledger[Marciana ledger]
+  Ledger --> Grust[Grust]
+  App --> Lake[LakeCat]
+  Lake --> Sail[Sail]
+```
+
+### D.2 Shared cognition service
+
+A larger organization may host formation workers centrally while keeping
+tenant vaults and authoritative commits isolated. Workers receive bounded,
+authorized inputs and return proposals; tenant-scoped commit services decide
+what becomes durable.
+
+```mermaid
+flowchart TB
+  TenantA[Tenant A vault] --> Worker[Shared cognition workers]
+  TenantB[Tenant B vault] --> Worker
+  Worker --> Proposals[Digest-only proposal queue]
+  Proposals --> CommitA[Tenant A commit boundary]
+  Proposals --> CommitB[Tenant B commit boundary]
+```
+
+The worker must not infer tenant authority from a queue topic. The commit
+boundary rechecks it from the capability and request digest.
+
+### D.3 Disaster recovery
+
+Backups are manifests plus encrypted deployment-owned payloads. Restore first
+checks schema family, key identity/revision, tenant scope, and receipt lineage;
+only then does it reopen projections. A vector index can be rebuilt from the
+ledger and a bounded ID-only repair batch.
+
+| Restore phase | Check |
+| --- | --- |
+| Inventory | Manifest schema and source revision |
+| Identity | Tenant and key-boundary digest |
+| Authority | Restore capability and deployment role |
+| Ledger | Assertion IDs and lifecycle closure |
+| Projection | Vector/semantic membership convergence |
+| Readiness | Health snapshot and SLO baseline |
+
+## Appendix E — Ossie/Croissant conformance checklist
+
+This checklist turns the future integration into an executable design review.
+It should be completed against the exact Apache Ossie release and Croissant
+schema revision selected by a deployment.
+
+| Check | Question | Marciana action |
+| --- | --- | --- |
+| Identity | Does an Ossie resource have a stable source ID? | Bind it to a manifest digest |
+| Schema | Are field and edge versions explicit? | Resolve through ontology registry |
+| Units | Are quantities normalized? | Require typed unit validation |
+| Time | Is the temporal policy explicit? | Bind `as_of` and validity intervals |
+| Provenance | Can a result cite its source chain? | Emit lineage graph identities |
+| Limits | Are result sets bounded? | Enforce source/output ceilings |
+| Authority | Can the plan express a capability? | Never; TypeSec supplies it |
+| Mutation | Does Ossie return a proposal or write? | Accept only inert proposals |
+| Retry | Is the plan deterministic? | Bind canonical request digest |
+| Privacy | Can summaries reveal hidden fields? | Run forbidden-ID and label gates |
+
+An integration passes only when every row has a concrete test and a named
+owner. “The semantic engine probably enforces it” is not a boundary.
+
+## Appendix F — Glossary
+
+**As-of cutoff** — The knowledge-time boundary applied to a recall plan and its
+materialized context.
+
+**Assertion** — A typed, identifiable claim with source lineage, temporal
+meaning, and lifecycle state.
+
+**Capability** — A TypeSec-authorized authority to perform a bounded operation
+for a purpose, space, clearance, and validity window.
+
+**Context plan** — A content-free, deterministic selection of candidate IDs and
+token accounting before vault materialization.
+
+**Formation profile** — A closed, versioned declaration selecting one native
+cognition operation, provider binding, run mode, and record ceilings.
+
+**Guarded commit** — An idempotent Grust mutation accepted only after fresh
+TypeSec authorization of the exact draft and request digest.
+
+**Lineage digest** — A content-free identity that links a result to its source
+and processing stages without exposing protected plaintext.
+
+**Projection** — A rebuildable representation such as a vector index, Fluree
+view, or Sail table derived from the logical ledger.
+
+**Proposal** — Transient cognition output that has not yet become authoritative
+memory.
+
+**Semantic layer** — An ontology- and catalog-aware naming and query surface
+that helps agents find meaning without replacing authorization.
+
+**TypeDID** — The identity and signed-provenance layer for agents and services.
+
+**TypeSec** — The capability, label, vault, and information-flow layer.
