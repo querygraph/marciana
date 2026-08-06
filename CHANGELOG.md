@@ -6,6 +6,12 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added `marciana-ledger`, the canonical assertion domain for MARCIANA2 Phase
+  1. Assertions now have collision-resistant identity independent of their
+  structural graph triplet, bounded lineage and temporal validity, and a
+  fail-closed, evidence-carrying belief lifecycle ready for guarded durable
+  projection.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

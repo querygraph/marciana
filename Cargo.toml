@@ -3,6 +3,7 @@ resolver = "3"
 members = [
     "crates/marciana-catalog",
     "crates/marciana-cognition",
+    "crates/marciana-ledger",
     "crates/marciana-memory",
 ]
 
@@ -20,6 +21,8 @@ serde_json = "1.0.149"
 thiserror = "2.0.17"
 tokio = { version = "1.52.2", features = ["macros", "rt-multi-thread", "sync"] }
 tempfile = "3.24.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

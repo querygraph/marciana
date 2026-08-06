@@ -1,0 +1,18 @@
+[package]
+name = "marciana-ledger"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Assertion identity and temporal lifecycle for governed Marciana memory"
+publish = false
+
+[dependencies]
+chrono = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+
+[lints]
+workspace = true

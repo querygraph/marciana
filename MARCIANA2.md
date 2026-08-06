@@ -1,11 +1,21 @@
 # Marciana 2: A Governed Memory System Plan
 
-**Status:** reviewed plan; accepted design constraints preserved
+**Status:** Phase 1 in progress; accepted design constraints preserved
 
 **Reviewed:** 2026-08-05
 
 **Scope:** comparison of Marciana with Mem0, Graphiti, Zep, Cognee, Letta,
 and LangMem, followed by a prioritized product and implementation plan
+
+## Implementation status
+
+Phase 1 has begun with `marciana-ledger`, the adapter-independent assertion
+domain. It establishes collision-resistant assertion identity, bounded source
+lineage, temporal intervals, exact confidence, and a fail-closed lifecycle
+whose transitions carry canonical causal assertion identifiers and evidence
+digests. The next Phase 1 unit is a guarded durable projection and migration;
+it must consume these types rather than reproduce their validation or state
+rules.
 
 ## Executive judgment
 
@@ -382,4 +392,3 @@ The following choices are reviewed and recommended:
 - Marciana: [`DESIGN.md`](DESIGN.md), the TypeSec-side
   `MARCIANA-PROJECT.md`, `MARCIANA.md`, and `MEMORY.md` handoff documents, and
   the current TypeSec memory contracts and tests
-
