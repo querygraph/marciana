@@ -16,6 +16,10 @@ All notable changes to Marciana are documented in this file.
 - Added a pure content-free context planner that deterministically applies a
   token budget to ranked IDs and emits a receipt-bound plan digest.
 
+- Added typed context-bundle materialization through TypeSec's authorized
+  candidate recall, preserving redacted metadata and plan identity without a
+  parallel content path.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

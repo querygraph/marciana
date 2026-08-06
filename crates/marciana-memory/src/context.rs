@@ -1,8 +1,15 @@
 //! Pure, content-free context planning over authorized candidate identities.
 
 use chrono::{DateTime, Utc};
+use grust_core::prelude::GraphMutationStore;
 use sha2::{Digest, Sha256};
-use typesec_memory::MemoryId;
+use typesec_core::policy::RequestContext;
+use typesec_core::{CanRead, Capability};
+use typesec_memory::{
+    Label, MemoryError, MemoryId, MemorySpace, MemoryVault, RecalledMemory, RedactedHit,
+};
+
+use crate::GraphStoreMemoryStore;
 
 /// Closed views a planner may request from the vault.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd)]
@@ -37,6 +44,15 @@ pub struct ContextPlan {
     pub candidates: Vec<ContextCandidate>,
     pub estimated_tokens: u32,
     pub plan_digest: String,
+}
+
+/// Typed result of vault-authorized plan materialization.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContextBundle {
+    pub plan_digest: String,
+    pub estimated_tokens: u32,
+    pub memories: Vec<RecalledMemory>,
+    pub redacted: Vec<RedactedHit>,
 }
 
 impl RecallIntent {
@@ -97,5 +113,25 @@ pub fn plan_context(
         candidates,
         estimated_tokens: used,
         plan_digest: digest,
+    })
+}
+
+/// Materialize only the IDs selected by a plan through TypeSec's visibility gate.
+pub fn materialize_context_plan<G: GraphMutationStore>(
+    vault: &MemoryVault<GraphStoreMemoryStore<G>>,
+    space: &MemorySpace,
+    capability: &Capability<CanRead, MemorySpace>,
+    plan: &ContextPlan,
+    ceiling: Label,
+    context: &RequestContext,
+) -> Result<ContextBundle, MemoryError> {
+    let ids = plan.candidates.iter().map(|candidate| candidate.id.clone());
+    let (memories, redacted) =
+        vault.recall_ids_at(space, capability, ids, plan.intent.as_of, ceiling, context)?;
+    Ok(ContextBundle {
+        plan_digest: plan.plan_digest.clone(),
+        estimated_tokens: plan.estimated_tokens,
+        memories,
+        redacted,
     })
 }
