@@ -4,6 +4,7 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Advance the Sail compatibility pin to the merged upstream baseline.
 - Add bounded session metadata that binds session, space, and recall-policy
   identity into recall planning without changing authorization semantics.
 

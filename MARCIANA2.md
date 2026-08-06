@@ -171,8 +171,9 @@ validated requests while keeping authorization and storage inside TypeSec.
 The cognition crate also provides a content-free versioned backup manifest and
 restore compatibility validator; backup bytes and storage orchestration remain
 deployment-owned.
-The Sail-feature live cognition target also compiles against the pinned Grust
-bindings; execution remains an explicitly separate endpoint-gated acceptance
+The Sail-feature live cognition target compiles against the pinned Grust
+bindings, and the compatibility gate now tracks the merged upstream Sail
+baseline; execution remains an explicitly separate endpoint-gated acceptance
 step.
 The cognition crate now also exposes a content-free `HealthSnapshot` for
 operator/readiness integrations; it reports only bounded component names,
