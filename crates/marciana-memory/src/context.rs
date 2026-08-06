@@ -92,6 +92,7 @@ pub struct ContextCitation {
 pub struct ContextExplanation {
     pub plan_digest: String,
     pub receipt_digest: String,
+    pub as_of: DateTime<Utc>,
     pub requested_tokens: u32,
     pub estimated_tokens: u32,
     pub selected_candidates: usize,
@@ -192,6 +193,7 @@ impl ContextBundle {
         ContextExplanation {
             plan_digest: self.plan_digest.clone(),
             receipt_digest: self.receipt_digest.clone(),
+            as_of: self.as_of,
             requested_tokens: self.token_budget,
             estimated_tokens: self.estimated_tokens,
             selected_candidates: self.memories.len() + self.redacted.len(),

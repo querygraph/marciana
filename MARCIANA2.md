@@ -201,6 +201,8 @@ leaking summaries cannot produce a release receipt. A checked-in content-free
 fixture provides the first versioned corpus input.
 Context bundles, citations, and text/XML renderers now also carry the verified
 point-in-time `as_of` cutoff used during materialization.
+Context explanations carry the same cutoff, keeping redaction and truncation
+descriptions bound to the temporal view they summarize.
 
 ## Executive judgment
 

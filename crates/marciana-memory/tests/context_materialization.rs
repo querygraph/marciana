@@ -121,6 +121,7 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     let explanation = bundle.explanation();
     assert_eq!(explanation.plan_digest, bundle.plan_digest);
     assert_eq!(explanation.receipt_digest, bundle.receipt_digest);
+    assert_eq!(explanation.as_of, bundle.as_of);
     assert_eq!(explanation.redacted_candidates, 1);
     assert!(!explanation.truncated);
     let replay = materialize_context_plan(
