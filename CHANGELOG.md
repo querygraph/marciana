@@ -6,6 +6,9 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Updated the delivery record to distinguish completed native error-boundary
+  extraction from the still-required move of governed `improve` composition.
+
 - Added Marciana-owned, fixed public errors for governed intent, proof,
   projection, authority, and proposal binding failures. The stable categories
   make the fail-closed composition boundary available without a QueryGraph
