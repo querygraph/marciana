@@ -6,9 +6,8 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
-- Recorded terminal direct Sail executor and cognition parity/secrecy gates,
-  while retaining the wrapper-script ignored-`rustdoc` orchestration stall as
-  a separate unresolved release-harness defect.
+- Recorded the bounded Grust Sail harness and its terminal executor, backend,
+  and cognition parity/secrecy results against the local Sail binary.
 
 - Recorded QueryGraph's completed switch to the native Marciana governed
   application and the remaining cross-stack compatibility and recovery gates.
