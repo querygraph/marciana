@@ -28,6 +28,7 @@ All notable changes to Marciana are documented in this file.
   targets and explicit abstention handling.
 - Added a transport-neutral typed Python client boundary for remember, recall,
   improve, and forget, with strict Pydantic v2 wire models and tests.
+- Added independent wheel build metadata for the Python client.
 
 ### 2026-08-06
 
