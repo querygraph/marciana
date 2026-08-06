@@ -51,6 +51,13 @@ resource budgets; the first registry contract now resolves each profile to a
 trusted Reference or Sail provider with fixed schema versions and record
 ceilings.
 
+Phase 3 groundwork has also started with a pure context planner in
+`querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
+identities, an as-of time, and a bounded token budget; it returns a stable
+selection and plan digest. It does not materialize content or replace the
+TypeSec vault gate. Vault-authorized context bundle materialization, citations,
+and renderers remain the next context unit.
+
 ## Executive judgment
 
 Marciana should not become another memory extraction framework. Its defensible
