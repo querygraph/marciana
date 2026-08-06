@@ -38,12 +38,12 @@ reproducible without a provider key. For live services:
 export DATAVERSE_DATASET_URL='https://dataverse.example/api/datasets/:persistentId/?persistentId=doi:...'
 export SAIL_SPARK_CONNECT_URL='sc://127.0.0.1:15002'
 export QUERYGRAPH_URL='http://127.0.0.1:8080'
-PYTHONPATH=.:../querygraph/qg-python python -m examples.coffee_market_demo.demo --live
+PYTHONPATH=.:../querygraph/python python -m examples.coffee_market_demo.demo --live
 ```
 
 Start Sail from the recorded revision in `compat/sail-revision.txt`; load the
-Dataverse CSV through Spark Connect, and start qg-rust with its exact-DID
-memory policy as documented in `../querygraph/qg-rust/docs/memory-service.md`.
+Dataverse CSV through Spark Connect, and start QueryGraph with its exact-DID
+memory policy as documented in `../querygraph/docs/memory-service.md`.
 The demo deliberately does not invent a Dataverse URL: provide the dataset
 URL for the coffee corpus you are authorized to use.
 
