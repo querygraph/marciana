@@ -1,0 +1,44 @@
+import json
+import tempfile
+import unittest
+from datetime import date
+from pathlib import Path
+
+from adapters import LONGMEMEVAL_SOURCE, LOCOMO_SOURCE, load_locomo, load_longmemeval
+
+
+class AdapterTests(unittest.TestCase):
+    def test_pins_are_exact_and_locomo_evidence_is_normalized(self) -> None:
+        LOCOMO_SOURCE.validate()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "locomo.json"
+            path.write_text(
+                json.dumps([{"qa": [{"question": "Where?", "evidence": ["D1"]}]}]),
+                encoding="utf-8",
+            )
+            cases = load_locomo(path, date(2026, 1, 1))
+        self.assertEqual(cases[0].expected_ids, ("D1",))
+        self.assertEqual(cases[0].as_of, date(2026, 1, 1))
+
+    def test_longmemeval_preserves_temporal_and_abstention_labels(self) -> None:
+        LONGMEMEVAL_SOURCE.validate()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "longmemeval.json"
+            path.write_text(
+                json.dumps([
+                    {
+                        "question_id": "q_abs",
+                        "question": "Unknown?",
+                        "question_date": "2025-04-03T10:00:00",
+                        "answer_session_ids": [],
+                    }
+                ]),
+                encoding="utf-8",
+            )
+            cases = load_longmemeval(path)
+        self.assertTrue(cases[0].abstain)
+        self.assertEqual(cases[0].as_of, date(2025, 4, 3))
+
+
+if __name__ == "__main__":
+    unittest.main()

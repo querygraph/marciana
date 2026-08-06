@@ -20,6 +20,8 @@ All notable changes to Marciana are documented in this file.
   each is bound to an existing native cognition operation.
 - Added explicit bounded embedding-space identity to vector indexes so model
   and preprocessing changes cannot silently reuse incompatible vectors.
+- Added local LoCoMo and LongMemEval adapters pinned to exact repository
+  revisions; BEAM remains explicitly unconfigured pending a verified source.
 
 ### 2026-08-06
 
