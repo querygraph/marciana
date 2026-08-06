@@ -37,6 +37,8 @@ All notable changes to Marciana are documented in this file.
   readiness exposes component revisions without protected memory data.
 - Added content-free four-verb operation metrics with denial, total-latency,
   and max-latency counters for SLO/dashboard integrations.
+- Updated the compatibility registry with the independently buildable Python
+  and TypeScript client baselines.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local

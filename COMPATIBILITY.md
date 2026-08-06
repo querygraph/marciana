@@ -20,7 +20,7 @@ baseline, not yet a versioned crate release.
 | LakeCat | Governed-proof schema and exact release or revision | Exact reachable revision `415d131` is ready for the QueryGraph adapter pin |
 | Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail revision recorded below; it passed the live gate |
 | QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `efd6245` consumes standalone Marciana; a fresh clone passes its active 71-test suite, doctests, and strict Clippy |
-| Clients | Rust/Python/JavaScript fixture versions | Not yet established |
+| Clients | Rust/Python/JavaScript fixture versions | Python client `0.1.0` (Pydantic `>=2.7,<3`) and TypeScript client `0.1.0` (Node ESM, TypeScript `^5.7`) are independently buildable; Rust wire fixtures and release publication remain pending |
 
 The linked Sail pin records upstream merge `2c1b2e45`. PR
 [lakehq/sail#2374](https://github.com/lakehq/sail/pull/2374) is merged; the
