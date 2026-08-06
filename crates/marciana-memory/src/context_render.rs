@@ -17,6 +17,11 @@ pub enum ContextRenderError {
 }
 
 /// Render visible memories with stable citation IDs; redacted items are metadata-only.
+///
+/// # Errors
+///
+/// Returns [`ContextRenderError`] when the bundle violates the bounded
+/// rendering contract.
 pub fn render_text(bundle: &ContextBundle) -> Result<String, ContextRenderError> {
     let mut output = format!(
         "plan={}\nas_of={}\nreceipt={}\n",
@@ -34,6 +39,11 @@ pub fn render_text(bundle: &ContextBundle) -> Result<String, ContextRenderError>
 }
 
 /// Render a minimal XML view with escaped authorized text and citation IDs.
+///
+/// # Errors
+///
+/// Returns [`ContextRenderError`] when the bundle violates the bounded
+/// rendering contract.
 pub fn render_xml(bundle: &ContextBundle) -> Result<String, ContextRenderError> {
     let mut output = format!(
         "<context plan=\"{}\" as_of=\"{}\" receipt=\"{}\">",

@@ -1,4 +1,4 @@
-//! Governed LakeCat source proof and explicit ingestion field mapping.
+//! Governed `LakeCat` source proof and explicit ingestion field mapping.
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -6,11 +6,11 @@ use sha2::{Digest, Sha256};
 use super::CognitionError;
 use super::bounds::{is_canonical_projection, is_canonical_text};
 
-/// Hash-bound proof of the LakeCat snapshot and governed Sail scan used by a job.
+/// Hash-bound proof of the `LakeCat` snapshot and governed Sail scan used by a job.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GovernedLakeCatSnapshot {
-    /// LakeCat catalog URI or id.
+    /// `LakeCat` catalog URI or id.
     pub catalog: String,
     /// Iceberg namespace.
     pub namespace: String,
@@ -24,18 +24,23 @@ pub struct GovernedLakeCatSnapshot {
     pub snapshot_digest: String,
     /// Digest of the opaque LakeCat/Sail plan-task token.
     pub plan_task_digest: String,
-    /// Cryptographically verified TypeDID subject.
+    /// Cryptographically verified `TypeDID` subject.
     pub subject: String,
     /// Purpose bound into authorization and scan planning.
     pub purpose: String,
-    /// Projection LakeCat allowed after policy narrowing.
+    /// Projection `LakeCat` allowed after policy narrowing.
     pub effective_projection: Vec<String>,
-    /// Digest of LakeCat's original authorization grant receipt.
+    /// Digest of `LakeCat`'s original authorization grant receipt.
     pub authorization_receipt_digest: String,
 }
 
 impl GovernedLakeCatSnapshot {
     /// Validate and return a stable proof digest.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CognitionError`] when the snapshot cannot be canonically
+    /// serialized for digesting.
     pub fn digest(&self) -> Result<String, CognitionError> {
         if self.snapshot_id < 0 {
             return Err(CognitionError::InvalidSnapshot("snapshot id"));
@@ -73,11 +78,11 @@ impl GovernedLakeCatSnapshot {
     }
 }
 
-/// LakeCat source columns used by governed ingestion to derive TypeSec memory.
+/// `LakeCat` source columns used by governed ingestion to derive `TypeSec` memory.
 ///
 /// This mapping is authorization evidence, not the live Sail staging schema.
 /// Sail receives bounded fields derived from the already-authorized memory
-/// views and never reads raw LakeCat rows through this value.
+/// views and never reads raw `LakeCat` rows through this value.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CognitionFieldMapping {

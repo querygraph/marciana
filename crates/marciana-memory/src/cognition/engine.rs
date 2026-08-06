@@ -13,20 +13,21 @@ use super::snapshot::{CognitionFieldMapping, GovernedLakeCatSnapshot};
 use crate::analytics::planning::{deduplicate, reconcile};
 
 /// Authorized inputs to a cognition engine.
+#[derive(Clone, Copy)]
 pub struct CognitionRequest<'a> {
     /// Idempotent durable job id.
     pub job_id: &'a str,
     /// Governed source proof.
     pub source: &'a GovernedLakeCatSnapshot,
-    /// Canonical TypeSec authority binding attached without post-hoc rewriting.
+    /// Canonical `TypeSec` authority binding attached without post-hoc rewriting.
     pub binding: &'a CognitionBinding,
     /// TypeSec-authorized memories and manifest from the same record revisions.
     pub input: &'a AuthorizedCognitionInput,
     /// Mapping used by governed ingestion to derive these authorized memories.
     ///
-    /// The mapping is checked against LakeCat's narrowed projection. Native
+    /// The mapping is checked against `LakeCat`'s narrowed projection. Native
     /// Sail analysis stages its own bounded, derived schema rather than raw
-    /// LakeCat rows or caller-selected column names.
+    /// `LakeCat` rows or caller-selected column names.
     pub field_mapping: &'a CognitionFieldMapping,
     /// Requested operation.
     pub operation: CognitionOperation,
@@ -87,14 +88,14 @@ pub struct SailCognitionOutput {
 #[async_trait::async_trait]
 pub trait SailCognitionExecutor: Send + Sync {
     /// Analyze only the TypeSec-authorized memories derived from the governed
-    /// LakeCat projection.
+    /// `LakeCat` projection.
     async fn execute(
         &self,
         request: &CognitionRequest<'_>,
     ) -> Result<SailCognitionOutput, SailCognitionExecutorError>;
 }
 
-/// Converts Sail results into TypeSec proposals.
+/// Converts Sail results into `TypeSec` proposals.
 pub struct SailCognitionEngine<E> {
     executor: E,
 }

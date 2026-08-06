@@ -25,6 +25,9 @@ fn digest(value: &str) -> String {
     format!("sha256:{:x}", sha2::Sha256::digest(value.as_bytes()))
 }
 
+// One linear lifecycle regression; splitting it would hide the ordering
+// the scenario exists to pin.
+#[allow(clippy::too_many_lines)]
 #[test]
 fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     let store = GraphStoreMemoryStore::new(MemoryGraphStore::default());

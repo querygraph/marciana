@@ -80,10 +80,12 @@ impl SailCognitionExecutor for LiveSailCognitionExecutor {
         &self,
         request: &CognitionRequest<'_>,
     ) -> Result<SailCognitionOutput, SailCognitionExecutorError> {
-        super::engine_validation::validate_request(request).map_err(sanitize_executor_error)?;
+        super::engine_validation::validate_request(request)
+            .map_err(|error| sanitize_executor_error(&error))?;
 
         let view = job_view();
-        let ipc = request::encode(request.input.memories()).map_err(sanitize_executor_error)?;
+        let ipc = request::encode(request.input.memories())
+            .map_err(|error| sanitize_executor_error(&error))?;
         let work = OwnedCognitionWork {
             operation: request.operation,
             memories: request::owned_planning_memories(request.input.memories()),
@@ -101,7 +103,7 @@ impl SailCognitionExecutor for LiveSailCognitionExecutor {
             },
         )
         .await
-        .map_err(sanitize_executor_error)
+        .map_err(|error| sanitize_executor_error(&error))
     }
 }
 
@@ -167,7 +169,7 @@ fn sail_cleanup_error(_: grust_core::prelude::GrustError) -> &'static str {
     "Sail cleanup failed"
 }
 
-fn sanitize_executor_error(error: CognitionError) -> SailCognitionExecutorError {
+fn sanitize_executor_error(error: &CognitionError) -> SailCognitionExecutorError {
     match error {
         CognitionError::InvalidSnapshot(_)
         | CognitionError::InvalidJobId

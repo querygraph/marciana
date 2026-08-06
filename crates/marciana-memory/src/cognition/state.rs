@@ -60,7 +60,7 @@ pub struct CognitionJob {
     pub job_digest: String,
     /// Domain-separated digest of the scheduler/tenant that submitted it.
     pub owner_digest: String,
-    /// Exact canonical digest of the immutable, verified TypeDID request envelope.
+    /// Exact canonical digest of the immutable, verified `TypeDID` request envelope.
     pub typedid_request_digest: String,
     /// Current lifecycle state.
     pub status: CognitionJobStatus,
@@ -82,7 +82,7 @@ pub struct CognitionJob {
     pub created_at: DateTime<Utc>,
     /// Caller-supplied logical timestamp for the latest transition.
     ///
-    /// A completed job uses the TypeSec audit's `prepared_at`. The authoritative
+    /// A completed job uses the `TypeSec` audit's `prepared_at`. The authoritative
     /// backend commit time exists only in the committed outcome and receipt.
     pub transitioned_at: DateTime<Utc>,
     /// Bounded, digest-only operational progress for the active attempt.
@@ -140,6 +140,7 @@ impl fmt::Debug for CognitionJobClaim {
 }
 
 /// Authenticated scheduler inputs for one idempotent job claim.
+#[derive(Clone, Copy)]
 pub struct CognitionJobClaimRequest<'a> {
     /// Scoped durable job address.
     pub key: &'a CognitionIdempotencyKey,
@@ -147,7 +148,7 @@ pub struct CognitionJobClaimRequest<'a> {
     pub submitter: &'a str,
     /// Authenticated worker attempting this claim.
     pub worker: &'a str,
-    /// Digest of the verified immutable TypeDID request.
+    /// Digest of the verified immutable `TypeDID` request.
     pub typedid_request_digest: &'a str,
     /// Bounded total number of worker attempts.
     pub max_attempts: u32,
@@ -173,21 +174,25 @@ impl CognitionLease {
     }
 
     /// Borrow the digest-safe job identity.
+    #[must_use]
     pub fn job_digest(&self) -> &str {
         &self.job_digest
     }
 
     /// Borrow the bearer token for the next scheduler operation.
+    #[must_use]
     pub fn token(&self) -> &str {
         &self.token
     }
 
     /// Return the one-based delivery attempt.
+    #[must_use]
     pub fn attempt(&self) -> u32 {
         self.attempt
     }
 
     /// Return the exclusive ownership deadline.
+    #[must_use]
     pub fn expires_at(&self) -> DateTime<Utc> {
         self.expires_at
     }

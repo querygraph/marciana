@@ -9,9 +9,14 @@ use typesec_memory::{Label, MemoryError, MemorySpace, MemoryVault, RecalledMemor
 
 use crate::GraphStoreMemoryStore;
 
-/// Materialize assertion-ranked candidates through TypeSec's one authorized
+/// Materialize assertion-ranked candidates through `TypeSec`'s one authorized
 /// read path. The graph supplies IDs only; the vault supplies all content and
 /// redaction decisions.
+///
+/// # Errors
+///
+/// Returns a fixed backend [`StoreError`] when assertion projections cannot
+/// be read or decoded; diagnostics never include record values.
 pub fn recall_assertions_at<G: GraphMutationStore>(
     vault: &MemoryVault<GraphStoreMemoryStore<G>>,
     space: &MemorySpace,

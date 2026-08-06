@@ -1,4 +1,4 @@
-//! Canonical binding between a prepared TypeSec commit and durable graph evidence.
+//! Canonical binding between a prepared `TypeSec` commit and durable graph evidence.
 
 use serde::Serialize;
 use typesec_memory::{CognitionCommitError, CognitionEffect};

@@ -22,7 +22,8 @@ pub enum CognitionOperation {
 }
 
 impl CognitionOperation {
-    /// Canonical operation identity bound into TypeDID and proposal evidence.
+    /// Canonical operation identity bound into `TypeDID` and proposal evidence.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Deduplicate => "marciana.deduplicate",
@@ -30,11 +31,12 @@ impl CognitionOperation {
         }
     }
 
-    /// Exact semantic contract version bound into TypeDID and proposals.
+    /// Exact semantic contract version bound into `TypeDID` and proposals.
     ///
     /// Reference and Sail implementations of one operation share this version
     /// because both must produce the same canonical plan. Package and build
     /// versions are implementation metadata, never mutation authority.
+    #[must_use]
     pub const fn algorithm_spec_version(self) -> &'static str {
         match self {
             Self::Deduplicate => DEDUPLICATE_ALGORITHM_SPEC_VERSION,
@@ -61,6 +63,7 @@ impl CognitionOperation {
     /// Reference and Sail implementations must claim the operation's exact
     /// semantic contract version. The trusted host binds the implementation
     /// family separately; a package version cannot grant mutation authority.
+    #[must_use]
     pub fn is_native_algorithm(self, algorithm: &str, version: &str) -> bool {
         version == self.algorithm_spec_version()
             && (algorithm == self.native_reference_algorithm()

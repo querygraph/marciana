@@ -34,6 +34,9 @@ fn assertion_split_matches_reference_heuristic() {
     assert_eq!(assertion_parts("singleton"), (String::new(), String::new()));
 }
 
+// A test double toggles independent failure stages; separate bools are the
+// clearest encoding for that, unlike a production state machine.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Default)]
 struct MockSailSession {
     events: Mutex<Vec<&'static str>>,
@@ -273,6 +276,9 @@ async fn worker_join_failure_is_fixed_and_still_cleans_up() {
     assert_eq!(store.events(), vec!["cleanup"]);
 }
 
+// The panic must fire when the worker polls the operation, not when the
+// closure constructs it, so the async signature is load-bearing.
+#[allow(clippy::unused_async)]
 async fn panicking_operation() -> Result<(), CognitionError> {
     panic!("operation panic")
 }

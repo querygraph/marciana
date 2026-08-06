@@ -28,15 +28,20 @@ pub enum FacadeError {
     SpaceMismatch,
 }
 
-impl<'a, G> MemoryFacade<'a, GraphStoreMemoryStore<G>>
+impl<G> MemoryFacade<'_, GraphStoreMemoryStore<G>>
 where
     G: GraphMutationStore,
 {
-    /// Materialize a verified context plan through the bound TypeSec vault.
+    /// Materialize a verified context plan through the bound `TypeSec` vault.
     ///
     /// This method is available only for Marciana's Graph/Sail-backed store;
     /// planning remains backend-independent and authorization remains owned by
     /// [`MemoryVault`].
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FacadeError`] when the intent is out of scope or invalid, or
+    /// the vault denies the recall.
     pub fn materialize_context(
         &self,
         cap: &Capability<CanRead, MemorySpace>,
@@ -53,6 +58,11 @@ where
     /// Bind product session metadata, plan, and materialize through the same
     /// capability gate. A session selects only the facade's space and recall
     /// identity; it cannot mint or widen a capability.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FacadeError`] when the session metadata or intent is
+    /// invalid, out of scope, or denied by the vault.
     pub fn materialize_context_for_session(
         &self,
         cap: &Capability<CanRead, MemorySpace>,
@@ -66,6 +76,11 @@ where
     }
 
     /// Bind thread metadata and materialize through the same capability gate.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FacadeError`] when the thread metadata or intent is invalid,
+    /// out of scope, or denied by the vault.
     pub fn materialize_context_for_thread(
         &self,
         cap: &Capability<CanRead, MemorySpace>,
@@ -120,6 +135,15 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
     }
 
     /// Execute remember after capability authorization in the vault.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FacadeError`] when the request is out of scope or invalid,
+    /// or the vault denies the write.
+    // All four verbs take owned requests so the facade signature stays
+    // uniform and free to consume request fields later without breaking
+    // callers.
+    #[allow(clippy::needless_pass_by_value)]
     pub fn remember(
         &self,
         cap: &Capability<CanWrite, MemorySpace>,
@@ -133,6 +157,11 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
     }
 
     /// Execute recall through the vault's runtime clearance gate.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FacadeError`] when the request is out of scope or invalid,
+    /// or the vault denies the recall.
     pub fn recall(
         &self,
         cap: &Capability<CanRead, MemorySpace>,
@@ -153,6 +182,11 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
     }
 
     /// Execute improve as a vault-authorized new draft; history is retained.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FacadeError`] when the request is out of scope or invalid,
+    /// or the vault denies the supersession.
     pub fn improve(
         &self,
         cap: &Capability<CanWrite, MemorySpace>,
@@ -183,6 +217,15 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
     }
 
     /// Execute scoped forgetting through the vault tombstone path.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FacadeError`] when the request is out of scope or invalid,
+    /// or the vault denies the tombstone.
+    // All four verbs take owned requests so the facade signature stays
+    // uniform and free to consume request fields later without breaking
+    // callers.
+    #[allow(clippy::needless_pass_by_value)]
     pub fn forget(
         &self,
         cap: &Capability<CanDelete, MemorySpace>,

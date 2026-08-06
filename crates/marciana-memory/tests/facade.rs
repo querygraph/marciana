@@ -20,6 +20,9 @@ assignments:
     roles: [memory]
 "#;
 
+// One linear lifecycle regression; splitting it would hide the ordering
+// the scenario exists to pin.
+#[allow(clippy::too_many_lines)]
 #[test]
 fn facade_executes_all_verbs_through_the_vault() {
     let store = GraphStoreMemoryStore::new(MemoryGraphStore::default());

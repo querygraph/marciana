@@ -307,7 +307,7 @@ pub(super) fn validate_affected_ids(
     if shape_is_invalid
         || affected_ids.len() > MAX_COGNITION_MUTATIONS
         || !within_byte_budget(
-            affected_ids.iter().map(|id| id.as_str()),
+            affected_ids.iter().map(typesec_memory::MemoryId::as_str),
             MAX_COGNITION_SOURCE_BYTES,
         )
         || affected_ids

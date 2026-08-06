@@ -13,6 +13,11 @@ const MANIFEST_LABEL: &str = "VectorIndexManifest";
 
 impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
     /// Persist one manifest with a guarded, replay-safe graph commit.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VectorManifestError`] when the manifest is invalid or the
+    /// guarded backend commit fails.
     pub fn persist_vector_manifest(
         &self,
         manifest: &VectorIndexManifest,
@@ -42,6 +47,11 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
     }
 
     /// Recover a manifest only when its persisted scope and digest match.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VectorManifestError`] when the persisted manifest is absent,
+    /// undecodable, or fails scope revalidation.
     pub fn load_vector_manifest(
         &self,
         scope: &VectorIndexScope,

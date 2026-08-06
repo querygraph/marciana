@@ -1,8 +1,8 @@
 //! Cross-field validation for vault-prepared commits.
 //!
 //! These checks enforce identities and relationships the storage adapter can
-//! prove without reimplementing TypeSec's policy and proposal compiler.
-//! TypeSec remains authoritative for deriving operation content, labels,
+//! prove without reimplementing `TypeSec`'s policy and proposal compiler.
+//! `TypeSec` remains authoritative for deriving operation content, labels,
 //! lineage, and retention from a proposal.
 
 use std::collections::{BTreeMap, BTreeSet};

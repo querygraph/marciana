@@ -83,13 +83,23 @@ fn text(value: &str) -> Result<(), ApiError> {
 }
 
 impl RememberRequest {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when the space, purpose, or text violates the
+    /// fixed identity or length bounds.
     pub fn validate(&self) -> Result<(), ApiError> {
         identity(&self.space_id)?;
         identity(&self.purpose)?;
         text(&self.text)
     }
 
-    /// Lower into the existing TypeSec draft without authorizing it.
+    /// Lower into the existing `TypeSec` draft without authorizing it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when validation fails; the draft is never built
+    /// from unvalidated input.
     pub fn to_draft(&self) -> Result<MemoryDraft, ApiError> {
         self.validate()?;
         Ok(MemoryDraft::new(
@@ -101,32 +111,57 @@ impl RememberRequest {
     }
 }
 impl RecallRequest {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when the space, purpose, or query violates the
+    /// fixed identity or length bounds.
     pub fn validate(&self) -> Result<(), ApiError> {
         identity(&self.space_id)?;
         identity(&self.purpose)?;
         text(&self.query)
     }
 
-    /// Lower into the existing TypeSec query without authorizing it.
+    /// Lower into the existing `TypeSec` query without authorizing it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when validation fails; the query is never built
+    /// from unvalidated input.
     pub fn to_query(&self) -> Result<RecallQuery, ApiError> {
         self.validate()?;
         Ok(RecallQuery::text(&self.query))
     }
 }
 impl ImproveRequest {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when the space, memory id, or replacement
+    /// violates the fixed bounds.
     pub fn validate(&self) -> Result<(), ApiError> {
         identity(&self.space_id)?;
         identity(&self.memory_id)?;
         self.replacement.validate()
     }
 
-    /// Lower the replacement into the existing TypeSec draft contract.
+    /// Lower the replacement into the existing `TypeSec` draft contract.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when validation fails; the replacement draft is
+    /// never built from unvalidated input.
     pub fn replacement_draft(&self) -> Result<MemoryDraft, ApiError> {
         self.validate()?;
         self.replacement.to_draft()
     }
 }
 impl ForgetRequest {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when the space, purpose, or any memory id
+    /// violates the fixed bounds, or the id collection is empty or oversized.
     pub fn validate(&self) -> Result<(), ApiError> {
         identity(&self.space_id)?;
         identity(&self.purpose)?;
@@ -136,7 +171,12 @@ impl ForgetRequest {
         self.memory_ids.iter().try_for_each(|id| identity(id))
     }
 
-    /// Lower into the existing TypeSec scoped selector without authorizing it.
+    /// Lower into the existing `TypeSec` scoped selector without authorizing it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ApiError`] when validation fails; the selector is never
+    /// built from unvalidated input.
     pub fn to_selector(&self) -> Result<ForgetSelector, ApiError> {
         self.validate()?;
         Ok(ForgetSelector::Ids(

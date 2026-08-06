@@ -29,7 +29,7 @@ fn session_metadata_is_bounded_and_stable() {
     assert_eq!(first.session_id(), "session-1");
     assert_eq!(first.space_id(), "tenant/space");
     assert!(matches!(
-        SessionMetadata::new("".into(), "space".into(), digest("policy")),
+        SessionMetadata::new(String::new(), "space".into(), digest("policy")),
         Err(SessionError::Invalid)
     ));
 }

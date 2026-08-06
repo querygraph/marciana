@@ -30,6 +30,11 @@ struct ContextMetadataCore {
 /// Shared binding contract used by session- and thread-scoped facade paths.
 pub trait RecallContextMetadata {
     fn space_id(&self) -> &str;
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SessionError`] when the intent cannot be bound to this
+    /// scope.
     fn bind_intent(&self, intent: RecallIntent) -> Result<RecallIntent, SessionError>;
 }
 
@@ -43,6 +48,10 @@ pub enum SessionError {
 
 impl SessionMetadata {
     /// Construct bounded, content-free session metadata.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SessionError`] when a session identity or bound is invalid.
     pub fn new(
         session_id: String,
         space_id: String,
@@ -87,12 +96,21 @@ impl SessionMetadata {
 
     /// Bind metadata into the intent identity used by the deterministic plan.
     /// This changes no capability or vault state.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SessionError`] when the intent's space or policy disagrees
+    /// with the session scope.
     pub fn bind_intent(&self, mut intent: RecallIntent) -> Result<RecallIntent, SessionError> {
         self.core.bind_intent(&mut intent)
     }
 }
 
 impl ThreadMetadata {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SessionError`] when a thread identity or bound is invalid.
     pub fn new(
         thread_id: String,
         space_id: String,
@@ -129,6 +147,11 @@ impl ThreadMetadata {
         &self.core.digest
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SessionError`] when the intent's space or policy disagrees
+    /// with the thread scope.
     pub fn bind_intent(&self, mut intent: RecallIntent) -> Result<RecallIntent, SessionError> {
         self.core.bind_intent(&mut intent)
     }

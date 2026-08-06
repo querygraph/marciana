@@ -76,6 +76,11 @@ impl VectorIndexManifest {
     }
 
     /// Verify the persisted membership and digest identity.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VectorManifestError`] when a scope component or the
+    /// membership digest is invalid.
     pub fn validate(&self) -> Result<(), VectorManifestError> {
         self.scope
             .validate()
@@ -101,6 +106,11 @@ impl VectorIndexManifest {
 
     /// Apply a repair batch atomically in memory. Hosts can persist the
     /// resulting manifest under their own transaction after this succeeds.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VectorManifestError`] when the batch scope does not match or
+    /// an operation violates the manifest bounds.
     pub fn apply(&mut self, batch: &VectorRepairBatch) -> Result<(), VectorManifestError> {
         if batch.scope_digest != self.scope.digest() {
             return Err(VectorManifestError::ScopeMismatch);
@@ -143,6 +153,11 @@ impl VectorIndexManifest {
 }
 
 impl VectorRepairBatch {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VectorManifestError`] when a scope component or repair
+    /// operation is invalid.
     pub fn new(
         scope: &VectorIndexScope,
         operations: Vec<VectorRepairOperation>,

@@ -14,7 +14,9 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         &self,
         future: impl std::future::Future<Output = grust_core::prelude::Result<T>> + Send,
     ) -> Result<T, CognitionCommitError> {
-        self.bridge.run(future).map_err(map_graph_error)
+        self.bridge
+            .run(future)
+            .map_err(|error| map_graph_error(&error))
     }
 }
 
@@ -25,7 +27,7 @@ pub(super) fn json_commit_digest<T: serde::Serialize + ?Sized>(
     json_digest(domain, value).map_err(state_store_error)
 }
 
-pub(super) fn map_graph_error(error: GrustError) -> CognitionCommitError {
+pub(super) fn map_graph_error(error: &GrustError) -> CognitionCommitError {
     match error {
         GrustError::GraphIdempotencyConflict(_) => CognitionCommitError::IdempotencyConflict,
         _ => store_error("cognition commit backend operation failed"),

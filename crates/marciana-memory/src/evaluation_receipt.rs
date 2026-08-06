@@ -4,6 +4,9 @@ use sha2::{Digest, Sha256};
 
 use crate::evaluation::ContextEvaluationSummary;
 
+// Every field is a digest; the shared suffix is the receipt's domain
+// vocabulary and mirrors the public accessor names.
+#[allow(clippy::struct_field_names)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextEvaluationReceipt {
     corpus_digest: String,
@@ -21,6 +24,11 @@ pub enum EvaluationReceiptError {
 }
 
 impl ContextEvaluationReceipt {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EvaluationReceiptError`] when the summary fails release
+    /// gates or a bound digest is invalid.
     pub fn new(
         summary: &ContextEvaluationSummary,
         evaluator_digest: String,

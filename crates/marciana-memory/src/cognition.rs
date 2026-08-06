@@ -1,7 +1,7 @@
-//! QueryGraph-native cognition over governed LakeCat snapshots and Sail.
+//! QueryGraph-native cognition over governed `LakeCat` snapshots and Sail.
 //!
-//! LakeCat proves the source, Sail performs bounded batch work, and this
-//! module emits an inert TypeSec proposal. Only `MemoryVault` applies it.
+//! `LakeCat` proves the source, Sail performs bounded batch work, and this
+//! module emits an inert `TypeSec` proposal. Only `MemoryVault` applies it.
 
 mod backend;
 mod bounds;

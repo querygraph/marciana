@@ -80,26 +80,31 @@ pub struct CognitionOutboxClaim {
 
 impl CognitionOutboxClaim {
     /// Borrow the digest-safe entry identity used for acknowledgement.
+    #[must_use]
     pub fn entry_id(&self) -> &str {
         &self.entry_id
     }
 
     /// Borrow the ID-only semantic-index mutation.
+    #[must_use]
     pub fn mutation(&self) -> &IndexMutation {
         &self.mutation
     }
 
     /// Borrow the bearer token required for acknowledgement.
+    #[must_use]
     pub fn token(&self) -> &str {
         &self.token
     }
 
     /// Return the one-based delivery attempt.
+    #[must_use]
     pub fn attempt(&self) -> u32 {
         self.attempt
     }
 
     /// Return the exclusive ownership deadline.
+    #[must_use]
     pub fn expires_at(&self) -> DateTime<Utc> {
         self.expires_at
     }
@@ -116,6 +121,11 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
     ///
     /// `owner` is an audit identity, not authentication. The enclosing trusted
     /// worker-pool boundary must authorize claims and protect the scoped key.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CognitionStateError`] when the outbox row is absent, already
+    /// claimed, or fails its persisted-state validation.
     pub fn claim_cognition_outbox(
         &self,
         key: &CognitionIdempotencyKey,
@@ -214,6 +224,11 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
     ///
     /// The unexpired claim token is the sole bearer credential for this state
     /// transition; the enclosing service must keep it confidential.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CognitionStateError`] when the claim token does not match or
+    /// the persisted outbox state fails validation.
     pub fn ack_cognition_outbox(
         &self,
         entry_id: &str,

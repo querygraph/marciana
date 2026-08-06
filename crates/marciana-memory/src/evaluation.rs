@@ -82,6 +82,11 @@ pub enum EvaluationError {
 }
 
 impl ContextEvaluationCase {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EvaluationError`] when a case identity, digest, or bound is
+    /// invalid.
     pub fn new(
         case_digest: String,
         expected_ids: Vec<MemoryId>,
@@ -107,6 +112,11 @@ impl ContextEvaluationCase {
     }
 
     /// Validate a decoded fixture before it enters a corpus.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EvaluationError`] when a case identity, digest, or bound is
+    /// invalid.
     pub fn validate(&self) -> Result<(), EvaluationError> {
         if !is_digest(&self.case_digest)
             || self.token_budget == 0
@@ -137,6 +147,11 @@ impl ContextEvaluationCase {
 
 impl ContextEvaluationReport {
     /// Evaluate only IDs and bounded planner accounting; no content is read.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EvaluationError`] when the case is invalid or the rendered
+    /// context violates the evaluation bounds.
     pub fn evaluate(
         case: &ContextEvaluationCase,
         plan: &ContextPlan,
@@ -185,6 +200,11 @@ impl ContextEvaluationReport {
 }
 
 impl ContextEvaluationCorpus {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EvaluationError`] when the corpus is empty, oversized, or
+    /// contains an invalid or duplicate case.
     pub fn new(cases: Vec<ContextEvaluationCase>) -> Result<Self, EvaluationError> {
         if cases.is_empty() || cases.len() > MAX_EVALUATION_CASES {
             return Err(EvaluationError::InvalidCorpus);
@@ -219,6 +239,11 @@ impl ContextEvaluationCorpus {
     }
 
     /// Evaluate plans in the corpus's declared stable order.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EvaluationError`] when any case in the corpus fails to
+    /// evaluate.
     pub fn evaluate(
         &self,
         plans: &[ContextPlan],

@@ -15,6 +15,7 @@ use thiserror::Error;
 use typesec_memory::StoredRecord;
 
 use crate::RELATES;
+use crate::graph_codec::entity_node_id;
 
 pub(crate) const ASSERTION_LABEL: &str = "MemoryAssertion";
 const ENTITY_LABEL: &str = "MemoryEntity";
@@ -142,10 +143,6 @@ pub(crate) fn decode_assertion_node(node: &Node) -> Result<Assertion, AssertionP
         return Err(AssertionProjectionError::LegacyInput);
     };
     serde_json::from_value(payload.clone()).map_err(|_| AssertionProjectionError::LegacyInput)
-}
-
-fn entity_node_id(name: &str) -> NodeId {
-    NodeId::from(format!("ent:{name}").as_str())
 }
 
 fn entity_node(name: &str, id: NodeId) -> Node {

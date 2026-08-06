@@ -228,7 +228,7 @@ assignments:
 
 /// Analytics propose a plan; the vault applies it. The invariant is that
 /// batch cognition never writes storage directly — it hands the vault a
-/// ConsolidationPlan and the vault does the label-join, invalidation, and
+/// `ConsolidationPlan` and the vault does the label-join, invalidation, and
 /// audit. Here a contradiction analyzer retracts a superseded belief.
 #[test]
 fn analytics_plan_flows_through_the_vault_front_door() {

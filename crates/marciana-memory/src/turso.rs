@@ -1,4 +1,4 @@
-//! Durable local storage for QueryGraph memory through Turso/libSQL.
+//! Durable local storage for `QueryGraph` memory through Turso/libSQL.
 //!
 //! [`TursoMemoryStore::open`] creates the Turso connection and bootstraps the
 //! Grust universal tables on the same runtime that drives subsequent
@@ -16,7 +16,7 @@ use typesec_memory::StoreError;
 
 use crate::{Bridge, GraphStoreMemoryStore};
 
-/// The v1 durable QueryGraph memory store.
+/// The v1 durable `QueryGraph` memory store.
 pub type TursoMemoryStore = GraphStoreMemoryStore<TursoGraphStore>;
 
 impl GraphStoreMemoryStore<TursoGraphStore> {
@@ -25,6 +25,11 @@ impl GraphStoreMemoryStore<TursoGraphStore> {
     /// The default table prefix is `querygraph_memory`. Use
     /// [`open_with_config`](Self::open_with_config) when sharing a database
     /// with another Grust graph or selecting a non-default journal mode.
+    ///
+    /// # Errors
+    ///
+    /// Returns a fixed backend [`StoreError`] when the database cannot be
+    /// opened or its schema prepared.
     pub fn open(path: impl AsRef<Path>) -> Result<Self, StoreError> {
         let path = path.as_ref();
         if let Some(parent) = path.parent()
@@ -49,10 +54,15 @@ impl GraphStoreMemoryStore<TursoGraphStore> {
 
     /// Open and bootstrap a Turso memory store with explicit backend options.
     ///
-    /// Construction is synchronous because TypeSec's `MemoryStore` contract is
+    /// Construction is synchronous because `TypeSec`'s `MemoryStore` contract is
     /// synchronous. The Turso async connection is created on this store's
     /// bridge runtime, which also owns the I/O and time drivers used by later
     /// operations.
+    ///
+    /// # Errors
+    ///
+    /// Returns a fixed backend [`StoreError`] when the database cannot be
+    /// opened or its schema prepared.
     pub fn open_with_config(config: TursoConfig) -> Result<Self, StoreError> {
         let bridge = Bridge::new();
         let graph = bridge

@@ -12,8 +12,8 @@ pub(super) const MAX_RESULT_CHUNKS: usize = 256;
 pub(super) const MAX_RESULT_ROWS: usize = 100_000;
 pub(super) const MAX_RECONCILE_COMPARISONS: usize = 100_000;
 
-/// Enforce the public engine's ID+text budget after TypeSec has released
-/// recalled views. TypeSec separately bounds the complete authorized-record
+/// Enforce the public engine's ID+text budget after `TypeSec` has released
+/// recalled views. `TypeSec` separately bounds the complete authorized-record
 /// envelope before constructing those opaque inputs.
 pub(super) fn check_authorized_input(memories: &[RecalledMemory]) -> Result<(), CognitionError> {
     let mut budget = CognitionSourceBudget::new();

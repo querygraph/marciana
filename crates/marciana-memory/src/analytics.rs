@@ -5,7 +5,7 @@
 //! `ConsolidationPlan`**, applied through the capability-gated vault — never a
 //! direct store write. That single rule is what keeps labels, quarantine, and
 //! audit intact at scale: analytics can *propose* a merge or a retraction, but
-//! the vault decides, mints nothing it shouldn't, and records the SecLib join.
+//! the vault decides, mints nothing it shouldn't, and records the `SecLib` join.
 //!
 //! These reference analyzers work on the vault-facing views a caller already
 //! holds ([`RecalledMemory`]) — they never touch content the caller could not
@@ -25,6 +25,7 @@ pub(crate) mod planning;
 ///
 /// Duplicates are the cheapest, safest consolidation: no information is lost,
 /// and the vault's join keeps the survivor at the max label of the group.
+#[must_use]
 pub fn dedup_plan(memories: &[RecalledMemory]) -> ConsolidationPlan {
     planning::deduplicate(memories).plan
 }
@@ -44,6 +45,7 @@ pub struct Contradiction {
 /// assertion — the newer belief wins, the older survives as bi-temporal
 /// history (the vault invalidates, it does not destroy). Equal staged validity
 /// times are ordered by memory id, matching the distributed Sail plan.
+#[must_use]
 pub fn contradiction_plan(memories: &[RecalledMemory]) -> (Vec<Contradiction>, ConsolidationPlan) {
     let planning = planning::reconcile(memories);
     let found = planning
@@ -61,7 +63,10 @@ pub fn contradiction_plan(memories: &[RecalledMemory]) -> (Vec<Contradiction>, C
 /// for `Profile` memories (durable facts decay slower than episodes). Purely
 /// advisory — a caller ranks by this and forgets the tail, always through the
 /// vault's `forget`/`reap`.
+#[must_use]
 pub fn importance(memory: &RecalledMemory, now: chrono::DateTime<chrono::Utc>) -> f64 {
+    // Day counts sit far below f64's 2^52 exact-integer range.
+    #[allow(clippy::cast_precision_loss)]
     let age_days = (now - memory.valid_from).num_days().max(0) as f64;
     let recency = 1.0 / (1.0 + age_days / 30.0);
     let kind_weight = match memory.kind {

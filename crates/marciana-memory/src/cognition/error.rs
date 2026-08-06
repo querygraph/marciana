@@ -12,13 +12,13 @@ pub enum CognitionError {
     /// Proof serialization failed under a fixed, non-sensitive category.
     #[error("cognition proof serialization failed: {0}")]
     Serialization(&'static str),
-    /// A TypeSec binding or source manifest did not match the governed request.
+    /// A `TypeSec` binding or source manifest did not match the governed request.
     #[error("cognition authority binding mismatch: {0}")]
     BindingMismatch(&'static str),
     /// An engine profile did not identify a native algorithm and version.
     #[error("cognition algorithm identity is not native")]
     InvalidAlgorithm,
-    /// An executor returned a plan or evidence that cannot form a canonical TypeSec proposal.
+    /// An executor returned a plan or evidence that cannot form a canonical `TypeSec` proposal.
     #[error("cognition executor returned invalid proposal output")]
     InvalidExecutorOutput,
     /// Sail would stage a field omitted by the authorized projection.

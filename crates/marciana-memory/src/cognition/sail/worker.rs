@@ -7,7 +7,7 @@ use std::time::Duration;
 use super::{SailCognitionSession, sail_cleanup_error};
 use crate::cognition::CognitionError;
 
-const OPERATION_DEADLINE: Duration = Duration::from_secs(10 * 60);
+const OPERATION_DEADLINE: Duration = Duration::from_mins(10);
 const ABORT_DEADLINE: Duration = Duration::from_secs(5);
 const CLEANUP_DEADLINE: Duration = Duration::from_secs(30);
 
@@ -53,13 +53,14 @@ where
         let operation_view = view.clone();
         let mut operation_task =
             tokio::spawn(async move { operation(operation_store, operation_view).await });
-        let result = match tokio::time::timeout(deadlines.operation, &mut operation_task).await {
-            Ok(joined) => joined.map_err(join_error).and_then(|result| result),
-            Err(_) => {
-                operation_task.abort();
-                let _ = tokio::time::timeout(deadlines.abort, &mut operation_task).await;
-                Err(CognitionError::Sail("Sail operation timed out"))
-            }
+        let result = if let Ok(joined) =
+            tokio::time::timeout(deadlines.operation, &mut operation_task).await
+        {
+            joined.map_err(join_error).and_then(|result| result)
+        } else {
+            operation_task.abort();
+            let _ = tokio::time::timeout(deadlines.abort, &mut operation_task).await;
+            Err(CognitionError::Sail("Sail operation timed out"))
         };
         let cleanup =
             match tokio::time::timeout(deadlines.cleanup, store.drop_arrow_ipc_view(&view)).await {

@@ -38,6 +38,11 @@ const MAX_SCOPE_COMPONENT: usize = 256;
 /// rule structurally.
 pub trait Embedder: Send + Sync {
     /// Embed `text` into a fixed-width vector.
+    ///
+    /// # Errors
+    ///
+    /// Returns an [`IndexError`] when the backend cannot produce an embedding
+    /// for `text`.
     fn embed(&self, text: &str) -> Result<Vec<f32>, IndexError>;
 
     /// Whether embedding happens entirely on-box (no network egress). A
@@ -113,6 +118,11 @@ impl VectorIndexScope {
     }
 
     /// Verify a decoded scope was created from canonical components.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TenantIndexError`] when a scope component violates the
+    /// bounded identity rules.
     pub fn validate(&self) -> Result<(), TenantIndexError> {
         if !valid_scope_component(&self.tenant_id) {
             return Err(TenantIndexError::InvalidTenant);
@@ -139,6 +149,11 @@ pub struct TenantVectorIndex<E: Embedder> {
 
 impl<E: Embedder> TenantVectorIndex<E> {
     /// Build a tenant-scoped index with an explicit embedding-space identity.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TenantIndexError`] when the scope is invalid or disagrees
+    /// with the recovered manifest.
     pub fn new(
         embedder: E,
         tenant_id: impl Into<String>,
@@ -161,6 +176,17 @@ impl<E: Embedder> TenantVectorIndex<E> {
     }
 
     /// Index one authorized record under the exact tenant scope.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TenantIndexError`] when the tenant scope does not match,
+    /// the record cannot be embedded, or the membership manifest rejects
+    /// the update.
+    ///
+    /// # Panics
+    ///
+    /// Panics only if the internal rollback-batch invariant is violated,
+    /// which indicates a bug rather than bad caller input.
     pub fn index_for(
         &self,
         tenant_id: &str,
@@ -207,6 +233,11 @@ impl<E: Embedder> TenantVectorIndex<E> {
     }
 
     /// Remove one record under the exact tenant scope.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TenantIndexError`] when the tenant scope does not match or
+    /// the removal cannot be recorded.
     pub fn remove_for(&self, tenant_id: &str, id: &MemoryId) -> Result<(), TenantIndexError> {
         self.check_tenant(tenant_id)?;
         let batch =
@@ -221,6 +252,11 @@ impl<E: Embedder> TenantVectorIndex<E> {
     }
 
     /// Search under the exact tenant scope.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TenantIndexError`] when the tenant scope does not match or
+    /// the query cannot be embedded.
     pub fn search_for(
         &self,
         tenant_id: &str,
@@ -234,6 +270,11 @@ impl<E: Embedder> TenantVectorIndex<E> {
     }
 
     /// Hybrid search under the exact tenant scope.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TenantIndexError`] when the tenant scope does not match or
+    /// the query cannot be embedded.
     pub fn search_hybrid_for(
         &self,
         tenant_id: &str,
@@ -290,6 +331,11 @@ fn valid_scope_component(value: &str) -> bool {
 
 impl<E: Embedder> VectorIndex<E> {
     /// Build a vector index over `embedder`.
+    ///
+    /// # Panics
+    ///
+    /// Panics never in practice: the built-in embedding-space identity is
+    /// statically canonical.
     pub fn new(embedder: E) -> Self {
         Self::with_embedding_space(embedder, "marciana-reference-embedding-v1")
             .expect("built-in embedding space is canonical")
@@ -300,6 +346,11 @@ impl<E: Embedder> VectorIndex<E> {
     /// Reusing vectors across model, dimension, or preprocessing changes is
     /// unsafe. Callers therefore persist and compare this identity alongside
     /// the index rather than treating all vectors as interchangeable.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TenantIndexError`] when the embedding-space identity
+    /// violates the bounded identity rules.
     pub fn with_embedding_space(
         embedder: E,
         embedding_space: impl Into<String>,
@@ -382,6 +433,10 @@ impl<E: Embedder> VectorIndex<E> {
     /// Hybrid search: cosine ranking with a bounded boost for records that
     /// mention any of `co_entities` (call [`note_entities`](Self::note_entities)
     /// first). Purely a reordering of vector candidates.
+    ///
+    /// # Errors
+    ///
+    /// Returns an [`IndexError`] when the query cannot be embedded.
     pub fn search_hybrid(
         &self,
         query: &str,

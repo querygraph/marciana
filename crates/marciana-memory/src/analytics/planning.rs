@@ -35,7 +35,8 @@ pub(crate) fn deduplicate(memories: &[RecalledMemory]) -> DedupPlanning {
     let mut rows = BTreeSet::new();
     #[cfg(any(feature = "sail", test))]
     let mut group_count = 0;
-    for (_key, mut group) in groups {
+    #[cfg_attr(not(feature = "sail"), allow(unused_variables))]
+    for (key, mut group) in groups {
         if group.len() < 2 {
             continue;
         }
@@ -46,7 +47,7 @@ pub(crate) fn deduplicate(memories: &[RecalledMemory]) -> DedupPlanning {
         group.sort_by(|left, right| validity_order(left).cmp(&validity_order(right)));
         #[cfg(feature = "sail")]
         for memory in &group {
-            rows.insert((_key.clone(), memory.id.as_str().to_owned()));
+            rows.insert((key.clone(), memory.id.as_str().to_owned()));
         }
 
         let canonical = group[0];

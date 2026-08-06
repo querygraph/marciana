@@ -25,6 +25,7 @@ impl CognitionEngineProfile {
     }
 
     /// Select the built-in deterministic reference profile.
+    #[must_use]
     pub const fn reference(operation: CognitionOperation) -> Self {
         Self::new(
             operation.native_reference_algorithm(),
@@ -33,6 +34,7 @@ impl CognitionEngineProfile {
     }
 
     /// Select the native Sail profile for the same canonical operation spec.
+    #[must_use]
     pub const fn sail(operation: CognitionOperation) -> Self {
         Self::new(
             operation.native_sail_algorithm(),
@@ -41,16 +43,19 @@ impl CognitionEngineProfile {
     }
 
     /// Exact native algorithm identity.
+    #[must_use]
     pub const fn algorithm(self) -> &'static str {
         self.algorithm
     }
 
     /// Exact native algorithm version.
+    #[must_use]
     pub const fn algorithm_version(self) -> &'static str {
         self.algorithm_version
     }
 
     /// Compare a signed identity without allocating or invoking the engine.
+    #[must_use]
     pub fn matches(self, algorithm: &str, algorithm_version: &str) -> bool {
         self.algorithm == algorithm && self.algorithm_version == algorithm_version
     }

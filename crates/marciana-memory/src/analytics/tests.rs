@@ -25,7 +25,7 @@ fn dedup_groups_exact_duplicates() {
     assert_eq!(plan.steps.len(), 1, "one duplicate group superseded");
     match &plan.steps[0] {
         ConsolidationStep::Supersede { superseded, .. } => assert_eq!(superseded.len(), 2),
-        _ => panic!("expected supersede"),
+        ConsolidationStep::Invalidate { .. } => panic!("expected supersede"),
     }
 }
 
@@ -42,7 +42,7 @@ fn contradiction_detects_and_invalidates_the_older() {
     assert_eq!(found[0].older.as_str(), "old");
     match &plan.steps[0] {
         ConsolidationStep::Invalidate { ids } => assert_eq!(ids[0].as_str(), "old"),
-        _ => panic!("expected invalidate of the older assertion"),
+        ConsolidationStep::Supersede { .. } => panic!("expected invalidate of the older assertion"),
     }
 }
 

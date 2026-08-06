@@ -36,30 +36,27 @@
 //! proposals to that vault. Passing `typesec_memory::conformance` is the
 //! storage compatibility bar.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::future::Future;
 
 use chrono::{DateTime, Utc};
 use grust_core::prelude::{
-    Direction, Edge, EdgeQuery, GraphCommitStore, GraphMutation, GraphMutationStore,
-    GuardedGraphCommit, Node, NodeId, Start, Step, Traversal, Value,
+    Direction, Edge, EdgeQuery, GraphMutation, GraphMutationStore, Node, NodeId, Start, Step,
+    Traversal, Value,
 };
-use sha2::{Digest, Sha256};
 use typesec_memory::{MemoryId, MemoryStore, StoreBatchOp, StoreError, StoreQuery, StoredRecord};
 
 use marciana_ledger::AssertionQuery;
+
+use bridge::Bridge;
+use graph_codec::{
+    decode_record, encode_record, entity_node_id, record_id_from_node, record_node_id,
+};
 
 const RECORD_LABEL: &str = "MemoryRecord";
 const ENTITY_LABEL: &str = "MemoryEntity";
 const MENTIONS: &str = "MENTIONS";
 pub(crate) const RELATES: &str = "RELATES";
-
-/// Non-disclosing result of an assertion projection migration.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct AssertionMigrationReport {
-    /// Number of previously unprojected legacy relations added in this run.
-    pub migrated: usize,
-}
 
 /// `typesec-memory`'s `MemoryStore` over any Grust [`GraphMutationStore`].
 pub struct GraphStoreMemoryStore<G: GraphMutationStore> {
@@ -105,82 +102,14 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
             .collect::<Result<Vec<_>, _>>()
             .map_err(|_| assertion_candidate_error())?;
         let mut ids = Vec::new();
+        let mut members = HashSet::new();
         for assertion in query.select(&assertions) {
             let id = MemoryId::from_string(assertion.lineage().source_record_id().to_owned());
-            if !ids.contains(&id) {
+            if members.insert(id.clone()) {
                 ids.push(id);
             }
         }
         Ok(ids)
-    }
-
-    /// Adds assertion projections for legacy `RELATES` edges in one backend
-    /// mutation batch. This is trusted storage maintenance, not a public
-    /// memory mutation API; callers run it under deployment migration
-    /// authority rather than a request capability.
-    ///
-    /// # Errors
-    ///
-    /// Returns a fixed backend error when the legacy graph cannot be read,
-    /// validated, or atomically projected. It never includes record or edge
-    /// values in the diagnostic.
-    pub fn migrate_legacy_assertions(&self) -> Result<AssertionMigrationReport, StoreError>
-    where
-        G: GraphCommitStore,
-    {
-        let edges = self
-            .run(self.graph.get_edges(EdgeQuery {
-                from: None,
-                to: None,
-                label: Some(RELATES.into()),
-            }))
-            .map_err(|_| legacy_migration_error())?;
-        let mut planned = Vec::new();
-        for edge in edges {
-            let record_id = legacy_record_id(&edge).ok_or_else(legacy_migration_error)?;
-            let record = self
-                .fetch(&record_id)
-                .map_err(|_| legacy_migration_error())?
-                .ok_or_else(legacy_migration_error)?;
-            let projection = assertion_projection::project_legacy_relation(&edge, &record)
-                .map_err(|_| legacy_migration_error())?;
-            let assertion_node = match projection.first() {
-                Some(GraphMutation::UpsertNode(node)) => &node.id,
-                _ => return Err(legacy_migration_error()),
-            };
-            if self
-                .run(self.graph.get_node(assertion_node))
-                .map_err(|_| legacy_migration_error())?
-                .is_none()
-            {
-                planned.push((assertion_node.as_str().to_owned(), projection));
-            }
-        }
-        if planned.is_empty() {
-            return Ok(AssertionMigrationReport { migrated: 0 });
-        }
-        planned.sort_by(|left, right| left.0.cmp(&right.0));
-        let request = legacy_migration_digest(
-            "querygraph.marciana.assertion-migration.request.v1",
-            &planned
-                .iter()
-                .map(|(id, _)| id.as_bytes())
-                .collect::<Vec<_>>(),
-        );
-        let ledger_key = format!("marciana-assertion-migration:{}", &request[7..]);
-        let migrated = planned.len();
-        let mutations = planned
-            .into_iter()
-            .flat_map(|(_, mutations)| mutations)
-            .collect();
-        let commit = GuardedGraphCommit::new(ledger_key, request, mutations);
-        let receipt = self
-            .bridge
-            .run(self.graph.commit_guarded(&commit))
-            .map_err(|_| legacy_migration_error())?;
-        Ok(AssertionMigrationReport {
-            migrated: if receipt.replayed { 0 } else { migrated },
-        })
     }
 
     fn run<T: Send>(
@@ -201,6 +130,7 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
     fn reachable_entities(&self, entity: &str, hops: u8) -> Result<Vec<NodeId>, StoreError> {
         let start = entity_node_id(entity);
         let mut seen: Vec<NodeId> = vec![start.clone()];
+        let mut members: HashSet<NodeId> = seen.iter().cloned().collect();
         for k in 1..=hops {
             let step = Step {
                 direction: Direction::Both,
@@ -213,7 +143,7 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
                 limit: None,
             };
             for node in self.run(self.graph.traverse(traversal))? {
-                if !seen.contains(&node.id) {
+                if members.insert(node.id.clone()) {
                     seen.push(node.id);
                 }
             }
@@ -365,6 +295,7 @@ impl<G: GraphMutationStore> MemoryStore for GraphStoreMemoryStore<G> {
 
     fn neighborhood(&self, entity: &str, hops: u8) -> Result<Vec<MemoryId>, StoreError> {
         let mut out: Vec<MemoryId> = Vec::new();
+        let mut members: HashSet<MemoryId> = HashSet::new();
         for entity_node in self.reachable_entities(entity, hops)? {
             // Records that mention this entity: one In step over MENTIONS.
             let mentions = self.run(self.graph.traverse(Traversal {
@@ -378,7 +309,7 @@ impl<G: GraphMutationStore> MemoryStore for GraphStoreMemoryStore<G> {
             }))?;
             for node in mentions {
                 if let Some(id) = record_id_from_node(&node.id)
-                    && !out.contains(&id)
+                    && members.insert(id.clone())
                 {
                     out.push(id);
                 }
@@ -388,130 +319,23 @@ impl<G: GraphMutationStore> MemoryStore for GraphStoreMemoryStore<G> {
     }
 }
 
-/// The sync→async bridge: a dedicated current-thread runtime, safe to call
-/// from inside or outside another tokio runtime.
-struct Bridge {
-    rt: Option<tokio::runtime::Runtime>,
-}
-
-impl Bridge {
-    fn new() -> Self {
-        Self {
-            rt: Some(
-                tokio::runtime::Builder::new_current_thread()
-                    .enable_all()
-                    .build()
-                    .expect("bridge runtime builds"),
-            ),
-        }
-    }
-
-    fn run<T: Send>(&self, fut: impl Future<Output = T> + Send) -> T {
-        let rt = self.rt.as_ref().expect("bridge runtime is available");
-        if tokio::runtime::Handle::try_current().is_ok() {
-            // Already inside a runtime: block_on here would panic. Drive the
-            // bridge runtime from a scoped thread instead.
-            std::thread::scope(|scope| {
-                scope
-                    .spawn(|| rt.block_on(fut))
-                    .join()
-                    .expect("bridge thread completes")
-            })
-        } else {
-            rt.block_on(fut)
-        }
-    }
-}
-
-impl Drop for Bridge {
-    fn drop(&mut self) {
-        let Some(rt) = self.rt.take() else {
-            return;
-        };
-        if tokio::runtime::Handle::try_current().is_ok() {
-            // Dropping a runtime may block while its workers shut down, which
-            // Tokio rejects inside an async context. Finish shutdown on a
-            // plain thread so a TursoMemoryStore can be owned directly by an
-            // async service without special drop choreography.
-            std::thread::spawn(move || drop(rt))
-                .join()
-                .expect("bridge runtime shutdown completes");
-        } else {
-            drop(rt);
-        }
-    }
-}
-
-fn record_node_id(id: &MemoryId) -> NodeId {
-    NodeId::from(format!("rec:{}", id.as_str()).as_str())
-}
-
-fn record_id_from_node(node: &NodeId) -> Option<MemoryId> {
-    node.as_str()
-        .strip_prefix("rec:")
-        .map(MemoryId::from_string)
-}
-
-fn entity_node_id(name: &str) -> NodeId {
-    NodeId::from(format!("ent:{name}").as_str())
-}
-
-fn legacy_record_id(edge: &Edge) -> Option<MemoryId> {
-    match edge.props.get("fact_id") {
-        Some(Value::String(id)) => Some(MemoryId::from_string(id.clone())),
-        _ => None,
-    }
-}
-
-fn legacy_migration_error() -> StoreError {
-    StoreError::Backend("legacy assertion migration failed".into())
-}
-
 fn assertion_candidate_error() -> StoreError {
     StoreError::Backend("assertion candidate lookup failed".into())
-}
-
-fn legacy_migration_digest(domain: &str, values: &[&[u8]]) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(domain.as_bytes());
-    hasher.update([0]);
-    for value in values {
-        hasher.update((value.len() as u64).to_be_bytes());
-        hasher.update(value);
-    }
-    format!("sha256:{:x}", hasher.finalize())
-}
-
-fn encode_record(record: &StoredRecord) -> Result<Node, StoreError> {
-    let json = serde_json::to_value(record)
-        .map_err(|err| StoreError::Backend(format!("record serialization failed: {err}")))?;
-    let mut props: BTreeMap<String, Value> = BTreeMap::new();
-    props.insert("record".into(), Value::Json(json));
-    props.insert("space".into(), Value::String(record.space_id.clone()));
-    Ok(Node::new(RECORD_LABEL, record_node_id(&record.id), props))
-}
-
-fn decode_record(node: &Node) -> Result<StoredRecord, StoreError> {
-    match node.props.get("record") {
-        Some(Value::Json(json)) => serde_json::from_value(json.clone())
-            .map_err(|err| StoreError::Backend(format!("record deserialization failed: {err}"))),
-        _ => Err(StoreError::Backend(format!(
-            "node {} has no record payload",
-            node.id.as_str()
-        ))),
-    }
 }
 
 pub mod analytics;
 mod api;
 pub mod assertion_projection;
 pub mod assertion_recall;
+mod bridge;
 pub mod cognition;
 pub mod context;
 pub mod context_render;
 pub mod evaluation;
 pub mod evaluation_receipt;
 mod facade;
+mod graph_codec;
+mod legacy_migration;
 pub mod session;
 #[cfg(feature = "turso")]
 pub mod turso;
@@ -527,6 +351,7 @@ pub use evaluation::{
 };
 pub use evaluation_receipt::{ContextEvaluationReceipt, EvaluationReceiptError};
 pub use facade::{FacadeError, MemoryFacade};
+pub use legacy_migration::AssertionMigrationReport;
 pub use session::{RecallContextMetadata, SessionError, SessionMetadata, ThreadMetadata};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;

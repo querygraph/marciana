@@ -103,7 +103,7 @@ pub struct ContextExplanation {
 /// A deterministic, typed view over one memory kind in a context bundle.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextSection {
-    /// TypeSec memory taxonomy for this section.
+    /// `TypeSec` memory taxonomy for this section.
     pub kind: MemoryKind,
     /// Authorized records in this section.
     pub memories: Vec<RecalledMemory>,
@@ -209,6 +209,11 @@ fn digest_serialized<T: serde::Serialize>(value: &T) -> String {
 }
 
 impl RecallIntent {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ContextError`] when an identity, digest, or bound in the
+    /// intent is invalid.
     pub fn validate(&self) -> Result<(), ContextError> {
         if !is_digest(&self.query_digest) {
             return Err(ContextError::InvalidIntent);
@@ -292,6 +297,11 @@ impl ContextPlan {
 }
 
 /// Plan without reading or disclosing candidate content.
+///
+/// # Errors
+///
+/// Returns [`ContextError`] when the intent or candidate set fails validation
+/// or the plan bounds are violated.
 pub fn plan_context(
     intent: RecallIntent,
     mut candidates: Vec<ContextCandidate>,
@@ -329,7 +339,12 @@ pub fn plan_context(
     })
 }
 
-/// Materialize only the IDs selected by a plan through TypeSec's visibility gate.
+/// Materialize only the IDs selected by a plan through `TypeSec`'s visibility gate.
+///
+/// # Errors
+///
+/// Returns [`ContextError`] when the plan fails validation or a planned
+/// record cannot be read from the backend.
 pub fn materialize_context_plan<G: GraphMutationStore>(
     vault: &MemoryVault<GraphStoreMemoryStore<G>>,
     space: &MemorySpace,

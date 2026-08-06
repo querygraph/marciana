@@ -6,6 +6,11 @@ All notable changes to Marciana are documented in this file.
 
 - Track TypeSec main for active QueryGraph integration so qg-rust and Marciana
   share one TypeSec dependency universe during development.
+- Opt marciana-memory into the workspace pedantic lint set and resolve every
+  surfaced finding, pin MSRV and workspace dependency specs across all
+  crates, split the memory crate root into bridge, graph-codec, and
+  legacy-migration modules with one node-id authority and an unchanged
+  public API, and make graph traversal dedupe O(1) while preserving order.
 - Add the adversarial-benchmark blog headboard — Venetian galleys racing
   toward Rovinj led by the Bucintoro under the banner of St Mark, with
   Marciana on the flagship's side — rendered reproducibly from a committed

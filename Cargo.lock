@@ -3645,7 +3645,7 @@ checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
 [[package]]
 name = "typesec-core"
 version = "0.13.0"
-source = "git+https://github.com/querygraph/typesec.git?rev=14bd54272c6df2846e86bcaa5d52b3ef14658f24#14bd54272c6df2846e86bcaa5d52b3ef14658f24"
+source = "git+https://github.com/querygraph/typesec.git?branch=main#e4f2d09d2154b303ff27d2909ab942f9342d3005"
 dependencies = [
  "chrono",
  "glob",
@@ -3659,7 +3659,7 @@ dependencies = [
 [[package]]
 name = "typesec-integrations"
 version = "0.13.0"
-source = "git+https://github.com/querygraph/typesec.git?rev=14bd54272c6df2846e86bcaa5d52b3ef14658f24#14bd54272c6df2846e86bcaa5d52b3ef14658f24"
+source = "git+https://github.com/querygraph/typesec.git?branch=main#e4f2d09d2154b303ff27d2909ab942f9342d3005"
 dependencies = [
  "base64",
  "chacha20poly1305",
@@ -3680,7 +3680,7 @@ dependencies = [
 [[package]]
 name = "typesec-memory"
 version = "0.13.0"
-source = "git+https://github.com/querygraph/typesec.git?rev=14bd54272c6df2846e86bcaa5d52b3ef14658f24#14bd54272c6df2846e86bcaa5d52b3ef14658f24"
+source = "git+https://github.com/querygraph/typesec.git?branch=main#e4f2d09d2154b303ff27d2909ab942f9342d3005"
 dependencies = [
  "chrono",
  "serde",
@@ -3694,7 +3694,7 @@ dependencies = [
 [[package]]
 name = "typesec-rbac"
 version = "0.13.0"
-source = "git+https://github.com/querygraph/typesec.git?rev=14bd54272c6df2846e86bcaa5d52b3ef14658f24#14bd54272c6df2846e86bcaa5d52b3ef14658f24"
+source = "git+https://github.com/querygraph/typesec.git?branch=main#e4f2d09d2154b303ff27d2909ab942f9342d3005"
 dependencies = [
  "garde",
  "glob",
