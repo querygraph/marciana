@@ -81,6 +81,9 @@ All notable changes to Marciana are documented in this file.
   activation, revocation, and capability-independent recall-intent stages.
 - Bound working-set identities and pinned slots into context planning and
   deterministic plan digests; pinned candidates must fit the token budget.
+- Added proposal-only procedure cohort rollouts with evaluated-procedure
+  binding, bounded traffic and trajectory retention, approval, activation, and
+  rollback.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

@@ -9,6 +9,7 @@ mod health;
 mod learning;
 mod memory_error;
 mod metrics;
+mod procedure_rollout;
 mod working_set;
 
 pub use backup::{BackupManifest, RestoreError};
@@ -44,6 +45,9 @@ pub use learning::{
 };
 pub use memory_error::CognitionMemoryError;
 pub use metrics::{MetricsSnapshot, OperationKind, OperationMetrics, OperationSample};
+pub use procedure_rollout::{
+    ProcedureRollout, ProcedureRolloutError, ProcedureRolloutStatus,
+};
 pub use working_set::{
     WorkingSet, WorkingSetError, WorkingSetSlot, WorkingSetSource, WorkingSetStatus,
 };

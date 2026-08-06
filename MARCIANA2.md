@@ -82,6 +82,9 @@ compile recall intents; they never mint capabilities or bypass the vault.
 Working-set identity and pinned slots are now carried into the context-plan
 digest; pinned candidates are required and prioritized before ordinary ranked
 candidates within the same deterministic token budget.
+Procedure learning now also has a digest-only cohort rollout policy with
+bounded traffic and trajectory-retention windows; rollout activation requires
+the exact evaluated procedure to be active and remains reversible.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
