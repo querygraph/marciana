@@ -1114,8 +1114,8 @@ the protected answer in the release report.
 For a selected set $S$ and expected set $E$:
 
 $$
-\operatorname{precision} = \frac{|S \cap E|}{|S|},\qquad
-\operatorname{recall} = \frac{|S \cap E|}{|E|}
+precision = |S \cap E| / |S|,\qquad
+recall = |S \cap E| / |E|
 $$
 
 Forbidden leakage is binary and release-blocking. Token utility is reported as
