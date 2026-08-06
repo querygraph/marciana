@@ -16,6 +16,8 @@ pub struct ContextEvaluationReceipt {
 pub enum EvaluationReceiptError {
     #[error("evaluation receipt identity is invalid")]
     Invalid,
+    #[error("evaluation summary did not pass its safety checks")]
+    SummaryFailed,
 }
 
 impl ContextEvaluationReceipt {
@@ -23,6 +25,9 @@ impl ContextEvaluationReceipt {
         summary: &ContextEvaluationSummary,
         evaluator_digest: String,
     ) -> Result<Self, EvaluationReceiptError> {
+        if !summary.passed {
+            return Err(EvaluationReceiptError::SummaryFailed);
+        }
         if !is_digest(&evaluator_digest)
             || !is_digest(&summary.corpus_digest)
             || !is_digest(&summary.summary_digest)
