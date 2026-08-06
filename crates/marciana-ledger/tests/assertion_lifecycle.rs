@@ -1,7 +1,7 @@
 use chrono::{TimeZone, Utc};
 use marciana_ledger::{
     Assertion, AssertionId, AssertionLineage, AssertionState, AssertionTransition, Confidence,
-    LedgerError, TemporalInterval, TransitionEvidence,
+    LedgerError, LegacyRelation, TemporalInterval, TransitionEvidence,
 };
 
 const DIGEST: &str = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -167,4 +167,36 @@ fn deserialization_cannot_bypass_temporal_or_lifecycle_validation() {
     let mut encoded = serde_json::to_value(assertion()).unwrap();
     encoded["state"] = serde_json::json!("current");
     assert!(serde_json::from_value::<Assertion>(encoded).is_err());
+}
+
+#[test]
+fn legacy_migration_is_retry_stable_and_keeps_ended_validity_historical() {
+    let migration = || {
+        LegacyRelation::new(
+            "legacy-edge:record-1:1",
+            "account:acme",
+            "locatedIn",
+            "place:venice",
+            Confidence::from_basis_points(10_000).unwrap(),
+            at(0),
+            at(1),
+            TemporalInterval::new(at(0), Some(at(3))).unwrap(),
+            AssertionLineage::new(
+                "episode:legacy-1",
+                "record:1",
+                "legacy-relates-v1",
+                "assertion-v1",
+            )
+            .unwrap(),
+            evidence(),
+        )
+        .unwrap()
+    };
+    let first = migration().migrate().unwrap();
+    let retry = migration().migrate().unwrap();
+
+    assert_eq!(first.id(), retry.id());
+    assert_eq!(first.state(), AssertionState::Current);
+    assert!(first.is_current_at(at(2)));
+    assert!(!first.is_current_at(at(3)));
 }

@@ -38,6 +38,11 @@ impl AssertionId {
         Ok(Self(parsed.to_string()))
     }
 
+    pub(crate) fn from_legacy_key(key: &str) -> Self {
+        let name = format!("querygraph.marciana.legacy-relation.v1\0{key}");
+        Self(Uuid::new_v5(&Uuid::NAMESPACE_OID, name.as_bytes()).to_string())
+    }
+
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0

@@ -15,8 +15,10 @@ lineage, temporal intervals, exact confidence, and a fail-closed lifecycle
 whose transitions carry canonical causal assertion identifiers and evidence
 digests. `querygraph-memory` now lowers validated assertions into an inert
 Grust graph-mutation plan with distinct assertion-node and relationship IDs;
-only the existing TypeSec-authorized guarded commit may submit that plan. The
-next Phase 1 unit is migration of legacy structural `RELATES` projections;
+only the existing TypeSec-authorized guarded commit may submit that plan. A
+retry-stable legacy relation conversion now maps baseline structural edges to
+explicit assertions, preserving historical validity with TypeSec-compatible
+half-open intervals. The next Phase 1 unit is its guarded durable adapter;
 it must consume these types rather than reproduce their validation or state
 rules.
 

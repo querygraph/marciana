@@ -31,6 +31,10 @@ All notable changes to Marciana are documented in this file.
   semantics, preventing an assertion from appearing current at its exact
   invalidation instant during migration or as-of recall.
 
+- Added retry-stable conversion from legacy structural relation inputs to
+  explicit assertions, retaining import evidence and historical validity
+  without generating a new unguarded mutation path.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source
