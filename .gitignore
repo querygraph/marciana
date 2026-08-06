@@ -1,6 +1,7 @@
 /target/
 docs/book/dist/
 benchmark-result.json
+/reports/
 __pycache__/
 clients/typescript/dist/
 clients/typescript/node_modules/

@@ -36,6 +36,29 @@ same local case contract. Their source revisions are pinned, loading is
 offline-only, and large Parquet datasets are optional PyArrow inputs. They are
 not silently substituted for the Marciana release corpus.
 
+## Adversarial run
+
+**Run:** `MARCIANA-ADVERSARIAL-v1`  
+**Date:** 2026-08-06  
+**Environment:** Darwin arm64, Python 3.14.6, 18 cases, 100 repeats  
+**Corpus digest:** `sha256:d879b8a53039d84134bf8b35f21a398c497b94605bddf1a4995854aa1cb798b9`
+
+The deterministic reference suite passed with status `pass`. Every hard gate
+held at zero: unauthorized disclosure, cross-scope leakage, residual recall
+after forget, stale proposal commits, invalid provenance, replayed mutations
+(including across restart), duplicate durable mutations, mishandled
+adversarial input, and non-deterministic receipts. Quality reached 100%
+accuracy in all eleven categories with a 0% unsupported-answer rate.
+Reference-path performance measured 36.1 µs P50, 49.9 µs P95, and 57.8 µs P99
+per full case run, 20.4 µs corpus formation, and 0.4 µs restart. All six
+comparative systems (Mem0, Zep, Letta, Cognee, Graphiti, Akka + Fluree) were
+enumerated and reported `unavailable` because no adapter command was
+configured; none was silently substituted. The five public corpora were
+inventoried as `unavailable` at their pinned revisions because no local
+fixture path was configured. These figures are local engineering
+diagnostics on the deterministic reference backend, not a hosted-system or
+vendor-comparison claim.
+
 ## Reproduce
 
 ```bash

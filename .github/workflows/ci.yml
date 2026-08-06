@@ -25,6 +25,13 @@ jobs:
           test -s compat/sail-revision.txt
           grep -Fq "Cognee is inspiration only" README.md
           grep -Fq "TypeSec, Grust, Sail, and LakeCat must never depend on Marciana" DESIGN.md
+      - name: Run Python benchmark suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s benchmarks -p 'test_*.py' -q
+          python3 benchmarks/run_memory_benchmark.py --json > /dev/null
+          python3 benchmarks/run_adversarial_benchmark.py
       - name: Inspect workspace
         id: workspace
         shell: bash

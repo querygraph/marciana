@@ -56,60 +56,50 @@ Quality and performance are reported separately:
 
 ## Current status
 
-**Status:** implementation in progress; benchmark not yet complete or
-published.
+**Status:** implemented; the deterministic reference suite passes with every
+hard gate at zero. See `docs/BENCHMARK-RESULTS.md` for the recorded run.
 
-### Implemented checkpoint
+### Implemented
 
 The deterministic policy-aware backend is implemented in
 `benchmarks/adversarial_backend.py`. It models the benchmark’s security and
 durability boundary without pretending to replace the Rust TypeSec vault. It
-currently covers:
+covers:
 
 - scoped tenant and memory-space authorization;
 - purpose and clearance checks;
 - valid-time filtering;
-- nonce replay rejection;
+- nonce replay rejection, durable across restart;
 - source-digest validation for improvement proposals;
 - stale proposal rejection;
-- idempotent improvement retry;
-- scoped forgetting with derived-memory invalidation; and
+- idempotent improvement retry with identical receipts;
+- scoped forgetting with derived-memory invalidation;
+- oversized query and memory rejection; and
 - state-preserving restart behavior.
 
-The first adversarial scenario set is implemented in
-`benchmarks/adversarial_cases.py`. It currently contains cases for:
+The scenario corpus in `benchmarks/adversarial_cases.py` contains eighteen
+cases across retrieval, temporal, abstention, authorization, provenance,
+mutation, replay, recovery, forget, reproducibility, and robustness —
+including replay-across-restart, empty and oversized input, Unicode
+confusables, and prompt-injection containment. Expectations are explicit per
+case: an expected ranked prefix, a mandatory-abstention flag, and forbidden
+IDs that must never appear.
 
-1. current retrieval;
-2. historical retrieval;
-3. unknown-query abstention;
-4. tenant isolation;
-5. clearance isolation;
-6. purpose denial;
-7. forged source binding;
-8. stale proposal;
-9. replayed mutation;
-10. idempotent retry;
-11. forget plus derived-memory invalidation;
-12. restart reproducibility; and
-13. query-order invariance.
+The remaining units from the original plan are now delivered:
 
-These files are intentionally still uncommitted while the previous benchmark
-implementation unit is incomplete. This document records their status; it
-does not claim that they have passed a release run.
-
-### Not yet implemented
-
-- adversarial benchmark runner and machine-readable report schema;
-- category-level metrics and hard-gate evaluation;
-- performance repetition and percentile measurement;
-- comparative adapter protocol;
-- executable adapters for Marciana, Mem0, Zep, Letta, Cognee, and Graphiti;
-- explicit command/HTTP configuration for external systems;
-- all-system inventory showing executed, failed, or unavailable status;
-- full tests for the backend and scenario corpus;
-- normalized LoCoMo, LongMemEval, BEAM, DMR, and Letta-Evals execution;
-- benchmark report and release documentation; and
-- final changelog, commit, push, and verification.
+- `benchmarks/run_adversarial_benchmark.py` — runner, versioned corpus
+  manifest verification (`--pin-corpus` to regenerate), receipt-determinism
+  double-run, formation/restart timing, and the machine-readable report;
+- `benchmarks/adversarial_report.py` — hard-gate evaluation, category
+  metrics, percentile performance, bounded-report enforcement;
+- `benchmarks/adversarial_adapters.py` — comparative adapter protocol,
+  the Marciana reference adapter, and explicit command-configured external
+  adapters with an all-system inventory;
+- `benchmarks/adversarial_corpora.py` — pinned, offline-only public-corpus
+  inventory (LoCoMo, LongMemEval, BEAM, DMR, Letta-Evals);
+- separate test files for the backend, corpus, adapters, and report; and
+- the corpus manifest fixture in
+  `benchmarks/fixtures/marciana-adversarial-v1/manifest.json`.
 
 ## Comparative systems
 
@@ -124,14 +114,15 @@ one backend for another:
 | Letta | Execute only when its package/service configuration is explicitly configured |
 | Cognee | Execute only when explicitly configured; no Cognee dependency may be added to Marciana |
 | Graphiti | Execute only when its package/service configuration is explicitly configured |
+| Akka + Fluree | Execute only when its adapter command is explicitly configured; Akka and Fluree remain external comparative systems, never Marciana runtime dependencies |
 
 Unavailable systems must produce a structured result with system name,
 adapter version, missing configuration, and status `unavailable`. A failed
 adapter must be reported as `error`, not converted into a passing result.
 
-## Recommended runner contract
+## Runner contract
 
-The eventual command should look like:
+The implemented command is:
 
 ```sh
 python3 benchmarks/run_adversarial_benchmark.py \
@@ -143,11 +134,21 @@ python3 benchmarks/run_adversarial_benchmark.py \
   --json reports/marciana-adversarial-v1.json
 ```
 
+External systems execute only when explicitly configured through
+`MARCIANA_ADVERSARIAL_<SYSTEM>_CMD` (`MEM0`, `ZEP`, `LETTA`, `COGNEE`,
+`GRAPHITI`, `AKKA_FLUREE`). The configured command receives the case corpus
+as JSON on stdin and must print one outcome per case; endpoint and credential
+configuration belong to the adapter command's own environment. Public-corpus
+fixtures are configured through `MARCIANA_ADVERSARIAL_<CORPUS>_PATH`
+(`LOCOMO`, `LONGMEMEVAL`, `BEAM`, `DMR`, `LETTA_EVALS`) and are normalized
+offline against their pinned source revisions.
+
 The report should include:
 
 ```json
 {
   "benchmark": "MARCIANA-ADVERSARIAL-v1",
+  "corpus_digest": "sha256:…",
   "status": "pass|fail|incomplete",
   "metadata": {},
   "hard_gates": {},
@@ -157,7 +158,8 @@ The report should include:
   },
   "cases": [],
   "quality": {},
-  "performance": {}
+  "performance": {},
+  "public_corpora": {}
 }
 ```
 

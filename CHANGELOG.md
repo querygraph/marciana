@@ -4,6 +4,19 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Deliver the MARCIANA-ADVERSARIAL-v1 benchmark: an eighteen-case adversarial
+  corpus with a versioned manifest, a deterministic policy-aware reference
+  backend with durable replay protection and idempotent receipts, hard-gate
+  and category-metric evaluation, percentile performance measurement, and a
+  bounded machine-readable report.
+- Enumerate comparative systems (Mem0, Zep, Letta, Cognee, Graphiti, and
+  Akka + Fluree) through an explicit command-configured adapter protocol that
+  reports executed, error, or unavailable status without substitution.
+- Inventory pinned offline-only public corpora (LoCoMo, LongMemEval, BEAM,
+  DMR, Letta-Evals) with exact source revisions in the adversarial report.
+- Record the passing adversarial reference run in the benchmark results.
+- Run the dependency-free Python benchmark suite in CI alongside the Rust
+  workspace checks.
 - Document the MARCIANA-ADVERSARIAL-v1 goal, release gates, implementation
   checkpoint, comparative-system status, and acceptance criteria.
 - Add the Marciana 2 release post with Ossie, benchmark, cognition, and

@@ -59,6 +59,41 @@ revisions are recorded and tested in `adapters.py`. Loading those large files is
 PyArrow adapter unit; it keeps only question text, category, and conversation
 ID, not the long chat, and is not part of the dependency-free smoke harness.
 
+## Adversarial cognition benchmark
+
+`MARCIANA-ADVERSARIAL-v1` tests whether the system stays correct, secure,
+auditable, and reproducible when the memory and request path are actively
+adversarial. The corpus (`adversarial_cases.py`, eighteen cases) covers
+retrieval, temporal correctness, abstention, tenant/space/clearance/purpose
+authorization, forged and stale proposals, replay (including across restart),
+idempotent retry, forget with derived-memory invalidation, restart
+reproducibility, query-order invariance, and malformed, oversized,
+confusable, and prompt-injection input. Safety failures are counted in named
+hard gates that must all be zero; they are never averaged into quality.
+
+```text
+python3 benchmarks/run_adversarial_benchmark.py
+```
+
+The runner verifies the corpus against its versioned manifest fixture
+(`fixtures/marciana-adversarial-v1/manifest.json`, regenerated with
+`--pin-corpus`), runs the deterministic Marciana reference path twice to gate
+receipt determinism, and enumerates every comparative system — Mem0, Zep,
+Letta, Cognee, Graphiti, and Akka + Fluree — as `executed`, `error`, or
+`unavailable` with the missing configuration named. External systems run only
+through explicitly configured `MARCIANA_ADVERSARIAL_<SYSTEM>_CMD` commands;
+public corpora (LoCoMo, LongMemEval, BEAM, DMR, Letta-Evals) are inventoried
+against pinned revisions and normalized offline only from explicitly
+configured `MARCIANA_ADVERSARIAL_<CORPUS>_PATH` fixtures. The JSON report
+carries bounded IDs, digests, counts, and timings — never memory plaintext —
+and is written to the untracked `reports/` directory. See
+[`adversarial-cognition-benchmark.md`](../adversarial-cognition-benchmark.md)
+for the full design and
+[`docs/BENCHMARK-RESULTS.md`](../docs/BENCHMARK-RESULTS.md) for the recorded
+run.
+
+## Smoke results
+
 The current smoke run (1,000 repeats, 504 records) reaches 100% case accuracy
 with zero redaction leaks. The indexed path measured about 5.3 µs p50 versus
 421 µs for the linear path in the local run; these are harness diagnostics,
