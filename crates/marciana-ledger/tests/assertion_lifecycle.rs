@@ -140,3 +140,15 @@ fn temporal_intervals_are_inclusive_and_reject_reversal() {
         Err(LedgerError::InvalidTemporalInterval)
     );
 }
+
+#[test]
+fn deserialization_cannot_bypass_temporal_or_lifecycle_validation() {
+    let mut encoded = serde_json::to_value(assertion()).unwrap();
+    encoded["validity"]["validFrom"] = serde_json::json!(at(1));
+    encoded["validity"]["validTo"] = serde_json::json!(at(0));
+    assert!(serde_json::from_value::<Assertion>(encoded).is_err());
+
+    let mut encoded = serde_json::to_value(assertion()).unwrap();
+    encoded["state"] = serde_json::json!("current");
+    assert!(serde_json::from_value::<Assertion>(encoded).is_err());
+}

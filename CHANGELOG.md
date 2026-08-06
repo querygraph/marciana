@@ -12,6 +12,10 @@ All notable changes to Marciana are documented in this file.
   fail-closed, evidence-carrying belief lifecycle ready for guarded durable
   projection.
 
+- Made persisted assertion values fail closed: deserialization now reuses the
+  canonical identity, interval, lineage, evidence, and lifecycle validators
+  rather than allowing stored JSON to construct an invalid ledger state.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

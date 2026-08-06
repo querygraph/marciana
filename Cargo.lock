@@ -1967,6 +1967,7 @@ version = "0.12.0"
 dependencies = [
  "chrono",
  "serde",
+ "serde_json",
  "thiserror",
  "uuid",
 ]

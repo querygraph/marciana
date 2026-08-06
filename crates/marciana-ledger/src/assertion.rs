@@ -1,7 +1,7 @@
 use std::fmt;
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, de};
 use uuid::Uuid;
 
 use crate::{AssertionState, AssertionTransition, LedgerError, TemporalInterval};
@@ -12,7 +12,7 @@ const MAX_LINEAGE_BYTES: usize = 512;
 /// A collision-resistant, opaque assertion identity. It is deliberately not a
 /// hash of a structural triplet, so identical claims may retain distinct
 /// provenance and temporal history.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 #[serde(transparent)]
 pub struct AssertionId(String);
 
@@ -56,8 +56,14 @@ impl fmt::Display for AssertionId {
     }
 }
 
+impl<'de> Deserialize<'de> for AssertionId {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Self::parse(String::deserialize(deserializer)?).map_err(de::Error::custom)
+    }
+}
+
 /// A bounded confidence represented exactly in basis points.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 #[serde(transparent)]
 pub struct Confidence(u16);
 
@@ -79,14 +85,42 @@ impl Confidence {
     }
 }
 
+impl<'de> Deserialize<'de> for Confidence {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Self::from_basis_points(u16::deserialize(deserializer)?).map_err(de::Error::custom)
+    }
+}
+
 /// Exact source-record and formation provenance for an assertion.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AssertionLineage {
     source_episode_id: String,
     source_record_id: String,
     formation_profile_version: String,
     schema_version: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct AssertionLineageWire {
+    source_episode_id: String,
+    source_record_id: String,
+    formation_profile_version: String,
+    schema_version: String,
+}
+
+impl<'de> Deserialize<'de> for AssertionLineage {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let wire = AssertionLineageWire::deserialize(deserializer)?;
+        Self::new(
+            wire.source_episode_id,
+            wire.source_record_id,
+            wire.formation_profile_version,
+            wire.schema_version,
+        )
+        .map_err(de::Error::custom)
+    }
 }
 
 impl AssertionLineage {
@@ -138,7 +172,7 @@ impl AssertionLineage {
 
 /// An atomic, provenance-bearing belief that has a stable identity independent
 /// of its graph projection.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Assertion {
     id: AssertionId,
@@ -152,6 +186,49 @@ pub struct Assertion {
     lineage: AssertionLineage,
     state: AssertionState,
     transitions: Vec<AssertionTransition>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct AssertionWire {
+    id: AssertionId,
+    subject: String,
+    predicate: String,
+    object: String,
+    confidence: Confidence,
+    observed_at: DateTime<Utc>,
+    ingested_at: DateTime<Utc>,
+    validity: TemporalInterval,
+    lineage: AssertionLineage,
+    state: AssertionState,
+    transitions: Vec<AssertionTransition>,
+}
+
+impl<'de> Deserialize<'de> for Assertion {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let wire = AssertionWire::deserialize(deserializer)?;
+        let mut assertion = Self::new(
+            wire.id,
+            wire.subject,
+            wire.predicate,
+            wire.object,
+            wire.confidence,
+            wire.observed_at,
+            wire.ingested_at,
+            wire.validity,
+            wire.lineage,
+        )
+        .map_err(de::Error::custom)?;
+        for transition in wire.transitions {
+            assertion
+                .apply_transition(transition)
+                .map_err(de::Error::custom)?;
+        }
+        if assertion.state != wire.state {
+            return Err(de::Error::custom(LedgerError::InvalidTransition));
+        }
+        Ok(assertion)
+    }
 }
 
 impl Assertion {

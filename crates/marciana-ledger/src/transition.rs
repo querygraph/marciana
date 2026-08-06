@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, de};
 
 use crate::{AssertionId, LedgerError};
 
@@ -48,11 +48,25 @@ impl AssertionState {
 }
 
 /// Identifiers and opaque evidence digests that justify a lifecycle change.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct TransitionEvidence {
     causing_assertions: Vec<AssertionId>,
     evidence_digests: Vec<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct TransitionEvidenceWire {
+    causing_assertions: Vec<AssertionId>,
+    evidence_digests: Vec<String>,
+}
+
+impl<'de> Deserialize<'de> for TransitionEvidence {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let wire = TransitionEvidenceWire::deserialize(deserializer)?;
+        Self::new(wire.causing_assertions, wire.evidence_digests).map_err(de::Error::custom)
+    }
 }
 
 impl TransitionEvidence {
@@ -98,13 +112,29 @@ impl TransitionEvidence {
 
 /// A recorded lifecycle state change. The guarded durable ledger applies it
 /// only if `from` matches the current persisted state.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AssertionTransition {
     from: AssertionState,
     to: AssertionState,
     at: DateTime<Utc>,
     evidence: TransitionEvidence,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct AssertionTransitionWire {
+    from: AssertionState,
+    to: AssertionState,
+    at: DateTime<Utc>,
+    evidence: TransitionEvidence,
+}
+
+impl<'de> Deserialize<'de> for AssertionTransition {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let wire = AssertionTransitionWire::deserialize(deserializer)?;
+        Self::new(wire.from, wire.to, wire.at, wire.evidence).map_err(de::Error::custom)
+    }
 }
 
 impl AssertionTransition {

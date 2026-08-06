@@ -1,15 +1,29 @@
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, de};
 
 use crate::LedgerError;
 
 /// The period in which an assertion is believed to hold. A missing end is
 /// open-ended rather than a sentinel timestamp.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct TemporalInterval {
     valid_from: DateTime<Utc>,
     valid_to: Option<DateTime<Utc>>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct TemporalIntervalWire {
+    valid_from: DateTime<Utc>,
+    valid_to: Option<DateTime<Utc>>,
+}
+
+impl<'de> Deserialize<'de> for TemporalInterval {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let wire = TemporalIntervalWire::deserialize(deserializer)?;
+        Self::new(wire.valid_from, wire.valid_to).map_err(de::Error::custom)
+    }
 }
 
 impl TemporalInterval {
