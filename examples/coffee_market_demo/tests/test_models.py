@@ -9,6 +9,7 @@ from examples.coffee_market_demo.memory import (
 )
 from examples.coffee_market_demo.models import MemoryFact
 from examples.coffee_market_demo.agents import AgentDeps, build_agent, tool_turn
+from examples.coffee_market_demo.demo import run
 from examples.coffee_market_demo.sail import SailWarehouse
 
 
@@ -65,3 +66,14 @@ class DemoModelTests(unittest.TestCase):
         )
         decision = asyncio.run(tool_turn(build_agent(), deps, "forget", "forget the selected memory"))
         self.assertEqual(decision.action, "forget")
+
+    def test_key_free_demo_runs_the_complete_governed_lifecycle(self) -> None:
+        report = asyncio.run(run(False, None))
+        actions = [
+            report["turns"][name]["action"]
+            for name in ("sail", "learned", "price", "recalled", "improved", "improved_recalled", "forgotten")
+        ]
+        self.assertEqual(actions, ["report", "learn", "learn", "recall", "improve", "recall", "forget"])
+        self.assertEqual(report["dataverse"]["row_count"], 3)
+        self.assertTrue(any('"operation":"improve"' in entry for entry in report["operation_log"]))
+        self.assertTrue(any('"operation":"forget"' in entry for entry in report["operation_log"]))
