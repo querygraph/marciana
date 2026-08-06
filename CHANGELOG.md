@@ -16,6 +16,7 @@ All notable changes to Marciana are documented in this file.
 - Reject release receipts for failed or leaking evaluation summaries.
 - Expose materialization as-of cutoffs in bundles, citations, and renderers.
 - Add thread metadata and a shared thread/session context facade path.
+- Synchronize tenant vector membership manifests with index operations.
 - Add bounded content-free P50/P95/P99 latency percentile snapshots.
 - Add a capability-bound facade path for session-scoped context planning.
 - Add bounded session metadata that binds session, space, and recall-policy

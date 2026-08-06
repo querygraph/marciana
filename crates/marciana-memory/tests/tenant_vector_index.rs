@@ -38,10 +38,13 @@ fn scoped_index_binds_tenant_and_embedding_space() {
     index
         .index_for("tenant:coffee", &id("m1"), Label::Public, "coffee price")
         .expect("index");
+    assert_eq!(index.manifest().indexed_ids().collect::<Vec<_>>(), ["m1"]);
     assert_eq!(
         index.search_for("tenant:coffee", "coffee", 1).unwrap(),
         vec![id("m1")]
     );
+    index.remove_for("tenant:coffee", &id("m1")).unwrap();
+    assert!(index.manifest().indexed_ids().next().is_none());
 }
 
 #[test]

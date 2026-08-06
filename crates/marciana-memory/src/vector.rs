@@ -27,6 +27,10 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use typesec_memory::{IndexError, Label, MemoryId, SemanticIndex};
 
+use crate::vector_manifest::{
+    VectorIndexManifest, VectorManifestError, VectorRepairBatch, VectorRepairOperation,
+};
+
 const MAX_SCOPE_COMPONENT: usize = 256;
 
 /// Turns text into a dense vector. Implementations declare whether they run
@@ -130,6 +134,7 @@ impl VectorIndexScope {
 pub struct TenantVectorIndex<E: Embedder> {
     scope: VectorIndexScope,
     index: VectorIndex<E>,
+    manifest: RwLock<VectorIndexManifest>,
 }
 
 impl<E: Embedder> TenantVectorIndex<E> {
@@ -142,7 +147,11 @@ impl<E: Embedder> TenantVectorIndex<E> {
         let scope = VectorIndexScope::new(tenant_id, embedding_space)?;
         let index = VectorIndex::with_embedding_space(embedder, scope.embedding_space.clone())
             .map_err(TenantIndexError::Index)?;
-        Ok(Self { scope, index })
+        Ok(Self {
+            manifest: RwLock::new(VectorIndexManifest::new(scope.clone())),
+            scope,
+            index,
+        })
     }
 
     /// Borrow the persisted scope identity.
@@ -160,14 +169,46 @@ impl<E: Embedder> TenantVectorIndex<E> {
         text: &str,
     ) -> Result<(), TenantIndexError> {
         self.check_tenant(tenant_id)?;
-        self.index
-            .index(id, label, text)
-            .map_err(TenantIndexError::Index)
+        if !self.index.may_embed(label) {
+            return self
+                .index
+                .index(id, label, text)
+                .map_err(TenantIndexError::Index);
+        }
+        let batch =
+            VectorRepairBatch::new(&self.scope, vec![VectorRepairOperation::Index(id.clone())])
+                .map_err(TenantIndexError::Manifest)?;
+        self.manifest
+            .write()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .apply(&batch)
+            .map_err(TenantIndexError::Manifest)?;
+        self.index.index(id, label, text).map_err(|error| {
+            let rollback = VectorRepairBatch::new(
+                &self.scope,
+                vec![VectorRepairOperation::Remove(id.clone())],
+            )
+            .expect("canonical rollback batch");
+            self.manifest
+                .write()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .apply(&rollback)
+                .expect("manifest rollback remains valid");
+            TenantIndexError::Index(error)
+        })
     }
 
     /// Remove one record under the exact tenant scope.
     pub fn remove_for(&self, tenant_id: &str, id: &MemoryId) -> Result<(), TenantIndexError> {
         self.check_tenant(tenant_id)?;
+        let batch =
+            VectorRepairBatch::new(&self.scope, vec![VectorRepairOperation::Remove(id.clone())])
+                .map_err(TenantIndexError::Manifest)?;
+        self.manifest
+            .write()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .apply(&batch)
+            .map_err(TenantIndexError::Manifest)?;
         self.index.remove(id).map_err(TenantIndexError::Index)
     }
 
@@ -198,6 +239,15 @@ impl<E: Embedder> TenantVectorIndex<E> {
             .map_err(TenantIndexError::Index)
     }
 
+    /// Return the content-free membership manifest for host persistence.
+    #[must_use]
+    pub fn manifest(&self) -> VectorIndexManifest {
+        self.manifest
+            .read()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clone()
+    }
+
     fn check_tenant(&self, tenant_id: &str) -> Result<(), TenantIndexError> {
         if tenant_id == self.scope.tenant_id {
             Ok(())
@@ -218,6 +268,8 @@ pub enum TenantIndexError {
     TenantMismatch,
     #[error(transparent)]
     Index(#[from] IndexError),
+    #[error(transparent)]
+    Manifest(#[from] VectorManifestError),
 }
 
 fn valid_scope_component(value: &str) -> bool {
