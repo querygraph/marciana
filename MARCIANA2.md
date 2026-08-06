@@ -13,7 +13,10 @@ Phase 1 has begun with `marciana-ledger`, the adapter-independent assertion
 domain. It establishes collision-resistant assertion identity, bounded source
 lineage, temporal intervals, exact confidence, and a fail-closed lifecycle
 whose transitions carry canonical causal assertion identifiers and evidence
-digests. The next Phase 1 unit is a guarded durable projection and migration;
+digests. `querygraph-memory` now lowers validated assertions into an inert
+Grust graph-mutation plan with distinct assertion-node and relationship IDs;
+only the existing TypeSec-authorized guarded commit may submit that plan. The
+next Phase 1 unit is migration of legacy structural `RELATES` projections;
 it must consume these types rather than reproduce their validation or state
 rules.
 

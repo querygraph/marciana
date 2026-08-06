@@ -2349,6 +2349,7 @@ dependencies = [
  "grust-memory",
  "grust-sail",
  "grust-turso",
+ "marciana-ledger",
  "serde",
  "serde_json",
  "sha2",

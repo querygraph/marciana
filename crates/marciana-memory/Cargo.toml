@@ -21,6 +21,7 @@ grust-sail = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5
 # TypeSec remains the security-contract owner. Pin its reviewed source rather
 # than relying on the developer's sibling checkout.
 typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
+marciana-ledger = { path = "../marciana-ledger" }
 chrono = { version = "0.4", features = ["serde"] }
 serde_json = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
