@@ -22,7 +22,8 @@ use super::lease::{
     cancel_exhausted, lease_expiry, new_lease_token, validate_bearer_token, validate_lease,
 };
 use super::{
-    CognitionJob, CognitionJobStatus, CognitionLease, CognitionLeaseState, CognitionStateError,
+    CognitionJob, CognitionJobClaim, CognitionJobClaimRequest, CognitionJobStatus, CognitionLease,
+    CognitionLeaseState, CognitionStateError,
 };
 use crate::GraphStoreMemoryStore;
 
@@ -88,6 +89,49 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         Ok(self.load_job_node(key)?.map(|(_, job)| job))
     }
 
+    /// Submit or recover a job, then either return its exclusive worker lease
+    /// or the only durable identity recovery may use.
+    ///
+    /// In particular, a staged proposal is never leased again. That prevents a
+    /// later process from re-planning protected input after response loss; it
+    /// must instead use the stored digest with TypeSec's proposal-free commit
+    /// recovery path.
+    pub fn claim_cognition_job(
+        &self,
+        request: CognitionJobClaimRequest<'_>,
+    ) -> Result<CognitionJobClaim, CognitionStateError> {
+        let job = self.submit_cognition_job(
+            request.key,
+            request.submitter,
+            request.typedid_request_digest,
+            request.max_attempts,
+            request.now,
+        )?;
+        match job.status {
+            CognitionJobStatus::ProposalReady => Ok(CognitionJobClaim::ProposalReady {
+                proposal_digest: job.proposal_digest.ok_or_else(|| {
+                    CognitionStateError::Backend("staged job has no proposal digest".into())
+                })?,
+            }),
+            CognitionJobStatus::Completed => Ok(CognitionJobClaim::Completed {
+                completion_digest: job.completion_digest.ok_or_else(|| {
+                    CognitionStateError::Backend("completed job has no commit digest".into())
+                })?,
+            }),
+            CognitionJobStatus::Cancelled => Err(CognitionStateError::Terminal),
+            CognitionJobStatus::Pending
+            | CognitionJobStatus::Leased
+            | CognitionJobStatus::Failed => self
+                .acquire_cognition_lease(
+                    request.key,
+                    request.worker,
+                    request.now,
+                    request.lease_ttl,
+                )
+                .map(CognitionJobClaim::Lease),
+        }
+    }
+
     fn recover_submission(
         &self,
         key: &CognitionIdempotencyKey,
@@ -131,6 +175,11 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         validate_transition_time(&job, now)?;
         if job.status.is_terminal() {
             return Err(CognitionStateError::Terminal);
+        }
+        if job.status == CognitionJobStatus::ProposalReady {
+            return Err(CognitionStateError::InvalidTransition(
+                "a staged proposal must use proposal-free recovery".into(),
+            ));
         }
         if job
             .lease

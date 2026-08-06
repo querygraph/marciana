@@ -1,7 +1,10 @@
 //! Durable, plaintext-free scheduler state for cognition work.
 
-use chrono::{DateTime, Utc};
+use std::fmt;
+
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
+use typesec_memory::CognitionIdempotencyKey;
 
 pub(super) const JOB_SCHEMA_VERSION: u32 = 2;
 
@@ -97,6 +100,59 @@ pub struct CognitionLease {
     attempt: u32,
     /// Exclusive ownership deadline.
     expires_at: DateTime<Utc>,
+}
+
+/// The durable result of asking the scheduler to claim an idempotent job.
+///
+/// A staged or completed job deliberately returns only its canonical digest.
+/// Proposal content is transient and must never be reconstructed or persisted
+/// during recovery.
+pub enum CognitionJobClaim {
+    /// The caller exclusively owns a pending or retryable job.
+    Lease(CognitionLease),
+    /// A previous worker durably staged this exact proposal identity.
+    ProposalReady { proposal_digest: String },
+    /// A previous worker completed the TypeSec-prepared decision.
+    Completed { completion_digest: String },
+}
+
+impl fmt::Debug for CognitionJobClaim {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Lease(lease) => formatter
+                .debug_struct("CognitionJobClaim::Lease")
+                .field("job_digest", &lease.job_digest)
+                .field("attempt", &lease.attempt)
+                .field("expires_at", &lease.expires_at)
+                .finish(),
+            Self::ProposalReady { proposal_digest } => formatter
+                .debug_struct("CognitionJobClaim::ProposalReady")
+                .field("proposal_digest", proposal_digest)
+                .finish(),
+            Self::Completed { completion_digest } => formatter
+                .debug_struct("CognitionJobClaim::Completed")
+                .field("completion_digest", completion_digest)
+                .finish(),
+        }
+    }
+}
+
+/// Authenticated scheduler inputs for one idempotent job claim.
+pub struct CognitionJobClaimRequest<'a> {
+    /// Scoped durable job address.
+    pub key: &'a CognitionIdempotencyKey,
+    /// Authenticated scheduler that owns submission.
+    pub submitter: &'a str,
+    /// Authenticated worker attempting this claim.
+    pub worker: &'a str,
+    /// Digest of the verified immutable TypeDID request.
+    pub typedid_request_digest: &'a str,
+    /// Bounded total number of worker attempts.
+    pub max_attempts: u32,
+    /// Scheduler transition time.
+    pub now: DateTime<Utc>,
+    /// Requested exclusive lease duration.
+    pub lease_ttl: Duration,
 }
 
 impl CognitionLease {

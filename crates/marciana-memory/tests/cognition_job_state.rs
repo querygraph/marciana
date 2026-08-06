@@ -8,8 +8,8 @@ use chrono::Duration;
 use grust_core::prelude::{GraphStore, Start, Traversal};
 use querygraph_memory::TursoMemoryStore;
 use querygraph_memory::cognition::{
-    CognitionJobStatus, CognitionStateError, MAX_COGNITION_BEARER_TOKEN_BYTES,
-    MAX_COGNITION_FAILURE_BYTES,
+    CognitionJobClaim, CognitionJobClaimRequest, CognitionJobStatus, CognitionStateError,
+    MAX_COGNITION_BEARER_TOKEN_BYTES, MAX_COGNITION_FAILURE_BYTES,
 };
 use typesec_memory::{MemoryContent, MemoryDraft, MemoryStore, Provenance};
 
@@ -87,6 +87,46 @@ async fn staged_proposal_digest_survives_reopen_without_proposal_content() {
     ] {
         assert!(!encoded.contains(forbidden), "job exposed {forbidden:?}");
     }
+}
+
+#[test]
+fn staged_jobs_return_only_the_durable_digest_and_never_reacquire_a_lease() {
+    let dir = tempfile::tempdir().expect("temporary database");
+    let store =
+        TursoMemoryStore::open_with_config(config(&dir, "staged_job_claim")).expect("open store");
+    let source = record("source", "private source", None);
+    let proposal = proposal("job", &source);
+    let proposal_digest = proposal.canonical_digest().expect("proposal digest");
+    store.put(source).expect("persist source");
+    store
+        .submit_cognition_job(&job_key("job"), "scheduler", &digest("request"), 3, at(0))
+        .expect("submit job");
+    let lease = store
+        .acquire_cognition_lease(&job_key("job"), "worker", at(1), Duration::minutes(5))
+        .expect("acquire lease");
+    store
+        .persist_cognition_proposal(&job_key("job"), lease.token(), &proposal, at(2))
+        .expect("stage proposal");
+
+    assert!(matches!(
+        store.acquire_cognition_lease(&job_key("job"), "worker", at(3), Duration::minutes(5)),
+        Err(CognitionStateError::InvalidTransition(_))
+    ));
+    assert!(matches!(
+        store
+            .claim_cognition_job(CognitionJobClaimRequest {
+                key: &job_key("job"),
+                submitter: "scheduler",
+                worker: "recovery-worker",
+                typedid_request_digest: &digest("request"),
+                max_attempts: 3,
+                now: at(3),
+                lease_ttl: Duration::minutes(5),
+            })
+            .expect("recover staged job"),
+        CognitionJobClaim::ProposalReady { proposal_digest: digest }
+            if digest == proposal_digest
+    ));
 }
 
 #[test]

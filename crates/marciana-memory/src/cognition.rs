@@ -46,7 +46,8 @@ pub use profile::CognitionEngineProfile;
 pub use sail::LiveSailCognitionExecutor;
 pub use snapshot::{CognitionFieldMapping, GovernedLakeCatSnapshot};
 pub use state::{
-    CognitionJob, CognitionJobStatus, CognitionLease, CognitionLeaseState, CognitionStateError,
+    CognitionJob, CognitionJobClaim, CognitionJobClaimRequest, CognitionJobStatus, CognitionLease,
+    CognitionLeaseState, CognitionStateError,
 };
 pub use typesec_memory::{
     MAX_COGNITION_SOURCE_BYTES as MAX_COGNITION_AUTHORIZED_INPUT_BYTES, MAX_COGNITION_SOURCE_BYTES,

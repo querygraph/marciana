@@ -13,6 +13,9 @@ All notable changes to Marciana are documented in this file.
   switch to the standalone path without changing its existing package contract.
 - Switched the local qg-rust consumer to the standalone Marciana crate and
   re-ran its 100-test cognition/application suite successfully.
+- Added a durable scheduler claim API that returns a lease only for pending or
+  retryable work; a staged proposal now returns its digest for proposal-free
+  recovery and can never be leased for re-planning.
 
 ### 2026-08-05
 
