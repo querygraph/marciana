@@ -97,6 +97,8 @@ step.
 The cognition crate now also exposes a content-free `HealthSnapshot` for
 operator/readiness integrations; it reports only bounded component names,
 revisions, and states.
+It also exposes bounded content-free operation metrics for verb counts,
+denials, and latency accounting; hosts own persistence and dashboard export.
 
 ## Executive judgment
 
