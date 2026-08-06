@@ -1,5 +1,6 @@
 //! Marciana-owned cognition composition primitives.
 
+mod audit_export;
 mod backup;
 mod binding_error;
 mod engine_binding;
@@ -13,6 +14,7 @@ mod procedure_rollout;
 mod quota;
 mod working_set;
 
+pub use audit_export::{AuditExportError, AuditExportRecord};
 pub use backup::{BackupManifest, RestoreError};
 pub use binding_error::CognitionBindingError;
 pub use engine_binding::CognitionEngineBinding;
@@ -46,9 +48,7 @@ pub use learning::{
 };
 pub use memory_error::CognitionMemoryError;
 pub use metrics::{MetricsSnapshot, OperationKind, OperationMetrics, OperationSample};
-pub use procedure_rollout::{
-    ProcedureRollout, ProcedureRolloutError, ProcedureRolloutStatus,
-};
+pub use procedure_rollout::{ProcedureRollout, ProcedureRolloutError, ProcedureRolloutStatus};
 pub use quota::{QuotaError, QuotaLimits, QuotaSnapshot, TenantQuota};
 pub use working_set::{
     WorkingSet, WorkingSetError, WorkingSetSlot, WorkingSetSource, WorkingSetStatus,

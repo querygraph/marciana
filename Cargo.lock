@@ -1953,6 +1953,7 @@ dependencies = [
  "lakecat-core",
  "marciana-catalog",
  "querygraph-memory",
+ "serde",
  "serde_json",
  "sha2",
  "thiserror",

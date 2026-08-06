@@ -88,6 +88,9 @@ the exact evaluated procedure to be active and remains reversible.
 Phase 5 groundwork now includes fixed-array tenant quotas sharing the metrics
 operation taxonomy, with bounded windows and no request or memory content in
 quota state or exported snapshots.
+Phase 5 also exposes a versioned audit-export projection that hashes subject,
+purpose, and affected IDs while retaining content-free lineage digests and
+rejecting unsupported audit schemas.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

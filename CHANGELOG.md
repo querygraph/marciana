@@ -86,6 +86,8 @@ All notable changes to Marciana are documented in this file.
   rollback.
 - Added content-free fixed-array tenant quotas with context-aware operation
   accounting, exhaustion, clock, and window-reset checks.
+- Added a versioned redacted audit-export projection with hashed identities,
+  lineage digests, deterministic affected-ID summaries, and schema bounds.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb
