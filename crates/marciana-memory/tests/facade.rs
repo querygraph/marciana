@@ -73,6 +73,8 @@ fn facade_executes_all_verbs_through_the_vault() {
     let context_plan = plan_context(
         RecallIntent {
             query_digest: digest("coffee-price"),
+            working_set_digest: None,
+            pinned_memory_ids: Vec::new(),
             view: ContextView::Episodes,
             recipe: ContextRecipe::Ranked,
             as_of: Utc::now(),

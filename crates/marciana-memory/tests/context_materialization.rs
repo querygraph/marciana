@@ -45,6 +45,8 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     let plan = plan_context(
         RecallIntent {
             query_digest: digest("query"),
+            working_set_digest: None,
+            pinned_memory_ids: Vec::new(),
             view: ContextView::Episodes,
             recipe: ContextRecipe::Ranked,
             as_of: Utc::now(),

@@ -31,6 +31,11 @@ pub enum ContextRecipe {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RecallIntent {
     pub query_digest: String,
+    /// Optional immutable working-set policy identity.
+    pub working_set_digest: Option<String>,
+    /// Bounded working-set slots that the planner must retain when candidates
+    /// are available.
+    pub pinned_memory_ids: Vec<MemoryId>,
     pub view: ContextView,
     pub recipe: ContextRecipe,
     pub as_of: DateTime<Utc>,
@@ -114,6 +119,8 @@ pub enum ContextError {
     TokenAccounting,
     #[error("context plan digest is invalid")]
     PlanDigest,
+    #[error("working-set slot has no ranked context candidate")]
+    PinnedCandidateMissing,
     #[error(transparent)]
     Memory(#[from] MemoryError),
 }
@@ -201,6 +208,34 @@ impl RecallIntent {
         if self.token_budget == 0 || self.token_budget > 64_000 {
             return Err(ContextError::InvalidIntent);
         }
+        if self.pinned_memory_ids.len() > 64
+            || self.pinned_memory_ids.iter().any(|id| {
+                id.as_str().is_empty()
+                    || id.as_str().len() > 256
+                    || !id
+                        .as_str()
+                        .bytes()
+                        .all(|byte| byte.is_ascii_alphanumeric() || b"_:/.-".contains(&byte))
+            })
+        {
+            return Err(ContextError::InvalidIntent);
+        }
+        if self
+            .working_set_digest
+            .as_deref()
+            .is_some_and(|digest| !is_digest(digest))
+        {
+            return Err(ContextError::InvalidIntent);
+        }
+        let mut ids = self
+            .pinned_memory_ids
+            .iter()
+            .map(MemoryId::as_str)
+            .collect::<Vec<_>>();
+        ids.sort_unstable();
+        if ids.windows(2).any(|pair| pair[0] == pair[1]) {
+            return Err(ContextError::InvalidIntent);
+        }
         Ok(())
     }
 }
@@ -215,10 +250,15 @@ impl ContextPlan {
     pub fn validate(&self) -> Result<(), ContextError> {
         self.intent.validate()?;
         validate_candidates(&self.candidates)?;
+        validate_pinned_candidates(&self.intent, &self.candidates)?;
         if self.candidates.windows(2).any(|pair| {
-            pair[0].score_basis_points < pair[1].score_basis_points
-                || (pair[0].score_basis_points == pair[1].score_basis_points
-                    && pair[0].id > pair[1].id)
+            let left_pinned = is_pinned(&self.intent, &pair[0]);
+            let right_pinned = is_pinned(&self.intent, &pair[1]);
+            (!left_pinned && right_pinned)
+                || (left_pinned == right_pinned
+                    && (pair[0].score_basis_points < pair[1].score_basis_points
+                        || (pair[0].score_basis_points == pair[1].score_basis_points
+                            && pair[0].id > pair[1].id)))
         }) {
             return Err(ContextError::InvalidCandidate);
         }
@@ -253,10 +293,12 @@ pub fn plan_context(
         return Err(ContextError::CandidateLimit);
     }
     validate_candidates(&candidates)?;
+    validate_pinned_candidates(&intent, &candidates)?;
     candidates.sort_by(|left, right| {
-        right
-            .score_basis_points
-            .cmp(&left.score_basis_points)
+        is_pinned(&intent, left)
+            .cmp(&is_pinned(&intent, right))
+            .reverse()
+            .then_with(|| right.score_basis_points.cmp(&left.score_basis_points))
             .then_with(|| left.id.cmp(&right.id))
     });
     let considered_candidates = candidates.len();
@@ -268,6 +310,7 @@ pub fn plan_context(
         }
         fits
     });
+    validate_pinned_candidates(&intent, &candidates).map_err(|_| ContextError::TokenAccounting)?;
     let digest = context_plan_digest(&intent, &candidates, used);
     Ok(ContextPlan {
         intent,
@@ -376,6 +419,25 @@ fn context_plan_digest(
     let mut hasher = Sha256::new();
     hasher.update(b"querygraph.marciana.context-plan.v1\0");
     hasher.update(intent.query_digest.as_bytes());
+    hasher.update(b"working-set\0");
+    hasher.update(
+        intent
+            .working_set_digest
+            .as_deref()
+            .unwrap_or_default()
+            .as_bytes(),
+    );
+    hasher.update(b"pinned\0");
+    let mut pinned = intent
+        .pinned_memory_ids
+        .iter()
+        .map(MemoryId::as_str)
+        .collect::<Vec<_>>();
+    pinned.sort_unstable();
+    for id in pinned {
+        hasher.update(id.as_bytes());
+        hasher.update([0]);
+    }
     hasher.update(
         format!(
             "{:?}|{:?}|{}|{}",
@@ -390,4 +452,29 @@ fn context_plan_digest(
         hasher.update(candidate.reason_digest.as_bytes());
     }
     format!("sha256:{:x}", hasher.finalize())
+}
+
+fn validate_pinned_candidates(
+    intent: &RecallIntent,
+    candidates: &[ContextCandidate],
+) -> Result<(), ContextError> {
+    for pinned in &intent.pinned_memory_ids {
+        if !candidates.iter().any(|candidate| candidate.id == *pinned) {
+            return Err(ContextError::PinnedCandidateMissing);
+        }
+    }
+    Ok(())
+}
+
+fn is_pinned(intent: &RecallIntent, candidate: &ContextCandidate) -> bool {
+    intent
+        .pinned_memory_ids
+        .iter()
+        .any(|id| id == &candidate.id)
+}
+
+fn is_digest(value: &str) -> bool {
+    value.len() == 71
+        && value.starts_with("sha256:")
+        && value[7..].bytes().all(|byte| byte.is_ascii_hexdigit())
 }

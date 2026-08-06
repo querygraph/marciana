@@ -9,6 +9,7 @@ mod health;
 mod learning;
 mod memory_error;
 mod metrics;
+mod working_set;
 
 pub use backup::{BackupManifest, RestoreError};
 pub use binding_error::CognitionBindingError;
@@ -43,6 +44,9 @@ pub use learning::{
 };
 pub use memory_error::CognitionMemoryError;
 pub use metrics::{MetricsSnapshot, OperationKind, OperationMetrics, OperationSample};
+pub use working_set::{
+    WorkingSet, WorkingSetError, WorkingSetSlot, WorkingSetSource, WorkingSetStatus,
+};
 
 #[cfg(test)]
 mod binding_error_tests;

@@ -77,6 +77,10 @@ All notable changes to Marciana are documented in this file.
   visible/redacted IDs; text and XML renderers now carry both identities.
 - Bound materialization receipts to the target space, clearance ceiling, and
   request purpose so equal result sets cannot be confused across policies.
+- Added a bounded, digest-only working-set policy with proposal, approval,
+  activation, revocation, and capability-independent recall-intent stages.
+- Bound working-set identities and pinned slots into context planning and
+  deterministic plan digests; pinned candidates must fit the token budget.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb
