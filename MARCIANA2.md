@@ -122,6 +122,10 @@ The vector layer now also exposes a tenant-checked index seam: every index,
 search, hybrid-rank, and removal operation carries the exact tenant, while a
 content-free scope digest binds that tenant to the embedding-space identity
 for durable manifests and repair work.
+Session metadata now provides a bounded, content-free product identity for a
+session, space, and recall-policy digest. Binding it changes the deterministic
+recall intent identity only; it does not mint capabilities or create an
+authorization namespace, and materialization remains behind the TypeSec vault.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

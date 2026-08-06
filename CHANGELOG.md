@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Add bounded session metadata that binds session, space, and recall-policy
+  identity into recall planning without changing authorization semantics.
+
 ### 2026-08-06
 
 - Restored the executable Sail baseline gate: CI now starts the exact pinned

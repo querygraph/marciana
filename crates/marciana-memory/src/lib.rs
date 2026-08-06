@@ -509,6 +509,7 @@ pub mod assertion_recall;
 pub mod cognition;
 pub mod context;
 pub mod context_render;
+pub mod session;
 mod facade;
 #[cfg(feature = "turso")]
 pub mod turso;
