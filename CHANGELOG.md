@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Document the MARCIANA-ADVERSARIAL-v1 goal, release gates, implementation
+  checkpoint, comparative-system status, and acceptance criteria.
 - Add the Marciana 2 release post with Ossie, benchmark, cognition, and
   end-to-end coffee-market coverage, including a generated library headboard.
 - Add the source-owned Marciana book manuscript, FirstPair build contract,
