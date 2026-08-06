@@ -6,6 +6,13 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-05
 
+- Corrected restart semantics so only active pre-commit workers may re-plan;
+  post-commit and lost-response handling now require the durable Grust proposal
+  identity and TypeSec's proposal-free recovery path, independent of
+  process-local proposal state.
+- Recorded the gated TypeSec governed-source, reauthorization, recovery, and
+  receipt foundation as complete while retaining remote-revision selection as
+  standalone delivery work.
 - Refined governed cognition into one opaque, leased `improve` state machine
   with post-engine LakeCat and TypeSec reauthorization, deterministic
   digest-only recovery, typed no-change completion, and no public or durable

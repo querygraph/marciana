@@ -95,8 +95,12 @@ worker and failure data.
 
 Public proposal and result diagnostics are deliberately redacted. A cognition
 proposal is transient internal data: it is neither a public QueryGraph value
-nor durable scheduler state. Recovery re-executes deterministic planning and
-requires the exact durably expected digest before any apply operation.
+nor durable scheduler state. Before commit, a retried leased worker may
+re-execute deterministic planning, but it must match the proposal digest stored
+by the durable scheduler before any apply operation. After commit, recovery
+never reconstructs or replans the proposal. A trusted scheduler adapter supplies
+the stored digest to TypeSec's proposal-free recovery path, which revalidates
+current disclosure authority and returns the historical durable outcome.
 
 ## Cognition orchestration
 
@@ -126,9 +130,11 @@ proposal digest at the last available trusted boundary.
 Jobs are leased, idempotent, and restartable. Lease renewal has structured
 lifetime and stops when the owning operation completes or is cancelled. Lost
 responses recover the backend commit identity and stored terminal outcome;
-they do not replay an unchecked mutation. A valid proposal with no mutations
-commits a typed no-change terminal outcome atomically with its audit evidence,
-without a fabricated memory write or index-outbox entry.
+they do not replay an unchecked mutation or depend on process-local proposal
+state. An in-process proposal pin may attribute apply to the engine invocation
+that produced it, but it is not durable recovery authority. A valid proposal
+with no mutations commits a typed no-change terminal outcome atomically with
+its audit evidence, without a fabricated memory write or index-outbox entry.
 
 Blocking TypeSec vault and storage operations execute behind a narrow blocking
 adapter boundary. Async service and worker tasks await those adapters rather

@@ -42,7 +42,7 @@ authorization or mutation path.
 
 | Area | Status | Remaining delivery work |
 |---|---|---|
-| TypeSec and TypeDID | The cognition authority, bound-proposal, prepared-commit, receipt-recovery, and request-binding foundations are committed. Exact governed-source scope, manifest-only reauthorization, and receipt hardening are under final verification in their owning repository. | Finish and commit the governed boundary, version audit and receipt evidence, make proposal diagnostics non-disclosing, and rerun the owning repository's release gates against the selected revision. |
+| TypeSec and TypeDID | The cognition authority, exact governed-source scope, manifest-only reauthorization, prepared-commit and proposal-free recovery, versioned receipt evidence, and non-disclosing diagnostics are committed and pass the owning repository's release gates. | Select a remotely reachable revision for the standalone dependency and retain these conformance gates in the cross-stack baseline. |
 | LakeCat | Persisted governed-scan grants and proof foundations are committed. Separate snapshot and source-scope digests, projection checks, and structural proof bounds are under final verification in their owning repository. | Finish and commit those owner-side invariants, pin the selected remotely reachable revision, and include its proof tests in the clean-clone gate. |
 | Grust | The durable cognition scheduler/store, leases, guarded commit and recovery, ID-only outbox, and Sail executor are under final verification in the owning repository. | Finish review and gates, commit the cohesive generic capabilities, and rebuild the owning documentation before selecting a revision. |
 | QueryGraph | The TypeDID/LakeCat cognition boundary is being hardened and is under final verification in qg-rust. | Finish the boundary gates, then switch the preserved integration from the Grust-hosted crate to standalone Marciana. |
@@ -108,11 +108,18 @@ plan/apply protocol. Its durable worker executes one state machine:
 
 The proposal is an internal transient value. Marciana never persists it,
 returns it to QueryGraph, places it in an outbox, or exposes it in logs or
-diagnostics. Restart recovery reruns deterministic planning and must match the
-durably expected digest before application. Revocation, projection change,
-snapshot change, scope change, lease loss, digest mismatch, or failed
-reauthorization closes the job without disclosing proposal content or
-partially mutating authoritative memory.
+diagnostics. Before commit, an active leased worker may deterministically
+re-plan, but it must match the expected proposal digest already stored by the
+durable Grust scheduler before application. After commit or a lost response,
+restart recovery does not reconstruct or re-plan the proposal: Marciana's
+trusted scheduler adapter supplies that durable digest to TypeSec's
+proposal-free recovery path, current disclosure authority is revalidated, and
+the identical receipt is reissued from the historical audit preparation time.
+A process-local proposal pin is only in-process engine attribution, never
+durable recovery authority. Revocation, projection change, snapshot change,
+scope change, lease loss, digest mismatch, or failed reauthorization closes
+active work without disclosing proposal content or partially mutating
+authoritative memory.
 
 Catalog source identity is a Marciana-owned composite scope, because Marciana
 alone knows the ingestion semantics. Its versioned digest binds LakeCat's
@@ -144,8 +151,10 @@ The active goal is complete only when all of these conditions hold:
 - all four native verbs share the same capability, policy, validation,
   mutation, and recovery authorities without alternate bypasses;
 - public `improve` is one authenticated durable operation: raw proposals and
-  worker state never cross the QueryGraph boundary, and retry or restart
-  re-planning must match the durably expected proposal digest;
+  worker state never cross the QueryGraph boundary; pre-commit worker retries
+  must match the durably expected proposal digest, while post-commit restart
+  recovery obtains that digest only from the trusted durable scheduler and
+  uses TypeSec's proposal-free recovery path without re-planning;
 - catalog-backed cognition requires valid LakeCat governed-scan evidence, and
   Marciana's trusted adapter—not a caller—derives the exact governed drafts
   from that scan and binds each write once; a proof cannot bless independently
