@@ -65,6 +65,8 @@ All notable changes to Marciana are documented in this file.
   `ids` forget field.
 - Added a closed formation registry with explicit provider capabilities and
   source/output record budgets for Reference and Sail bindings.
+- Enforced the selected formation provider's source and proposal ceilings at
+  the governed cognition application boundary.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

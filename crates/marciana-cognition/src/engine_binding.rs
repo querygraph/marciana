@@ -10,6 +10,8 @@ use querygraph_memory::cognition::{
 };
 use typesec_memory::CognitionProposal;
 
+use crate::FormationProvider;
+
 /// Host-authorized native cognition engine.
 ///
 /// The profile is selected by this closed composition boundary, independently
@@ -73,6 +75,15 @@ impl CognitionEngineBinding {
         match self.family {
             NativeEngineFamily::Reference => CognitionEngineProfile::reference(operation),
             NativeEngineFamily::Sail => CognitionEngineProfile::sail(operation),
+        }
+    }
+
+    /// Return the trusted provider family selected by the host.
+    #[must_use]
+    pub fn provider(&self) -> FormationProvider {
+        match self.family {
+            NativeEngineFamily::Reference => FormationProvider::ReferenceV1,
+            NativeEngineFamily::Sail => FormationProvider::SailV1,
         }
     }
 

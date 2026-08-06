@@ -23,6 +23,10 @@ pub enum CognitionBindingError {
     InvalidAlgorithm,
     #[error("selected cognition engine differs from signed intent")]
     EngineProfileMismatch,
+    #[error("formation provider cannot satisfy the selected profile")]
+    FormationRegistryMismatch,
+    #[error("formation resource budget was exceeded")]
+    FormationBudgetExceeded,
     #[error("verified TypeDID cognition request has expired")]
     RequestExpired,
     #[error("LakeCat proof subject does not match verified TypeDID subject")]

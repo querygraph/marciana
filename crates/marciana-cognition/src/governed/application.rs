@@ -4,7 +4,8 @@ use std::fmt;
 use std::sync::{Arc, OnceLock};
 
 use crate::{
-    CognitionBindingError, CognitionEngineBinding, CognitionMemoryError, FormationProfile,
+    CognitionBindingError, CognitionEngineBinding, CognitionMemoryError, FormationBinding,
+    FormationProfile, FormationRegistry,
 };
 use chrono::TimeDelta;
 use lakecat_core::governed_scan::GovernedScanProof;
@@ -115,6 +116,7 @@ where
     lakecat: A,
     basis: BindingBasis,
     engine: CognitionEngineBinding,
+    formation: FormationBinding,
     space: MemorySpace,
     verifier: Arc<PrimedAuthorityVerifier>,
     receipts: CognitionReceiptSigner,
@@ -237,12 +239,20 @@ where
         {
             return Err(CognitionBindingError::EngineProfileMismatch);
         }
+        let formation = FormationRegistry
+            .resolve(config.formation_profile, engine.provider())
+            .map_err(|_| CognitionBindingError::FormationRegistryMismatch)?;
+        formation
+            .budget
+            .check_source_records(config.source_ids.len())
+            .map_err(|_| CognitionBindingError::FormationBudgetExceeded)?;
         let authority_verifier = Arc::new(PrimedAuthorityVerifier::new(Arc::clone(&clock)));
         Ok(Self {
             vault: vault.with_cognition_authority(authority_verifier.clone()),
             lakecat,
             basis,
             engine,
+            formation,
             space: config.space,
             verifier: authority_verifier,
             receipts: CognitionReceiptSigner::new(receipt_issuer, config.receipt_ttl),
@@ -315,6 +325,10 @@ where
             })
             .await?;
         self.ensure_request_active()?;
+        self.formation
+            .budget
+            .check_output_records(proposal.drafts.len() + proposal.plan.steps.len())
+            .map_err(|_| CognitionBindingError::FormationBudgetExceeded)?;
         let identity =
             validate_planned_proposal(&proposal, &self.basis, &binding, input.manifest())?;
         self.bind_planned_proposal(identity.proposal_digest())?;

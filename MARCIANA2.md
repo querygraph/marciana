@@ -58,6 +58,9 @@ The registry now exposes that closed provider/profile resolution as a typed
 surface, including explicit native capabilities and inclusive source/output
 record ceilings; no model- or payload-defined provider registration is
 possible.
+The governed cognition application now resolves that registry against the
+host-selected engine and checks source and proposal ceilings before any
+protected materialization or authoritative commit.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
