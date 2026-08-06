@@ -6,8 +6,9 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
-- Recorded the partial local Sail rerun and its ignored-`rustdoc` hang so the
-  delivery record does not overstate the live-gate result.
+- Recorded terminal direct Sail executor and cognition parity/secrecy gates,
+  while retaining the wrapper-script ignored-`rustdoc` orchestration stall as
+  a separate unresolved release-harness defect.
 
 - Recorded QueryGraph's completed switch to the native Marciana governed
   application and the remaining cross-stack compatibility and recovery gates.
