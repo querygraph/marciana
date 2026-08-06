@@ -100,6 +100,8 @@ All notable changes to Marciana are documented in this file.
   validation seam for supported upgrade ranges.
 - Added an immutable bounded schema/ontology registry for typed fields and
   edges, with canonical ordering, exact resolution, and stable digests.
+- Added an explicit tenant-scoped vector-index seam with persistable scope
+  digests, embedding-space identity, and fail-closed cross-tenant operations.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

@@ -519,7 +519,7 @@ pub use api::{
 pub use facade::{FacadeError, MemoryFacade};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;
-pub use vector::{Embedder, VectorIndex};
+pub use vector::{Embedder, TenantIndexError, TenantVectorIndex, VectorIndex, VectorIndexScope};
 
 #[cfg(test)]
 mod tests;

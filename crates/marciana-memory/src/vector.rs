@@ -23,7 +23,10 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
 
+use sha2::{Digest, Sha256};
 use typesec_memory::{IndexError, Label, MemoryId, SemanticIndex};
+
+const MAX_SCOPE_COMPONENT: usize = 256;
 
 /// Turns text into a dense vector. Implementations declare whether they run
 /// locally (on-box, no egress) so the index can honor the embedding-privacy
@@ -45,6 +48,167 @@ pub struct VectorIndex<E: Embedder> {
     vectors: RwLock<HashMap<MemoryId, Vec<f32>>>,
     // id -> entity names it mentions, for the optional hybrid graph re-rank.
     entities: RwLock<HashMap<MemoryId, Vec<String>>>,
+}
+
+/// Tenant and embedding-space identity that must accompany a vector index.
+/// The digest is safe to persist as an index manifest; it contains no key or
+/// memory content.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VectorIndexScope {
+    tenant_id: String,
+    embedding_space: String,
+    digest: String,
+}
+
+impl VectorIndexScope {
+    /// Create a bounded scope for one tenant and one embedding space.
+    ///
+    /// # Errors
+    /// Returns a fixed error for malformed tenant or embedding-space IDs.
+    pub fn new(
+        tenant_id: impl Into<String>,
+        embedding_space: impl Into<String>,
+    ) -> Result<Self, TenantIndexError> {
+        let tenant_id = tenant_id.into();
+        let embedding_space = embedding_space.into();
+        if !valid_scope_component(&tenant_id) {
+            return Err(TenantIndexError::InvalidTenant);
+        }
+        if !valid_scope_component(&embedding_space) {
+            return Err(TenantIndexError::InvalidEmbeddingSpace);
+        }
+        let mut hasher = Sha256::new();
+        hasher.update(b"querygraph.marciana.vector-scope.v1\0");
+        hasher.update(tenant_id.as_bytes());
+        hasher.update([0]);
+        hasher.update(embedding_space.as_bytes());
+        Ok(Self {
+            tenant_id,
+            embedding_space,
+            digest: format!("sha256:{:x}", hasher.finalize()),
+        })
+    }
+
+    /// Tenant identity bound to the index.
+    #[must_use]
+    pub fn tenant_id(&self) -> &str {
+        &self.tenant_id
+    }
+
+    /// Embedding-space identity bound to the index.
+    #[must_use]
+    pub fn embedding_space(&self) -> &str {
+        &self.embedding_space
+    }
+
+    /// Stable scope digest for durable manifests and repair work.
+    #[must_use]
+    pub fn digest(&self) -> &str {
+        &self.digest
+    }
+}
+
+/// Explicitly tenant-checked vector-index seam. It intentionally does not
+/// implement `SemanticIndex`, because every operation must carry its tenant.
+pub struct TenantVectorIndex<E: Embedder> {
+    scope: VectorIndexScope,
+    index: VectorIndex<E>,
+}
+
+impl<E: Embedder> TenantVectorIndex<E> {
+    /// Build a tenant-scoped index with an explicit embedding-space identity.
+    pub fn new(
+        embedder: E,
+        tenant_id: impl Into<String>,
+        embedding_space: impl Into<String>,
+    ) -> Result<Self, TenantIndexError> {
+        let scope = VectorIndexScope::new(tenant_id, embedding_space)?;
+        let index = VectorIndex::with_embedding_space(embedder, scope.embedding_space.clone())
+            .map_err(TenantIndexError::Index)?;
+        Ok(Self { scope, index })
+    }
+
+    /// Borrow the persisted scope identity.
+    #[must_use]
+    pub fn scope(&self) -> &VectorIndexScope {
+        &self.scope
+    }
+
+    /// Index one authorized record under the exact tenant scope.
+    pub fn index_for(
+        &self,
+        tenant_id: &str,
+        id: &MemoryId,
+        label: Label,
+        text: &str,
+    ) -> Result<(), TenantIndexError> {
+        self.check_tenant(tenant_id)?;
+        self.index
+            .index(id, label, text)
+            .map_err(TenantIndexError::Index)
+    }
+
+    /// Remove one record under the exact tenant scope.
+    pub fn remove_for(&self, tenant_id: &str, id: &MemoryId) -> Result<(), TenantIndexError> {
+        self.check_tenant(tenant_id)?;
+        self.index.remove(id).map_err(TenantIndexError::Index)
+    }
+
+    /// Search under the exact tenant scope.
+    pub fn search_for(
+        &self,
+        tenant_id: &str,
+        query: &str,
+        limit: usize,
+    ) -> Result<Vec<MemoryId>, TenantIndexError> {
+        self.check_tenant(tenant_id)?;
+        self.index
+            .search(query, limit)
+            .map_err(TenantIndexError::Index)
+    }
+
+    /// Hybrid search under the exact tenant scope.
+    pub fn search_hybrid_for(
+        &self,
+        tenant_id: &str,
+        query: &str,
+        limit: usize,
+        co_entities: &[String],
+    ) -> Result<Vec<MemoryId>, TenantIndexError> {
+        self.check_tenant(tenant_id)?;
+        self.index
+            .search_hybrid(query, limit, co_entities)
+            .map_err(TenantIndexError::Index)
+    }
+
+    fn check_tenant(&self, tenant_id: &str) -> Result<(), TenantIndexError> {
+        if tenant_id == self.scope.tenant_id {
+            Ok(())
+        } else {
+            Err(TenantIndexError::TenantMismatch)
+        }
+    }
+}
+
+/// Fixed tenant-index boundary failures.
+#[derive(Debug, thiserror::Error)]
+pub enum TenantIndexError {
+    #[error("tenant index tenant identity is invalid")]
+    InvalidTenant,
+    #[error("tenant index embedding-space identity is invalid")]
+    InvalidEmbeddingSpace,
+    #[error("tenant index scope does not match")]
+    TenantMismatch,
+    #[error(transparent)]
+    Index(#[from] IndexError),
+}
+
+fn valid_scope_component(value: &str) -> bool {
+    !value.is_empty()
+        && value.len() <= MAX_SCOPE_COMPONENT
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || b"_:/.-".contains(&byte))
 }
 
 impl<E: Embedder> VectorIndex<E> {

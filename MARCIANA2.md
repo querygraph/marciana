@@ -111,6 +111,10 @@ without weakening the existing exact-schema validator.
 The cognition layer now also has an operator-owned immutable ontology registry
 for typed fields and edges; declarations are bounded, canonicalized, resolved
 by exact identity, and digest-bound before any formation integration.
+The vector layer now also exposes a tenant-checked index seam: every index,
+search, hybrid-rank, and removal operation carries the exact tenant, while a
+content-free scope digest binds that tenant to the embedding-space identity
+for durable manifests and repair work.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
