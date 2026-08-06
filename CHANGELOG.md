@@ -94,6 +94,8 @@ All notable changes to Marciana are documented in this file.
   with conservative latency and denial-rate checks.
 - Added a digest-only tenant/encryption-key boundary contract with exact scope
   matching and monotonic key-revision rotation; key material remains host-owned.
+- Added a fixed-order digest-only lineage graph projection over audit exports,
+  including bounded stage edges and affected-ID summaries.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

@@ -25,7 +25,7 @@ pub struct AuditExportRecord {
     pub governed_scan_digest: String,
     pub snapshot_digest: String,
     pub authorization_receipt_digest: String,
-    pub policy_decision_id: String,
+    pub policy_decision_digest: String,
     pub evidence_digest: String,
     pub affected_id_count: u32,
     pub affected_ids_digest: String,
@@ -64,7 +64,7 @@ impl AuditExportRecord {
             governed_scan_digest: audit.governed_scan_digest.clone(),
             snapshot_digest: audit.snapshot_digest.clone(),
             authorization_receipt_digest: audit.authorization_receipt_digest.clone(),
-            policy_decision_id: audit.policy_decision_id.clone(),
+            policy_decision_digest: digest("policy-decision", &audit.policy_decision_id),
             evidence_digest: audit.evidence_digest.clone(),
             affected_id_count: u32::try_from(audit.affected_ids.len())
                 .map_err(|_| AuditExportError::Bounds)?,

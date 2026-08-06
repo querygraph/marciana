@@ -102,6 +102,9 @@ Encryption-boundary groundwork now binds tenant identity, non-secret key
 identity, and monotonic key revision into a stable digest; exact matching is
 required before host-managed persistence, while key material remains outside
 Marciana.
+Audit exports now also support a fixed-order, digest-only lineage inspection
+graph covering proposal, binding, source, TypeDID, governed scan, snapshot,
+authorization, policy, and evidence stages without exposing protected values.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
