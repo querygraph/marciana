@@ -1,4 +1,4 @@
-use super::{ApiError, ForgetRequest, RecallRequest, RememberRequest};
+use super::{ApiError, ForgetRequest, ImproveRequest, RecallRequest, RememberRequest};
 
 fn remember() -> RememberRequest {
     RememberRequest {
@@ -37,6 +37,24 @@ fn public_requests_validate_without_performing_authorization() {
             purpose: "research".into()
         }
         .validate()
+        .is_ok()
+    );
+    assert!(
+        ForgetRequest {
+            space_id: "tenant/coffee".into(),
+            memory_ids: vec!["m1".into()],
+            purpose: "research".into()
+        }
+        .to_selector()
+        .is_ok()
+    );
+    assert!(
+        ImproveRequest {
+            space_id: "tenant/coffee".into(),
+            memory_id: "m0".into(),
+            replacement: remember()
+        }
+        .replacement_draft()
         .is_ok()
     );
 }

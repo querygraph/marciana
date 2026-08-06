@@ -43,6 +43,8 @@ All notable changes to Marciana are documented in this file.
   authorization and mutation remain behind the existing TypeSec boundary.
 - Added safe lowering from remember/recall requests into existing TypeSec draft
   and query types, still before capability authorization.
+- Completed safe lowering for improve replacement drafts and scoped forget ID
+  selectors without acquiring capabilities or mutating storage.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local

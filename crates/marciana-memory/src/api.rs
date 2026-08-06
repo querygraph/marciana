@@ -1,6 +1,8 @@
 //! Stable validation-only request contracts for Marciana's four verbs.
 
-use typesec_memory::{MemoryContent, MemoryDraft, MemoryKind, Provenance, RecallQuery};
+use typesec_memory::{
+    ForgetSelector, MemoryContent, MemoryDraft, MemoryKind, Provenance, RecallQuery,
+};
 
 const MAX_ID: usize = 256;
 const MAX_TEXT: usize = 16 * 1024;
@@ -111,6 +113,12 @@ impl ImproveRequest {
         identity(&self.memory_id)?;
         self.replacement.validate()
     }
+
+    /// Lower the replacement into the existing TypeSec draft contract.
+    pub fn replacement_draft(&self) -> Result<MemoryDraft, ApiError> {
+        self.validate()?;
+        self.replacement.to_draft()
+    }
 }
 impl ForgetRequest {
     pub fn validate(&self) -> Result<(), ApiError> {
@@ -120,6 +128,18 @@ impl ForgetRequest {
             return Err(ApiError::InvalidIds);
         }
         self.memory_ids.iter().try_for_each(|id| identity(id))
+    }
+
+    /// Lower into the existing TypeSec scoped selector without authorizing it.
+    pub fn to_selector(&self) -> Result<ForgetSelector, ApiError> {
+        self.validate()?;
+        Ok(ForgetSelector::Ids(
+            self.memory_ids
+                .iter()
+                .cloned()
+                .map(typesec_memory::MemoryId::from_string)
+                .collect(),
+        ))
     }
 }
 
