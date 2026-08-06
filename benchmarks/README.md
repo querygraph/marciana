@@ -48,6 +48,11 @@ Before the coffee demo, the next benchmark work is to add pinned adapters for
 LoCoMo, LongMemEval, and BEAM; record model/provider/revision metadata; and
 reject results that omit safety, token, or latency metrics.
 
+`corpus.py` now defines the adapter boundary: external adapters must emit
+strict normalized JSONL cases and an exact HTTPS source revision. Loading is
+local-only and rejects malformed, duplicate, empty, or oversized corpora;
+dataset-specific adapters remain responsible for obtaining authorized data.
+
 The current smoke run (1,000 repeats, 504 records) reaches 100% case accuracy
 with zero redaction leaks. The indexed path measured about 5.3 µs p50 versus
 421 µs for the linear path in the local run; these are harness diagnostics,

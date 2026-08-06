@@ -14,6 +14,8 @@ All notable changes to Marciana are documented in this file.
   contracts and borrowed evidence input.
 - Extended the memory benchmark report with p99 latency, speedup, and
   reproducibility metadata required by the evaluation plan.
+- Added a strict, local-only pinned corpus contract for future LoCoMo,
+  LongMemEval, and BEAM adapters.
 
 ### 2026-08-06
 
