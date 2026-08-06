@@ -9,6 +9,7 @@ All notable changes to Marciana are documented in this file.
 - Restored the executable Sail baseline gate: CI now starts the exact pinned
   upstream Sail binary (or uses an explicit `SAIL_ENDPOINT`) before running
   Marciana's ignored live cognition tests.
+- Kept the durable progress validator clean under strict all-feature Clippy.
 
 ### 2026-08-06
 

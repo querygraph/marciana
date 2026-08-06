@@ -51,12 +51,12 @@ impl CognitionProgress {
                 "progress exceeds its fixed bound".into(),
             ));
         }
-        if let Some(total) = self.total_units {
-            if total == 0 || total > MAX_COGNITION_PROGRESS_UNITS || self.completed_units > total {
-                return Err(CognitionStateError::Invalid(
-                    "progress units violate bounds".into(),
-                ));
-            }
+        if let Some(total) = self.total_units
+            && (total == 0 || total > MAX_COGNITION_PROGRESS_UNITS || self.completed_units > total)
+        {
+            return Err(CognitionStateError::Invalid(
+                "progress units violate bounds".into(),
+            ));
         }
         if self
             .detail_digest
