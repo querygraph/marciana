@@ -10,6 +10,10 @@ All notable changes to Marciana are documented in this file.
   Git revisions, allowing its workspace to build and test independently of the
   local QueryGraph checkout layout.
 
+- Recorded passing fresh-clone gates for Marciana and qg-rust, including the
+  exact Git-pinned stack revisions and the remaining requirement to land the
+  reviewed generic Sail correction in canonical upstream before release.
+
 - Recorded the passing focused local Sail integration gate for the Grust
   cognition substrate while retaining the requirement for a remotely reachable
   Sail revision before Marciana claims an executable compatibility baseline.

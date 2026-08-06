@@ -45,8 +45,8 @@ authorization or mutation path.
 | TypeSec and TypeDID | The cognition authority, exact governed-source scope, manifest-only reauthorization, prepared-commit and proposal-free recovery, versioned receipt evidence, and non-disclosing diagnostics are reachable as `1926f18` and pass the owning repository's release gates. | Retain these conformance gates in the cross-stack baseline. |
 | LakeCat | Owner-bound governed-scan proof v2, catalog identity, strict decoding, snapshot/source-scope digests, and opaque revalidation results are reachable as `415d131`; core and book gates pass. | Include the service API gate in the clean-clone matrix. |
 | Grust | Durable cognition scheduler/store, leases, guarded commit/recovery, ID-only outbox, typed no-change outcome, and Sail executor are reachable as `3bbd715`; formatting and compile/test gates pass. On 2026-08-06 the explicit local Sail binary also passed 26 `grust-sail` tests, 2 live backend tests, and 2 live cognition parity/secrecy tests. | Rerun the live gate against the selected reachable Sail source. |
-| QueryGraph | TypeDID/LakeCat cognition boundary, fixed host engine binding, no-change application, opaque proof adaptation, and category-safe errors are committed as `2abc997`; qg-rust resolves the standalone Marciana path in `f25863b`. Its public cognition entry point is now one opaque `improve(read, write)` operation in `9befb6b`; planning and application remain internal test seams. 101 tests plus doctests pass. | Move the compatibility seam into Marciana after the clean-clone extraction baseline, then replace the development path with a reachable Marciana revision. |
-| Sail | Canonical upstream is refreshed to `50567c79`; the generic Delta `MERGE` constraint correction is cleanly rebased above it as local commit `d97f7e59`. The correction is not remotely reachable and the refreshed source has not yet passed Marciana's live gate, so neither fact is overstated as a supported executable baseline. | Land the generic fix in canonical Sail, record its reachable revision, build that exact source, and pass Marciana's live gate. |
+| QueryGraph | TypeDID/LakeCat cognition boundary, fixed host engine binding, no-change application, opaque proof adaptation, and category-safe errors are committed as `2abc997`; qg-rust's exact reachable `c5ecf76` resolves the standalone Marciana stack without sibling paths. Its public cognition entry point is one opaque `improve(read, write)` operation in `9befb6b`; planning and application remain internal test seams. A fresh clone passes 101 tests plus doctest. | Move the compatibility seam into Marciana after the extraction baseline is merged. |
+| Sail | Canonical upstream is refreshed to `50567c79`; the generic Delta `MERGE` constraint correction is reachable in querygraph/sail as `d97f7e59` and passed Marciana's live gate from its explicit binary. It remains under review and is not yet a canonical `lakehq/sail` baseline. | Land the generic fix in canonical Sail, record its reachable revision, build that exact source, and rerun the live gate. |
 | Marciana | `querygraph-memory` has been transplanted with preserved Git history into `crates/marciana-memory`; its Grust and TypeSec dependencies now use exact reachable Git revisions. The durable scheduler returns staged work only as its proposal digest, forbidding post-restart re-planning; the full unit/integration suite and strict Clippy checks pass against those revisions. | Complete the four-verb adapters and pass the cross-stack clean-clone gates. |
 
 No executable Marciana compatibility baseline is claimed yet. The status above
@@ -66,10 +66,13 @@ sibling checkout paths into released dependencies.
    combine the move with a redesign.
 4. Replace sibling path dependencies with released versions or exact Git
    revisions that are reachable from configured remotes. Prove that a clean
-   clone builds without the local QueryGraph workspace layout.
+   clone builds without the local QueryGraph workspace layout. **Complete for
+   the review candidate:** fresh Marciana and qg-rust clones pass their full
+   suites from exact Git revisions.
 5. Switch qg-rust to standalone Marciana and prove route, wire, denial,
    receipt, database reopen, retry, and recovery compatibility before removing
-   the former Grust copy.
+   the former Grust copy. **The review candidate is complete; merge and
+   canonical Sail policy remain.**
 6. Complete and expose the native `remember`, `recall`, `improve`, and
    `forget` lifecycle through one shared domain implementation and thin
    embedded, service, Sail, LakeCat, and QueryGraph adapters.
