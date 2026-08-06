@@ -1954,6 +1954,7 @@ dependencies = [
  "marciana-catalog",
  "querygraph-memory",
  "serde_json",
+ "sha2",
  "thiserror",
  "tokio",
  "typesec-core",

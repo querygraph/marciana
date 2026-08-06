@@ -1,4 +1,5 @@
 /target/
+benchmark-result.json
 .DS_Store
 .env
 .env.*

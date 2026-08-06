@@ -39,6 +39,10 @@ All notable changes to Marciana are documented in this file.
 - Bound procedure evaluation to a specific dataset and procedure digest with
   a fixed passing threshold before approval or activation is possible.
 
+- Added a dependency-free memory benchmark harness covering temporal recall,
+  abstention, redaction safety, token accounting, deterministic ranking, and
+  indexed-vs-linear latency, with standalone Python tests and benchmark notes.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.
