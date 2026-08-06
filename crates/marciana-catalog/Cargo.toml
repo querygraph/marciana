@@ -12,5 +12,8 @@ lakecat-core = { git = "https://github.com/querygraph/lakecat.git", rev = "415d1
 querygraph-memory = { path = "../marciana-memory", version = "0.12.0" }
 thiserror = { workspace = true }
 
+[dev-dependencies]
+serde_json = { workspace = true }
+
 [lints]
 workspace = true
