@@ -4,27 +4,32 @@ This document is the human-readable compatibility registry for Marciana. Exact
 machine-consumed revisions live under `compat/` so documentation and CI do not
 maintain competing pins.
 
-## Scaffold baseline
+## Extraction baseline
 
-The repository currently contains governance and CI scaffolding only. It does
-not yet claim a compatible Marciana API, database schema, or QueryGraph route
-baseline.
+`querygraph-memory` has been transplanted into
+`crates/marciana-memory` with its behavior-preserving history. qg-rust resolves
+that crate from this standalone checkout for local development. This is an
+extraction baseline, not a released compatibility matrix: its current sibling
+path dependencies prevent a clean clone from building.
 
 | Component | Required compatibility datum | Current scaffold status |
 |---|---|---|
-| Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Pending the behavior-preserving transplant |
-| TypeSec | Contract version, conformance fixture version, exact release or revision | Pending owning-repository stabilization |
-| Grust | Core/backend version and guarded-commit capability | Pending owning-repository stabilization |
-| LakeCat | Governed-proof schema and exact release or revision | Required for catalog-backed cognition; pending owning-repository stabilization |
-| Sail | Exact current canonical-upstream revision and Arrow input/output schema | Revision recorded in [`compat/sail-revision.txt`](compat/sail-revision.txt); source build baseline in progress |
-| QueryGraph | Supported route/wire baseline and exact version or revision | Pending qg-rust stabilization |
+| Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Transplanted local development baseline; no public four-verb facade or released schema range yet |
+| TypeSec | Contract version, conformance fixture version, exact release or revision | Required owner changes exist locally, but no remotely reachable pin has been selected |
+| Grust | Core/backend version and guarded-commit capability | Required owner changes exist locally, but no remotely reachable pin has been selected |
+| LakeCat | Governed-proof schema and exact release or revision | Required for catalog-backed cognition; required owner changes exist locally, but no remotely reachable pin has been selected |
+| Sail | Exact current canonical-upstream revision and Arrow input/output schema | Canonical candidate recorded below; local source live gate passed, but the generic correction is not remotely reachable |
+| QueryGraph | Supported route/wire baseline and exact version or revision | qg-rust has a local standalone-path cutover; clean-clone and route baseline remain pending |
 | Clients | Rust/Python/JavaScript fixture versions | Not yet established |
 
 The linked Sail pin records canonical upstream `main` revision `50567c79`,
-refreshed on 2026-08-05. It is a scaffold/source-build candidate, not a claim
-that the not-yet-transplanted Marciana live gate has passed. The generic Delta
-`MERGE` correction currently rebased above it is deliberately not recorded as
-a compatible dependency until that correction is remotely reachable.
+refreshed on 2026-08-05. On 2026-08-06, the explicit binary built from the
+local source checkout (including the generic Delta `MERGE` correction rebased
+above that revision) passed 26 `grust-sail` tests, two live backend tests, and
+two live cognition parity and evidence-secrecy tests. This is local-source
+evidence only. The correction is deliberately not recorded as a compatible
+dependency until it is remotely reachable, and the recorded canonical pin has
+not yet passed the same gate unaided.
 
 ## Baseline procedure
 

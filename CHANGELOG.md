@@ -10,6 +10,10 @@ All notable changes to Marciana are documented in this file.
   cognition substrate while retaining the requirement for a remotely reachable
   Sail revision before Marciana claims an executable compatibility baseline.
 
+- Replaced the obsolete scaffold-only compatibility description with the
+  history-preserving extraction baseline and its explicit clean-clone and
+  remotely-reachable dependency limitations.
+
 ### 2026-08-06
 
 - Transplanted `querygraph-memory` into standalone Marciana with preserved
