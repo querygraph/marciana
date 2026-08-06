@@ -1,6 +1,6 @@
 # Marciana 2: A Governed Memory System Plan
 
-**Status:** Phase 2 in progress; accepted design constraints preserved
+**Status:** Phase 2/3/4/5 implementation in progress; accepted design constraints preserved
 
 **Reviewed:** 2026-08-05
 
@@ -127,15 +127,15 @@ session, space, and recall-policy digest. Binding it changes the deterministic
 recall intent identity only; it does not mint capabilities or create an
 authorization namespace, and materialization remains behind the TypeSec vault.
 
-Phase 3 groundwork has also started with a pure context planner in
+Phase 3 implementation has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
 identities, an as-of time, and a bounded token budget; it returns a stable
 selection and plan digest. It does not materialize content or replace the
 TypeSec vault gate. The first materializer now returns a typed bundle
 containing visible memories, redacted candidates, the selected token estimate,
-and the immutable plan digest. Citations and renderers remain the next context
-unit. The bundle now also exposes stable provenance citations and bounded text
-and XML views; redacted candidates render as metadata-only markers.
+and the immutable plan digest. The bundle now exposes stable provenance
+citations and bounded text and XML views; redacted candidates render as
+metadata-only markers.
 Context intents now also carry a closed retrieval-recipe identity, which is
 included in the deterministic plan digest.
 Rendered text and XML views now carry that plan digest explicitly.
