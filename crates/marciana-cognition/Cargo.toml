@@ -2,6 +2,7 @@
 name = "marciana-cognition"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Marciana cognition composition primitives"
@@ -21,14 +22,14 @@ serde_json = { workspace = true }
 serde = { workspace = true }
 sha2 = "0.10"
 tokio = { workspace = true }
-typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
-typesec-integrations = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
-typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
+typesec-integrations = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
+typesec-memory = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
 thiserror = { workspace = true }
 
 [dev-dependencies]
 async-trait = { workspace = true }
-typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
 
 [lints]
 workspace = true

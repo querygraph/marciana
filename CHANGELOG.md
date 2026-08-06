@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Track TypeSec main for active QueryGraph integration so qg-rust and Marciana
+  share one TypeSec dependency universe during development.
 - Preserve vector manifest membership when re-indexing an existing record
   fails; rollback now removes only newly inserted members.
 - Bind Ossie metric expressions and labeled, count-prefixed sections into

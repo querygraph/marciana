@@ -11,6 +11,9 @@ maintain competing pins.
 Grust dependencies are exact public Git revisions, so Marciana itself no
 longer requires sibling checkouts. This is the first verified executable
 baseline, not yet a versioned crate release.
+During active QueryGraph integration, Marciana's TypeSec dependencies follow
+the TypeSec `main` branch; release candidates must restore reviewed exact
+reachable revisions in the release matrix.
 
 | Component | Required compatibility datum | Current scaffold status |
 |---|---|---|
