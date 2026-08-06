@@ -6,6 +6,8 @@ All notable changes to Marciana are documented in this file.
 
 - Track TypeSec main for active QueryGraph integration so qg-rust and Marciana
   share one TypeSec dependency universe during development.
+- Stamp the adversarial-benchmark blog textpack with its versioned link and
+  version marker through the FirstPair delivery workflow.
 - Opt marciana-memory into the workspace pedantic lint set and resolve every
   surfaced finding, pin MSRV and workspace dependency specs across all
   crates, split the memory crate root into bridge, graph-codec, and
