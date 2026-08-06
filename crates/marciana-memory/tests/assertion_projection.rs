@@ -1,8 +1,12 @@
 use chrono::{TimeZone, Utc};
 use grust_core::prelude::{Edge, GraphMutation, NodeId, Value};
+use grust_memory::MemoryGraphStore;
 use marciana_ledger::{Assertion, AssertionId, AssertionLineage, Confidence, TemporalInterval};
-use querygraph_memory::assertion_projection::{project_assertion, project_legacy_relation};
-use typesec_memory::StoredRecord;
+use querygraph_memory::{
+    GraphStoreMemoryStore,
+    assertion_projection::{project_assertion, project_legacy_relation},
+};
+use typesec_memory::{MemoryStore, StoredRecord};
 
 fn assertion() -> Assertion {
     let at = Utc.with_ymd_and_hms(2026, 8, 6, 12, 0, 0).unwrap();
@@ -106,4 +110,17 @@ fn legacy_relation_migration_is_retry_stable_and_preserves_half_open_validity() 
     };
     assert_eq!(payload["state"], "current");
     assert_eq!(payload["validity"]["validTo"], "2026-08-06T12:00:03Z");
+}
+
+#[test]
+fn storage_migration_is_idempotent() {
+    let store = GraphStoreMemoryStore::new(MemoryGraphStore::default());
+    let source = record();
+    store.put(source.clone()).unwrap();
+    store
+        .link("account:acme", "locatedIn", "place:venice", &source.id)
+        .unwrap();
+
+    assert_eq!(store.migrate_legacy_assertions().unwrap().migrated, 1);
+    assert_eq!(store.migrate_legacy_assertions().unwrap().migrated, 0);
 }

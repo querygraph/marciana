@@ -20,8 +20,11 @@ retry-stable legacy relation conversion now maps baseline structural edges to
 explicit assertions, preserving historical validity with TypeSec-compatible
 half-open intervals. `querygraph-memory` now binds that conversion to the
 actual legacy edge and trusted source-record shape, returning only inert
-mutations for the pre-existing guarded commit. The next Phase 1 unit is the
-versioned durable migration runner; it must consume these types rather than
+mutations for the pre-existing guarded commit. The versioned storage migration
+runner now applies only those projections in one idempotent backend batch under
+explicit deployment migration authority and returns no source values. The
+remaining Phase 1 work is mixed-version read coverage and a TypeSec-guarded
+production migration invocation; both must consume these types rather than
 reproduce their validation or state rules.
 
 ## Executive judgment

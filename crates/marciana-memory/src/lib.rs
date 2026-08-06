@@ -51,6 +51,13 @@ const ENTITY_LABEL: &str = "MemoryEntity";
 const MENTIONS: &str = "MENTIONS";
 pub(crate) const RELATES: &str = "RELATES";
 
+/// Non-disclosing result of an assertion projection migration.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AssertionMigrationReport {
+    /// Number of previously unprojected legacy relations added in this run.
+    pub migrated: usize,
+}
+
 /// `typesec-memory`'s `MemoryStore` over any Grust [`GraphMutationStore`].
 pub struct GraphStoreMemoryStore<G: GraphMutationStore> {
     graph: G,
@@ -69,6 +76,54 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
     /// Borrow the underlying Grust store.
     pub fn graph(&self) -> &G {
         &self.graph
+    }
+
+    /// Adds assertion projections for legacy `RELATES` edges in one backend
+    /// mutation batch. This is trusted storage maintenance, not a public
+    /// memory mutation API; callers run it under deployment migration
+    /// authority rather than a request capability.
+    ///
+    /// # Errors
+    ///
+    /// Returns a fixed backend error when the legacy graph cannot be read,
+    /// validated, or atomically projected. It never includes record or edge
+    /// values in the diagnostic.
+    pub fn migrate_legacy_assertions(&self) -> Result<AssertionMigrationReport, StoreError> {
+        let edges = self
+            .run(self.graph.get_edges(EdgeQuery {
+                from: None,
+                to: None,
+                label: Some(RELATES.into()),
+            }))
+            .map_err(|_| legacy_migration_error())?;
+        let mut mutations = Vec::new();
+        let mut migrated = 0;
+        for edge in edges {
+            let record_id = legacy_record_id(&edge).ok_or_else(legacy_migration_error)?;
+            let record = self
+                .fetch(&record_id)
+                .map_err(|_| legacy_migration_error())?
+                .ok_or_else(legacy_migration_error)?;
+            let projection = assertion_projection::project_legacy_relation(&edge, &record)
+                .map_err(|_| legacy_migration_error())?;
+            let assertion_node = match projection.first() {
+                Some(GraphMutation::UpsertNode(node)) => &node.id,
+                _ => return Err(legacy_migration_error()),
+            };
+            if self
+                .run(self.graph.get_node(assertion_node))
+                .map_err(|_| legacy_migration_error())?
+                .is_none()
+            {
+                mutations.extend(projection);
+                migrated += 1;
+            }
+        }
+        if !mutations.is_empty() {
+            self.run(self.graph.apply_mutations(&mutations))
+                .map_err(|_| legacy_migration_error())?;
+        }
+        Ok(AssertionMigrationReport { migrated })
     }
 
     fn run<T: Send>(
@@ -342,6 +397,17 @@ fn record_id_from_node(node: &NodeId) -> Option<MemoryId> {
 
 fn entity_node_id(name: &str) -> NodeId {
     NodeId::from(format!("ent:{name}").as_str())
+}
+
+fn legacy_record_id(edge: &Edge) -> Option<MemoryId> {
+    match edge.props.get("fact_id") {
+        Some(Value::String(id)) => Some(MemoryId::from_string(id.clone())),
+        _ => None,
+    }
+}
+
+fn legacy_migration_error() -> StoreError {
+    StoreError::Backend("legacy assertion migration failed".into())
 }
 
 fn encode_record(record: &StoredRecord) -> Result<Node, StoreError> {
