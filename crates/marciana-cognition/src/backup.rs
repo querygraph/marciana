@@ -2,6 +2,8 @@
 
 use chrono::{DateTime, Utc};
 
+use crate::SchemaWindow;
+
 const MAX_COMPONENTS: usize = 32;
 
 /// Immutable metadata describing one exported deployment snapshot.
@@ -64,6 +66,18 @@ impl BackupManifest {
             return Err(RestoreError::IncompatibleSchema);
         }
         if supported_schema != self.database_schema {
+            return Err(RestoreError::IncompatibleSchema);
+        }
+        Ok(())
+    }
+
+    /// Verify restore against an inclusive, deployment-owned schema window.
+    ///
+    /// # Errors
+    /// Returns [`RestoreError::IncompatibleSchema`] when this manifest or its
+    /// database schema falls outside the supported window.
+    pub fn validate_restore_window(&self, window: &SchemaWindow) -> Result<(), RestoreError> {
+        if self.schema_version != "marciana-backup-v1" || !window.accepts(&self.database_schema) {
             return Err(RestoreError::IncompatibleSchema);
         }
         Ok(())

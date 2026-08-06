@@ -105,6 +105,9 @@ Marciana.
 Audit exports now also support a fixed-order, digest-only lineage inspection
 graph covering proposal, binding, source, TypeDID, governed scan, snapshot,
 authorization, policy, and evidence stages without exposing protected values.
+Backup compatibility now also supports a bounded inclusive schema-family
+window, so deployment restore checks can accept a declared upgrade range
+without weakening the existing exact-schema validator.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
