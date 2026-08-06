@@ -31,6 +31,8 @@ All notable changes to Marciana are documented in this file.
 - Added independent wheel build metadata for the Python client.
 - Added a thin MCP tool registry/dispatcher over the typed Python client,
   preserving host-owned transport and authorization.
+- Verified compilation of the Sail-feature live cognition target against the
+  recorded Grust bindings; live endpoint execution remains explicitly pending.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local

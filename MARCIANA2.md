@@ -91,6 +91,9 @@ transport. A matching independently buildable TypeScript client now lives under
 `clients/typescript`.
 The Python client also exposes a thin `mcp` tool registry/dispatcher; MCP host
 transport, credentials, and policy remain outside Marciana's adapter.
+The Sail-feature live cognition target also compiles against the pinned Grust
+bindings; execution remains an explicitly separate endpoint-gated acceptance
+step.
 
 ## Executive judgment
 

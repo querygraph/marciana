@@ -49,6 +49,9 @@ active 71-test suite plus doctests and strict Clippy were built from fresh
 clones using only the exact Git revisions named above. The recorded Sail live
 gate was run from the selected QueryGraph Sail source. The refreshed upstream
 revision is recorded above and its live gate is pending rerun.
+Marciana's Sail-feature integration target compiles successfully against the
+recorded Grust/Sail bindings; the two ignored cognition tests still require a
+running Spark Connect endpoint and are not represented as live verification.
 
 Generic Sail changes are contributed upstream. Marciana consumes exact
 remotely reachable QueryGraph Sail revisions and never establishes a private
