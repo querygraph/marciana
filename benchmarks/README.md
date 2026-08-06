@@ -86,18 +86,24 @@ public corpora (LoCoMo, LongMemEval, BEAM, DMR, Letta-Evals) are inventoried
 against pinned revisions and normalized offline only from explicitly
 configured `MARCIANA_ADVERSARIAL_<CORPUS>_PATH` fixtures. The JSON report
 carries bounded IDs, digests, counts, and timings — never memory plaintext —
-and is written to the untracked `reports/` directory. See
+and is written to the untracked `reports/` directory. External adapters are
+vendor-authorable: an adapter reports its own version, recorded verbatim,
+and may declare individual cases unsupported — counted separately, never
+scored as passes or failures. See
 [`adversarial-cognition-benchmark.md`](../adversarial-cognition-benchmark.md)
-for the full design and
+for the goal and acceptance criteria,
+[`docs/benchmark/MARCIANA-ADVERSARIAL-v1.md`](../docs/benchmark/MARCIANA-ADVERSARIAL-v1.md)
+for the full benchmark document (threat model, gate mapping, fairness
+policy; also rendered as a PDF alongside it), and
 [`docs/BENCHMARK-RESULTS.md`](../docs/BENCHMARK-RESULTS.md) for the recorded
 run.
 
 ## Smoke results
 
-The current smoke run (1,000 repeats, 504 records) reaches 100% case accuracy
-with zero redaction leaks. The indexed path measured about 5.3 µs p50 versus
-421 µs for the linear path in the local run; these are harness diagnostics,
-not a hosted-system claim. The JSON report emits p50/p95/p99 speedups,
+The recorded 2026-08-06 smoke run (1,000 repeats, 504 records) reaches 100%
+case accuracy with zero redaction leaks. The indexed path measured 7.03 µs p50
+versus 572.52 µs for the linear path (81.44× at p50, 60.21× at p95); these are
+harness diagnostics, not a hosted-system claim. The JSON report emits p50/p95/p99 speedups,
 required model/provider/embedding/prompt/profile/hardware/revision metadata,
 and a machine-checkable `indexed_faster` gate. Override metadata with the
 corresponding CLI options; empty or overlong values are rejected.

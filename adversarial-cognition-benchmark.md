@@ -138,7 +138,13 @@ External systems execute only when explicitly configured through
 `MARCIANA_ADVERSARIAL_<SYSTEM>_CMD` (`MEM0`, `ZEP`, `LETTA`, `COGNEE`,
 `GRAPHITI`, `AKKA_FLUREE`). The configured command receives the case corpus
 as JSON on stdin and must print one outcome per case; endpoint and credential
-configuration belong to the adapter command's own environment. Public-corpus
+configuration belong to the adapter command's own environment. An adapter
+may report its own `adapter_version`, recorded verbatim, and may declare a
+case `"supported": false` when its system does not claim that capability;
+unsupported cases are counted separately and excluded from accuracy, never
+scored as passes, failures, or gate violations. The full fairness policy —
+anticipated comparative-system objections and how the design answers them —
+is in `docs/benchmark/MARCIANA-ADVERSARIAL-v1.md`. Public-corpus
 fixtures are configured through `MARCIANA_ADVERSARIAL_<CORPUS>_PATH`
 (`LOCOMO`, `LONGMEMEVAL`, `BEAM`, `DMR`, `LETTA_EVALS`) and are normalized
 offline against their pinned source revisions.

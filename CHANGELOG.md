@@ -31,6 +31,13 @@ All notable changes to Marciana are documented in this file.
   references by name, consistent Ossie naming and book-title citations,
   canonical smoke-benchmark numbers, demo prerequisite ordering, and merged
   duplicate unreleased changelog date headings.
+- Publish the comprehensive MARCIANA-ADVERSARIAL-v1 benchmark document —
+  threat model, corpus, gate mapping, report schema, recorded results, and a
+  fairness policy answering anticipated comparative-system objections — as
+  tracked Markdown and PDF, with a companion blog post linking the code.
+- Let external adversarial adapters report their own recorded version and
+  declare individual cases unsupported; unsupported cases are counted
+  separately and never scored as passes, failures, or gate violations.
 - Deliver the MARCIANA-ADVERSARIAL-v1 benchmark: an eighteen-case adversarial
   corpus with a versioned manifest, a deterministic policy-aware reference
   backend with durable replay protection and idempotent receipts, hard-gate

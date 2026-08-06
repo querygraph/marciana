@@ -80,12 +80,16 @@ def receipt_mismatches(
 
 
 def quality(outcomes: tuple[CaseOutcome, ...]) -> dict[str, object]:
+    # Accuracy is computed over supported cases only; a declared-unsupported
+    # case is reported separately and never counted as a pass or a failure.
+    supported = tuple(o for o in outcomes if o.supported)
     by_category: dict[str, list[CaseOutcome]] = {}
-    for outcome in outcomes:
+    for outcome in supported:
         by_category.setdefault(outcome.category, []).append(outcome)
     abstentions = by_category.get("abstention", [])
     return {
-        "accuracy": sum(o.correct for o in outcomes) / len(outcomes),
+        "accuracy": (sum(o.correct for o in supported) / len(supported)) if supported else 0.0,
+        "unsupported_cases": len(outcomes) - len(supported),
         "category_accuracy": {
             category: sum(o.correct for o in rows) / len(rows)
             for category, rows in sorted(by_category.items())

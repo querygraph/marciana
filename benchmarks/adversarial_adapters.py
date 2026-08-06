@@ -39,6 +39,7 @@ class CaseOutcome:
     returned_ids: tuple[str, ...]
     receipt: str
     latency_us: float
+    supported: bool = True
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -49,6 +50,7 @@ class CaseOutcome:
             "returned_ids": list(self.returned_ids),
             "receipt": self.receipt,
             "latency_us": round(self.latency_us, 3),
+            "supported": self.supported,
         }
 
 
@@ -73,6 +75,9 @@ class SystemReport:
             report["error"] = self.error
         if self.status == "executed":
             report["cases"] = [outcome.as_dict() for outcome in self.outcomes]
+            report["unsupported_cases"] = sum(
+                not outcome.supported for outcome in self.outcomes
+            )
         return report
 
 
@@ -123,12 +128,21 @@ def _external_request(suite: tuple[Case, ...], repeats: int) -> str:
 
 def _parse_external_outcomes(
     payload: str, suite: tuple[Case, ...]
-) -> tuple[CaseOutcome, ...]:
-    rows = json.loads(payload)["cases"]
+) -> tuple[str, tuple[CaseOutcome, ...]]:
+    """Parse an external adapter's payload into a version and case outcomes.
+
+    An adapter may honestly declare a case ``"supported": false`` instead of
+    faking a result for a feature its system does not claim; unsupported
+    cases are reported separately, never counted as passes.
+    """
+
+    parsed = json.loads(payload)
+    version = str(parsed.get("adapter_version", ADAPTER_PROTOCOL))[:64]
+    rows = parsed["cases"]
     by_id = {row["case_id"]: row for row in rows}
     if set(by_id) != {case.case_id for case in suite}:
         raise ValueError("external adapter did not report every case exactly once")
-    return tuple(
+    return version, tuple(
         CaseOutcome(
             case.case_id,
             case.category,
@@ -137,6 +151,7 @@ def _parse_external_outcomes(
             tuple(str(item) for item in by_id[case.case_id].get("returned_ids", ())),
             str(by_id[case.case_id].get("receipt", "")),
             float(by_id[case.case_id].get("latency_us", 0.0)),
+            bool(by_id[case.case_id].get("supported", True)),
         )
         for case in suite
     )
@@ -170,12 +185,12 @@ def execute_external(
             timeout=EXTERNAL_TIMEOUT_SECONDS,
             check=True,
         )
-        outcomes = _parse_external_outcomes(completed.stdout, suite)
+        version, outcomes = _parse_external_outcomes(completed.stdout, suite)
     except Exception as error:  # noqa: BLE001 - adapter failures become reportable errors
         return SystemReport(
             system, ADAPTER_PROTOCOL, "error", error=str(error)[:MAX_ERROR_CHARS]
         )
-    return SystemReport(system, ADAPTER_PROTOCOL, "executed", outcomes=outcomes)
+    return SystemReport(system, version, "executed", outcomes=outcomes)
 
 
 def execute_systems(

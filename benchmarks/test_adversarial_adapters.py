@@ -20,6 +20,7 @@ STUB_ADAPTER = """
 import json, sys
 request = json.load(sys.stdin)
 print(json.dumps({
+    "adapter_version": "stub-adapter-1",
     "cases": [
         {
             "case_id": case["case_id"],
@@ -28,8 +29,9 @@ print(json.dumps({
             "returned_ids": case["expected_ids"],
             "receipt": "sha256:" + "0" * 64,
             "latency_us": 1.0,
+            "supported": index > 0,
         }
-        for case in request["cases"]
+        for index, case in enumerate(request["cases"])
     ]
 }))
 """
@@ -62,7 +64,10 @@ class ExternalAdapterTests(unittest.TestCase):
         finally:
             Path(stub).unlink()
         self.assertEqual(report.status, "executed")
+        self.assertEqual(report.adapter_version, "stub-adapter-1")
         self.assertTrue(all(outcome.correct for outcome in report.outcomes))
+        self.assertEqual(sum(not o.supported for o in report.outcomes), 1)
+        self.assertEqual(report.as_dict()["unsupported_cases"], 1)
 
     def test_malformed_adapter_output_reports_error(self) -> None:
         environ = {"MARCIANA_ADVERSARIAL_ZEP_CMD": f'{sys.executable} -c "print(42)"'}

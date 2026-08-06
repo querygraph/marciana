@@ -20,6 +20,7 @@ from adversarial_report import (
     corpus_manifest,
     hard_gates,
     overall_status,
+    quality,
     receipt_mismatches,
 )
 
@@ -85,6 +86,14 @@ class ReportTests(unittest.TestCase):
         for key in ("benchmark", "metadata", "hard_gates", "systems", "cases", "quality", "performance", "public_corpora"):
             self.assertIn(key, report)
         self.assertEqual(report["quality"]["accuracy"], 1.0)
+        self.assertEqual(report["quality"]["unsupported_cases"], 0)
+
+    def test_unsupported_cases_never_count_toward_accuracy(self) -> None:
+        outcomes = reference_outcomes()
+        declared = (replace(outcomes[0], correct=False, supported=False),) + outcomes[1:]
+        measured = quality(declared)
+        self.assertEqual(measured["accuracy"], 1.0)
+        self.assertEqual(measured["unsupported_cases"], 1)
 
     def test_report_contains_no_memory_plaintext(self) -> None:
         rendered = json.dumps(reference_report())
