@@ -67,15 +67,45 @@ fn facade_executes_all_verbs_through_the_vault() {
     assert!(redacted.is_empty());
     assert_eq!(hits.len(), 1);
     assert_eq!(hits[0].id, id);
+    let replacement = facade
+        .improve(
+            &write,
+            querygraph_memory::ImproveRequest {
+                space_id: "memory/user:alice/semantic".into(),
+                memory_id: id.as_str().into(),
+                replacement: RememberRequest {
+                    space_id: "memory/user:alice/semantic".into(),
+                    text: "Honduras coffee price is 4.80 USD/kg".into(),
+                    purpose: "research".into(),
+                },
+            },
+        )
+        .unwrap();
+    let (updated, _) = facade
+        .recall(
+            &read,
+            RecallRequest {
+                space_id: "memory/user:alice/semantic".into(),
+                query: "coffee price".into(),
+                purpose: "research".into(),
+            },
+        )
+        .unwrap();
+    assert_eq!(updated.len(), 1);
+    assert_eq!(updated[0].id, replacement);
+    assert_eq!(
+        updated[0].content.text,
+        "Honduras coffee price is 4.80 USD/kg"
+    );
     let tombstone = facade
         .forget(
             &delete,
             ForgetRequest {
                 space_id: "memory/user:alice/semantic".into(),
-                memory_ids: vec![id.as_str().into()],
+                memory_ids: vec![replacement.as_str().into()],
                 purpose: "research".into(),
             },
         )
         .unwrap();
-    assert_eq!(tombstone.forgotten, vec![id]);
+    assert_eq!(tombstone.forgotten, vec![replacement]);
 }

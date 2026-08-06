@@ -2,7 +2,10 @@
 
 use typesec_core::policy::RequestContext;
 use typesec_core::{CanDelete, CanRead, CanWrite, Capability, Resource};
-use typesec_memory::{Label, MemoryError, MemoryId, MemorySpace, MemoryStore, MemoryVault};
+use typesec_memory::{
+    ConsolidationPlan, ConsolidationStep, Label, MemoryError, MemoryId, MemorySpace, MemoryStore,
+    MemoryVault,
+};
 
 use crate::api::{ApiError, ForgetRequest, ImproveRequest, RecallRequest, RememberRequest};
 
@@ -79,9 +82,26 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
     ) -> Result<MemoryId, FacadeError> {
         self.check_space(&request.space_id)?;
         let draft = request.replacement_draft()?;
-        self.vault
-            .remember(self.space, cap, draft)
-            .map_err(FacadeError::Vault)
+        let report = self
+            .vault
+            .consolidate(
+                self.space,
+                cap,
+                ConsolidationPlan {
+                    steps: vec![ConsolidationStep::Supersede {
+                        superseded: vec![MemoryId::from_string(request.memory_id)],
+                        replacement: draft,
+                    }],
+                },
+            )
+            .map_err(FacadeError::Vault)?;
+        report
+            .created
+            .into_iter()
+            .next()
+            .ok_or(FacadeError::Vault(MemoryError::NotFound(
+                "improvement produced no replacement".into(),
+            )))
     }
 
     /// Execute scoped forgetting through the vault tombstone path.
