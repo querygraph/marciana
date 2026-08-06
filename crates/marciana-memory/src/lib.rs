@@ -514,6 +514,7 @@ mod facade;
 #[cfg(feature = "turso")]
 pub mod turso;
 pub mod vector;
+pub mod vector_manifest;
 pub use api::{
     ApiError, ForgetRequest, ImproveRequest, MemoryVerb, RecallRequest, RememberRequest,
 };
@@ -521,6 +522,9 @@ pub use facade::{FacadeError, MemoryFacade};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;
 pub use vector::{Embedder, TenantIndexError, TenantVectorIndex, VectorIndex, VectorIndexScope};
+pub use vector_manifest::{
+    VectorIndexManifest, VectorManifestError, VectorRepairBatch, VectorRepairOperation,
+};
 
 #[cfg(test)]
 mod tests;

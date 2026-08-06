@@ -122,6 +122,10 @@ The vector layer now also exposes a tenant-checked index seam: every index,
 search, hybrid-rank, and removal operation carries the exact tenant, while a
 content-free scope digest binds that tenant to the embedding-space identity
 for durable manifests and repair work.
+The vector layer now also provides a content-free index manifest and bounded
+scope-bound repair batch; repairs are applied atomically to the manifest and
+carry only memory IDs, leaving embedding persistence and transaction storage
+host-owned.
 Session metadata now provides a bounded, content-free product identity for a
 session, space, and recall-policy digest. Binding it changes the deterministic
 recall intent identity only; it does not mint capabilities or create an
