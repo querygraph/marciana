@@ -1,0 +1,10 @@
+{
+  "name": "@querygraph/marciana-client",
+  "version": "0.1.0",
+  "description": "Typed transport-neutral TypeScript client for Marciana memory verbs",
+  "type": "module",
+  "exports": { ".": "./dist/index.js" },
+  "files": ["dist"],
+  "scripts": { "build": "tsc -p tsconfig.json" },
+  "devDependencies": { "typescript": "^5.7.0" }
+}

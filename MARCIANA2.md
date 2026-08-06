@@ -87,7 +87,8 @@ through typed agent tools while preserving historical price observations.
 The first thin Python client boundary now lives under
 `clients/python/marciana_client`; it validates four-verb request/receipt wire
 shapes while leaving signing, authorization, and storage to the injected
-transport.
+transport. A matching independently buildable TypeScript client now lives under
+`clients/typescript`.
 
 ## Executive judgment
 

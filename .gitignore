@@ -1,6 +1,8 @@
 /target/
 benchmark-result.json
 __pycache__/
+clients/typescript/dist/
+clients/typescript/node_modules/
 .DS_Store
 .env
 .env.*
