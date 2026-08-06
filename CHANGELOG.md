@@ -4,6 +4,12 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+### 2026-08-06
+
+- Transplanted `querygraph-memory` into standalone Marciana with preserved
+  commit history, modular cognition modules, separate tests, and a compiling
+  workspace over the current Grust and TypeSec checkouts.
+
 ### 2026-08-05
 
 - Refreshed the canonical Sail source candidate to `50567c79` and recorded the

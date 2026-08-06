@@ -2,7 +2,7 @@
 
 **Status:** active implementation goal
 
-**Updated:** 2026-08-05
+**Updated:** 2026-08-06
 
 This document is the canonical execution record for extracting and completing
 Marciana as a standalone QueryGraph-stack project. It records current delivery
@@ -43,11 +43,11 @@ authorization or mutation path.
 | Area | Status | Remaining delivery work |
 |---|---|---|
 | TypeSec and TypeDID | The cognition authority, exact governed-source scope, manifest-only reauthorization, prepared-commit and proposal-free recovery, versioned receipt evidence, and non-disclosing diagnostics are committed and pass the owning repository's release gates. | Select a remotely reachable revision for the standalone dependency and retain these conformance gates in the cross-stack baseline. |
-| LakeCat | Persisted governed-scan grants and proof foundations are committed. Separate snapshot and source-scope digests, projection checks, and structural proof bounds are under final verification in their owning repository. | Finish and commit those owner-side invariants, pin the selected remotely reachable revision, and include its proof tests in the clean-clone gate. |
-| Grust | The durable cognition scheduler/store, leases, guarded commit and recovery, ID-only outbox, and Sail executor are under final verification in the owning repository. | Finish review and gates, commit the cohesive generic capabilities, and rebuild the owning documentation before selecting a revision. |
-| QueryGraph | The TypeDID/LakeCat cognition boundary is being hardened and is under final verification in qg-rust. | Finish the boundary gates, then switch the preserved integration from the Grust-hosted crate to standalone Marciana. |
+| LakeCat | Owner-bound governed-scan proof v2, catalog identity, strict decoding, snapshot/source-scope digests, and opaque revalidation results are committed as `1a1b5b18`; core and book gates pass. | Select a remotely reachable revision for the standalone dependency and include the service API gate in the clean-clone matrix. |
+| Grust | Durable cognition scheduler/store, leases, guarded commit/recovery, ID-only outbox, typed no-change outcome, and Sail executor are committed as `0aca778`; formatting and compile/test gates pass in the owning workspace. | Select a remotely reachable revision and run the live Sail gate against the canonical refreshed Sail source. |
+| QueryGraph | TypeDID/LakeCat cognition boundary, fixed host engine binding, no-change application, opaque proof adaptation, and category-safe errors are committed as `2abc997`; 100 tests and doctests pass. | Switch the preserved integration from the Grust-hosted crate to standalone Marciana. |
 | Sail | Canonical upstream is refreshed to `50567c79`; the generic Delta `MERGE` constraint correction is cleanly rebased above it as local commit `d97f7e59`. The correction is not remotely reachable and the refreshed source has not yet passed Marciana's live gate, so neither fact is overstated as a supported executable baseline. | Land the generic fix in canonical Sail, record its reachable revision, build that exact source, and pass Marciana's live gate. |
-| Marciana | Repository governance, ownership, compatibility scaffolding, and the reviewed product plan are established. | Transplant `querygraph-memory` with history, establish exact dependency pins, switch QueryGraph, complete the native four verbs, and pass the cross-stack gates. |
+| Marciana | `querygraph-memory` has been transplanted with preserved Git history into `crates/marciana-memory`; workspace compilation and the full 72-unit/integration test matrix pass against local Grust and TypeSec. | Replace temporary sibling paths with reachable revisions, switch QueryGraph, complete the four-verb adapters, and pass the cross-stack gates. |
 
 No executable Marciana compatibility baseline is claimed yet. The status above
 describes work in owning repositories; it does not turn local branches or
