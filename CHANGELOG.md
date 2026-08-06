@@ -73,6 +73,8 @@ All notable changes to Marciana are documented in this file.
   context bundles use the same capability-bound vault path as the four verbs.
 - Added deterministic typed context sections grouped by TypeSec memory kind,
   while preserving redacted results as metadata-only entries.
+- Added a content-free materialization receipt digest bound to the plan and
+  visible/redacted IDs; text and XML renderers now carry both identities.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

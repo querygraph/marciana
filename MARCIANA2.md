@@ -71,6 +71,9 @@ same capability-bound vault seam as remember, recall, improve, and forget.
 Bundles now expose deterministic episodic, semantic, procedural, and profile
 sections over the authorized result set, including redacted metadata without
 moving content outside the vault gate.
+Each materialized bundle now carries a deterministic, content-free receipt
+digest bound to its plan and visible/redacted IDs; renderers expose both the
+plan and materialization identities.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

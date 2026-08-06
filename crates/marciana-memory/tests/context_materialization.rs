@@ -76,6 +76,7 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     )
     .unwrap();
     assert_eq!(bundle.plan_digest, plan.plan_digest);
+    assert!(bundle.receipt_digest.starts_with("sha256:"));
     assert_eq!(bundle.memories.len(), 1);
     assert_eq!(bundle.redacted.len(), 1);
     assert_eq!(bundle.memories[0].content.text, "public fact");
@@ -100,8 +101,19 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     assert_eq!(bundle.citations().len(), 2);
     let explanation = bundle.explanation();
     assert_eq!(explanation.plan_digest, bundle.plan_digest);
+    assert_eq!(explanation.receipt_digest, bundle.receipt_digest);
     assert_eq!(explanation.redacted_candidates, 1);
     assert!(!explanation.truncated);
+    let replay = materialize_context_plan(
+        &vault,
+        &space,
+        &capability,
+        &plan,
+        Label::Public,
+        &RequestContext::new(),
+    )
+    .unwrap();
+    assert_eq!(replay.receipt_digest, bundle.receipt_digest);
 }
 
 fn support_record(id: &str, text: &str, label: &str) -> typesec_memory::StoredRecord {

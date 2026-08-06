@@ -60,6 +60,8 @@ pub struct ContextPlan {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextBundle {
     pub plan_digest: String,
+    /// Content-free digest of the authorized materialization result.
+    pub receipt_digest: String,
     pub estimated_tokens: u32,
     pub token_budget: u32,
     pub truncated: bool,
@@ -80,6 +82,7 @@ pub struct ContextCitation {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextExplanation {
     pub plan_digest: String,
+    pub receipt_digest: String,
     pub requested_tokens: u32,
     pub estimated_tokens: u32,
     pub selected_candidates: usize,
@@ -175,6 +178,7 @@ impl ContextBundle {
     pub fn explanation(&self) -> ContextExplanation {
         ContextExplanation {
             plan_digest: self.plan_digest.clone(),
+            receipt_digest: self.receipt_digest.clone(),
             requested_tokens: self.token_budget,
             estimated_tokens: self.estimated_tokens,
             selected_candidates: self.memories.len() + self.redacted.len(),
@@ -287,14 +291,47 @@ pub fn materialize_context_plan<G: GraphMutationStore>(
     let ids = plan.candidates.iter().map(|candidate| candidate.id.clone());
     let (memories, redacted) =
         vault.recall_ids_at(space, capability, ids, plan.intent.as_of, ceiling, context)?;
+    let receipt_digest = context_materialization_digest(&plan.plan_digest, &memories, &redacted);
     Ok(ContextBundle {
         plan_digest: plan.plan_digest.clone(),
+        receipt_digest,
         estimated_tokens: plan.estimated_tokens,
         token_budget: plan.intent.token_budget,
         truncated: plan.candidates.len() < plan.considered_candidates,
         memories,
         redacted,
     })
+}
+
+fn context_materialization_digest(
+    plan_digest: &str,
+    memories: &[RecalledMemory],
+    redacted: &[RedactedHit],
+) -> String {
+    let mut visible = memories
+        .iter()
+        .map(|memory| memory.id.as_str())
+        .collect::<Vec<_>>();
+    let mut withheld = redacted
+        .iter()
+        .map(|memory| memory.id.as_str())
+        .collect::<Vec<_>>();
+    visible.sort_unstable();
+    withheld.sort_unstable();
+    let mut hasher = Sha256::new();
+    hasher.update(b"querygraph.marciana.context-materialization.v1\0");
+    hasher.update(plan_digest.as_bytes());
+    hasher.update(b"visible\0");
+    for id in visible {
+        hasher.update(id.as_bytes());
+        hasher.update([0]);
+    }
+    hasher.update(b"redacted\0");
+    for id in withheld {
+        hasher.update(id.as_bytes());
+        hasher.update([0]);
+    }
+    format!("sha256:{:x}", hasher.finalize())
 }
 
 fn validate_candidates(candidates: &[ContextCandidate]) -> Result<(), ContextError> {
