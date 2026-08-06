@@ -503,6 +503,7 @@ fn decode_record(node: &Node) -> Result<StoredRecord, StoreError> {
 }
 
 pub mod analytics;
+mod api;
 pub mod assertion_projection;
 pub mod assertion_recall;
 pub mod cognition;
@@ -511,6 +512,9 @@ pub mod context_render;
 #[cfg(feature = "turso")]
 pub mod turso;
 pub mod vector;
+pub use api::{
+    ApiError, ForgetRequest, ImproveRequest, MemoryVerb, RecallRequest, RememberRequest,
+};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;
 pub use vector::{Embedder, VectorIndex};

@@ -39,6 +39,8 @@ All notable changes to Marciana are documented in this file.
   and max-latency counters for SLO/dashboard integrations.
 - Updated the compatibility registry with the independently buildable Python
   and TypeScript client baselines.
+- Added validation-only Rust request contracts for the four memory verbs;
+  authorization and mutation remain behind the existing TypeSec boundary.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local
