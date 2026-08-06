@@ -13,6 +13,7 @@ mod memory_error;
 mod metrics;
 mod procedure_rollout;
 mod quota;
+mod slo;
 mod tenant;
 mod working_set;
 
@@ -53,6 +54,7 @@ pub use memory_error::CognitionMemoryError;
 pub use metrics::{MetricsSnapshot, OperationKind, OperationMetrics, OperationSample};
 pub use procedure_rollout::{ProcedureRollout, ProcedureRolloutError, ProcedureRolloutStatus};
 pub use quota::{QuotaError, QuotaLimits, QuotaSnapshot, TenantQuota};
+pub use slo::{SloError, SloPolicy, SloReport};
 pub use working_set::{
     WorkingSet, WorkingSetError, WorkingSetSlot, WorkingSetSource, WorkingSetStatus,
 };

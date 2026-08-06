@@ -95,6 +95,9 @@ Cost-accounting groundwork now provides one bounded meter per tenant, records
 only operation/resource counters, and derives deterministic integer
 microcredit estimates from deployment-owned rates; arithmetic saturates rather
 than wrapping and snapshots contain no request or memory content.
+Operation metrics now also have an explicit SLO evaluator with per-verb
+latency and denial-rate targets, conservative rounding, and content-free
+compliance reports for host dashboards.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
