@@ -29,6 +29,9 @@ All notable changes to Marciana are documented in this file.
 - Bound rendered context views to their plan digest so downstream consumers
   retain the exact selection identity alongside visible content.
 
+- Added a content-free context explanation reporting selected, redacted, and
+  budgeted candidate counts under the same plan identity.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

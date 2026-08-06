@@ -63,6 +63,8 @@ and XML views; redacted candidates render as metadata-only markers.
 Context intents now also carry a closed retrieval-recipe identity, which is
 included in the deterministic plan digest.
 Rendered text and XML views now carry that plan digest explicitly.
+Bundles also expose a content-free explanation of selected, redacted, and
+budgeted candidates under that identity.
 
 ## Executive judgment
 

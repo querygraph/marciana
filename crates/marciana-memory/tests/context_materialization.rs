@@ -89,6 +89,10 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     );
     assert!(render_xml(&bundle).unwrap().contains("redacted=\"true\""));
     assert_eq!(bundle.citations().len(), 2);
+    let explanation = bundle.explanation();
+    assert_eq!(explanation.plan_digest, bundle.plan_digest);
+    assert_eq!(explanation.redacted_candidates, 1);
+    assert!(!explanation.truncated);
 }
 
 fn support_record(id: &str, text: &str, label: &str) -> typesec_memory::StoredRecord {

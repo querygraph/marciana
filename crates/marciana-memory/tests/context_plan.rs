@@ -46,6 +46,7 @@ fn planning_is_deterministic_and_content_free() {
         ["mem-a", "mem-b"]
     );
     assert_eq!(plan.estimated_tokens, 5);
+    assert_eq!(plan.considered_candidates, 3);
     assert!(plan.plan_digest.starts_with("sha256:"));
     assert_ne!(
         plan_context(intent, plan.candidates.clone())

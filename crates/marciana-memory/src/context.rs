@@ -51,6 +51,7 @@ pub struct ContextCandidate {
 pub struct ContextPlan {
     pub intent: RecallIntent,
     pub candidates: Vec<ContextCandidate>,
+    pub considered_candidates: usize,
     pub estimated_tokens: u32,
     pub plan_digest: String,
 }
@@ -60,6 +61,8 @@ pub struct ContextPlan {
 pub struct ContextBundle {
     pub plan_digest: String,
     pub estimated_tokens: u32,
+    pub token_budget: u32,
+    pub truncated: bool,
     pub memories: Vec<RecalledMemory>,
     pub redacted: Vec<RedactedHit>,
 }
@@ -71,6 +74,17 @@ pub struct ContextCitation {
     pub valid_from: Option<DateTime<Utc>>,
     pub provenance_digest: Option<String>,
     pub redacted: bool,
+}
+
+/// Non-content explanation of how a context bundle was bounded.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContextExplanation {
+    pub plan_digest: String,
+    pub requested_tokens: u32,
+    pub estimated_tokens: u32,
+    pub selected_candidates: usize,
+    pub redacted_candidates: usize,
+    pub truncated: bool,
 }
 
 impl ContextBundle {
@@ -95,6 +109,19 @@ impl ContextBundle {
             .collect::<Vec<_>>();
         citations.sort_by(|left, right| left.id.cmp(&right.id));
         citations
+    }
+
+    /// Explain deterministic selection outcomes without exposing candidate content.
+    #[must_use]
+    pub fn explanation(&self) -> ContextExplanation {
+        ContextExplanation {
+            plan_digest: self.plan_digest.clone(),
+            requested_tokens: self.token_budget,
+            estimated_tokens: self.estimated_tokens,
+            selected_candidates: self.memories.len() + self.redacted.len(),
+            redacted_candidates: self.redacted.len(),
+            truncated: self.truncated,
+        }
     }
 }
 
@@ -137,6 +164,7 @@ pub fn plan_context(
             .cmp(&left.score_basis_points)
             .then_with(|| left.id.cmp(&right.id))
     });
+    let considered_candidates = candidates.len();
     let mut used = 0_u32;
     candidates.retain(|candidate| {
         let fits = candidate.estimated_tokens <= intent.token_budget.saturating_sub(used);
@@ -165,6 +193,7 @@ pub fn plan_context(
     Ok(ContextPlan {
         intent,
         candidates,
+        considered_candidates,
         estimated_tokens: used,
         plan_digest: digest,
     })
@@ -185,6 +214,8 @@ pub fn materialize_context_plan<G: GraphMutationStore>(
     Ok(ContextBundle {
         plan_digest: plan.plan_digest.clone(),
         estimated_tokens: plan.estimated_tokens,
+        token_budget: plan.intent.token_budget,
+        truncated: plan.candidates.len() < plan.considered_candidates,
         memories,
         redacted,
     })
