@@ -425,7 +425,9 @@ p50/p95/p99 latency for linear versus indexed retrieval. A 1,000-repeat local
 run over 504 records reached 100% smoke accuracy with zero redaction leaks and
 reduced p50 lookup time from roughly 421 µs to 5.3 µs. These figures are engineering
 diagnostics, not a claim against the published vendor results; pinned adapters
-for LoCoMo, LongMemEval, and BEAM remain the next benchmark unit.
+for LoCoMo and LongMemEval now normalize authorized local fixtures at exact
+source revisions. A BEAM adapter remains pending a verified public source
+layout and revision.
 
 ## Priority decisions
 
