@@ -60,7 +60,7 @@ impl SchemaWindow {
         let Ok(version) = version_text.parse::<u32>() else {
             return false;
         };
-        version >= self.minimum && version <= self.maximum
+        version_text == version.to_string() && version >= self.minimum && version <= self.maximum
     }
 }
 

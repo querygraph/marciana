@@ -11,6 +11,7 @@ fn schema_window_accepts_only_canonical_versions_inclusive() {
     assert!(window.accepts("querygraph-memory-v2"));
     assert!(!window.accepts("querygraph-memory-v3"));
     assert!(!window.accepts("querygraph-memory-v1-extra"));
+    assert!(!window.accepts("querygraph-memory-v01"));
     assert!(!window.accepts("other-v1"));
 }
 
