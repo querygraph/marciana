@@ -6,6 +6,8 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-05
 
+- Refreshed the canonical Sail source candidate to `50567c79` and recorded the
+  rebased but still local Delta correction separately from the supported pin.
 - Corrected restart semantics so only active pre-commit workers may re-plan;
   post-commit and lost-response handling now require the durable Grust proposal
   identity and TypeSec's proposal-free recovery path, independent of

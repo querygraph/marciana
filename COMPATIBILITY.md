@@ -20,9 +20,11 @@ baseline.
 | QueryGraph | Supported route/wire baseline and exact version or revision | Pending qg-rust stabilization |
 | Clients | Rust/Python/JavaScript fixture versions | Not yet established |
 
-The linked Sail pin records the exact canonical upstream `main` revision
-selected on 2026-08-05. It is a scaffold/source-build candidate, not a claim
-that the not-yet-transplanted Marciana live gate has passed.
+The linked Sail pin records canonical upstream `main` revision `50567c79`,
+refreshed on 2026-08-05. It is a scaffold/source-build candidate, not a claim
+that the not-yet-transplanted Marciana live gate has passed. The generic Delta
+`MERGE` correction currently rebased above it is deliberately not recorded as
+a compatible dependency until that correction is remotely reachable.
 
 ## Baseline procedure
 
