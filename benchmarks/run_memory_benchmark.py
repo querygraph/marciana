@@ -77,6 +77,11 @@ def main() -> None:
             "accuracy": indexed["accuracy"],
             "redaction_leaks": indexed["redaction_leaks"],
         },
+        "performance": {
+            "p50_speedup": linear["p50_latency_us"] / indexed["p50_latency_us"],
+            "p95_speedup": linear["p95_latency_us"] / indexed["p95_latency_us"],
+            "indexed_faster": indexed["p95_latency_us"] < linear["p95_latency_us"],
+        },
     }
     output = json.dumps(report, indent=2, sort_keys=True)
     print(output if args.json else output)

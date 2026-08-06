@@ -42,4 +42,5 @@ reject results that omit safety, token, or latency metrics.
 The current smoke run (1,000 repeats, 502 records) reaches 100% case accuracy
 with zero redaction leaks. The indexed path measured about 5.5 µs p50 versus
 437 µs for the linear path in the local run; these are harness diagnostics,
-not a hosted-system claim.
+not a hosted-system claim. The JSON report also emits p50/p95 speedup and a
+machine-checkable `indexed_faster` gate.
