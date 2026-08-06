@@ -2,7 +2,7 @@ use chrono::{TimeZone, Utc};
 use querygraph_memory::context::{
     ContextCandidate, ContextRecipe, ContextView, RecallIntent, plan_context,
 };
-use querygraph_memory::{ContextEvaluationCase, ContextEvaluationReport};
+use querygraph_memory::{ContextEvaluationCase, ContextEvaluationCorpus, ContextEvaluationReport};
 use sha2::Digest;
 use typesec_memory::MemoryId;
 
@@ -66,4 +66,31 @@ fn forbidden_ids_fail_the_evaluation_without_leaking_values() {
     let report = ContextEvaluationReport::evaluate(&case, &plan(&["mem-secret"])).unwrap();
     assert_eq!(report.forbidden_count, 1);
     assert!(!report.passed);
+}
+
+#[test]
+fn corpus_summary_is_ordered_and_digest_stable() {
+    let first = ContextEvaluationCase::new(
+        digest("case-a"),
+        vec![MemoryId::from_string("mem-a")],
+        Vec::new(),
+        8,
+    )
+    .unwrap();
+    let second = ContextEvaluationCase::new(
+        digest("case-b"),
+        vec![MemoryId::from_string("mem-b")],
+        Vec::new(),
+        8,
+    )
+    .unwrap();
+    let corpus = ContextEvaluationCorpus::new(vec![first, second]).unwrap();
+    let summary = corpus
+        .evaluate(&[plan(&["mem-a"]), plan(&["mem-b"])])
+        .unwrap();
+    assert_eq!(summary.case_count, 2);
+    assert_eq!(summary.passed_count, 2);
+    assert!(summary.passed);
+    assert_eq!(summary.average_recall_basis_points, 10_000);
+    assert!(summary.summary_digest.starts_with("sha256:"));
 }

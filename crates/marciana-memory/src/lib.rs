@@ -521,7 +521,10 @@ pub use api::{
     ApiError, ForgetRequest, ImproveRequest, MemoryVerb, RecallRequest, RememberRequest,
 };
 pub use facade::{FacadeError, MemoryFacade};
-pub use evaluation::{ContextEvaluationCase, ContextEvaluationReport, EvaluationError};
+pub use evaluation::{
+    ContextEvaluationCase, ContextEvaluationCorpus, ContextEvaluationReport,
+    ContextEvaluationSummary, EvaluationError,
+};
 pub use session::{SessionError, SessionMetadata};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;

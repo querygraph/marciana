@@ -8,6 +8,7 @@ use typesec_memory::MemoryId;
 use crate::context::ContextPlan;
 
 const MAX_EVALUATION_IDS: usize = 1_000;
+const MAX_EVALUATION_CASES: usize = 1_000;
 
 #[derive(Debug, Clone, Copy)]
 struct EvaluationMetrics {
@@ -44,6 +45,27 @@ pub struct ContextEvaluationReport {
     pub report_digest: String,
 }
 
+/// A bounded, ordered suite of synthetic or user-owned evaluation cases.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContextEvaluationCorpus {
+    cases: Vec<ContextEvaluationCase>,
+    corpus_digest: String,
+}
+
+/// Aggregate quality and safety measurements for one corpus run.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContextEvaluationSummary {
+    pub corpus_digest: String,
+    pub case_count: usize,
+    pub passed_count: usize,
+    pub leakage_case_count: usize,
+    pub average_precision_basis_points: u16,
+    pub average_recall_basis_points: u16,
+    pub average_token_utility_basis_points: u16,
+    pub passed: bool,
+    pub summary_digest: String,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
 pub enum EvaluationError {
     #[error("evaluation case is invalid")]
@@ -52,6 +74,10 @@ pub enum EvaluationError {
     BudgetExceeded,
     #[error("context plan digest is invalid")]
     InvalidPlan,
+    #[error("evaluation corpus is invalid")]
+    InvalidCorpus,
+    #[error("evaluation plan count does not match its corpus")]
+    PlanCountMismatch,
 }
 
 impl ContextEvaluationCase {
@@ -138,6 +164,91 @@ impl ContextEvaluationReport {
     }
 }
 
+impl ContextEvaluationCorpus {
+    pub fn new(cases: Vec<ContextEvaluationCase>) -> Result<Self, EvaluationError> {
+        if cases.is_empty() || cases.len() > MAX_EVALUATION_CASES {
+            return Err(EvaluationError::InvalidCorpus);
+        }
+        let mut digests = BTreeSet::new();
+        for case in &cases {
+            if !digests.insert(case.case_digest.clone()) {
+                return Err(EvaluationError::InvalidCorpus);
+            }
+        }
+        let mut hasher = Sha256::new();
+        hasher.update(b"querygraph.marciana.context-evaluation-corpus.v1\0");
+        for case in &cases {
+            hasher.update(case.case_digest.as_bytes());
+            hasher.update([0]);
+        }
+        Ok(Self {
+            cases,
+            corpus_digest: format!("sha256:{:x}", hasher.finalize()),
+        })
+    }
+
+    #[must_use]
+    pub fn cases(&self) -> &[ContextEvaluationCase] {
+        &self.cases
+    }
+
+    #[must_use]
+    pub fn corpus_digest(&self) -> &str {
+        &self.corpus_digest
+    }
+
+    /// Evaluate plans in the corpus's declared stable order.
+    pub fn evaluate(
+        &self,
+        plans: &[ContextPlan],
+    ) -> Result<ContextEvaluationSummary, EvaluationError> {
+        if plans.len() != self.cases.len() {
+            return Err(EvaluationError::PlanCountMismatch);
+        }
+        let reports = self
+            .cases
+            .iter()
+            .zip(plans)
+            .map(|(case, plan)| ContextEvaluationReport::evaluate(case, plan))
+            .collect::<Result<Vec<_>, _>>()?;
+        let case_count = reports.len();
+        let passed_count = reports.iter().filter(|report| report.passed).count();
+        let leakage_case_count = reports
+            .iter()
+            .filter(|report| report.forbidden_count > 0)
+            .count();
+        let average_precision_basis_points =
+            average_metric(reports.iter().map(|report| report.precision_basis_points));
+        let average_recall_basis_points =
+            average_metric(reports.iter().map(|report| report.recall_basis_points));
+        let average_token_utility_basis_points = average_metric(
+            reports
+                .iter()
+                .map(|report| report.token_utility_basis_points),
+        );
+        let passed = passed_count == case_count;
+        let summary_digest = summary_digest(
+            self,
+            &reports,
+            average_precision_basis_points,
+            average_recall_basis_points,
+            average_token_utility_basis_points,
+            passed,
+        );
+        Ok(ContextEvaluationSummary {
+            corpus_digest: self.corpus_digest.clone(),
+            case_count,
+            passed_count,
+            leakage_case_count,
+            average_precision_basis_points,
+            average_recall_basis_points,
+            average_token_utility_basis_points,
+            passed,
+            summary_digest,
+        })
+    }
+}
+
 fn id_set(ids: Vec<MemoryId>) -> Result<BTreeSet<String>, EvaluationError> {
     if ids.len() > MAX_EVALUATION_IDS {
         return Err(EvaluationError::InvalidCase);
@@ -162,6 +273,34 @@ fn ratio_basis_points(numerator: usize, denominator: usize) -> u16 {
             .min(10_000),
     )
     .unwrap_or(10_000)
+}
+
+fn average_metric(values: impl Iterator<Item = u16>) -> u16 {
+    let values = values.collect::<Vec<_>>();
+    if values.is_empty() {
+        return 0;
+    }
+    let total = values.iter().map(|value| u64::from(*value)).sum::<u64>();
+    u16::try_from(total / u64::try_from(values.len()).unwrap_or(1)).unwrap_or(u16::MAX)
+}
+
+fn summary_digest(
+    corpus: &ContextEvaluationCorpus,
+    reports: &[ContextEvaluationReport],
+    precision: u16,
+    recall: u16,
+    utility: u16,
+    passed: bool,
+) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(b"querygraph.marciana.context-evaluation-summary.v1\0");
+    hasher.update(corpus.corpus_digest.as_bytes());
+    for report in reports {
+        hasher.update(report.report_digest.as_bytes());
+        hasher.update([0]);
+    }
+    hasher.update(format!("{precision}|{recall}|{utility}|{passed}").as_bytes());
+    format!("sha256:{:x}", hasher.finalize())
 }
 
 fn report_digest(

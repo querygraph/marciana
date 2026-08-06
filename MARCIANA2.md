@@ -186,7 +186,9 @@ It also exposes bounded content-free operation metrics for verb counts,
 denials, and latency accounting; hosts own persistence and dashboard export.
 The context layer now also exposes a deterministic, content-free evaluation
 contract measuring relevance precision/recall, token utility, and forbidden-ID
-leakage against a verified plan; protected text never enters the report.
+leakage against a verified plan; bounded corpora aggregate those measurements
+in stable order for release comparisons, and protected text never enters the
+report.
 
 ## Executive judgment
 
