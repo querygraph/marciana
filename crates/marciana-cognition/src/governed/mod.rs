@@ -11,6 +11,9 @@ mod projection;
 mod proposal;
 mod receipt;
 
+#[cfg(test)]
+mod intent_tests;
+
 pub use application::{
     CognitionApplicationError, GovernedCognitionApplication, GovernedCognitionConfig,
     GovernedCognitionResult,

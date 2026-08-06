@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added native cognition unit coverage for canonical source-selection and
+  field-mapping digest boundaries, including duplicate and ambiguous mapping
+  rejection.
+
 - Added Marciana's native governed cognition composition: verified TypeDID
   intent binding, LakeCat revalidation, TypeSec authority priming and commit,
   proposal validation, receipt signing, and the opaque `improve` operation now
