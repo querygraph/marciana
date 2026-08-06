@@ -6,6 +6,9 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Recorded QueryGraph's completed switch to the native Marciana governed
+  application and the remaining cross-stack compatibility and recovery gates.
+
 - Added native cognition unit coverage for canonical source-selection and
   field-mapping digest boundaries, including duplicate and ambiguous mapping
   rejection.
