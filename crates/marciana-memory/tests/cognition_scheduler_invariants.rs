@@ -28,7 +28,7 @@ fn persisted_job_schema_names_the_exact_typedid_request_digest() {
         .expect("submit job");
     let encoded = serde_json::to_value(job).expect("serialize durable job");
 
-    assert_eq!(encoded["schemaVersion"], serde_json::json!(2));
+    assert_eq!(encoded["schemaVersion"], serde_json::json!(3));
     assert_eq!(
         encoded["transitionedAt"],
         serde_json::to_value(at(0)).expect("fixture timestamp")
@@ -155,7 +155,7 @@ async fn unsupported_persisted_job_schema_is_rejected() {
         .submit_cognition_job(&job_key("job"), "scheduler", &digest("request"), 3, at(0))
         .expect("submit job");
     mutate_job_payload(&store, |payload| {
-        payload["schemaVersion"] = serde_json::json!(3);
+        payload["schemaVersion"] = serde_json::json!(4);
     })
     .await;
 
