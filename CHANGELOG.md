@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added `marciana-cognition` with the closed host-selected engine binding.
+  Only fixed reference and live Sail profiles can receive protected cognition
+  input; arbitrary engine implementations cannot self-assign trusted identity.
+
 - Added `marciana-catalog`, the native LakeCat proof-to-cognition-source
   adapter. It preserves LakeCat ownership of proof validation while moving the
   memory-product translation out of QueryGraph.

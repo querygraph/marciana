@@ -1090,6 +1090,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "grust-graph"
+version = "0.12.0"
+source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
+dependencies = [
+ "grust-core",
+ "grust-cypher",
+ "grust-sail",
+ "serde_json",
+]
+
+[[package]]
 name = "grust-memory"
 version = "0.12.0"
 source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
@@ -1736,6 +1747,16 @@ dependencies = [
  "querygraph-memory",
  "serde_json",
  "thiserror",
+]
+
+[[package]]
+name = "marciana-cognition"
+version = "0.12.0"
+dependencies = [
+ "async-trait",
+ "grust-graph",
+ "querygraph-memory",
+ "typesec-memory",
 ]
 
 [[package]]
