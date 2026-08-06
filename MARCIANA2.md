@@ -194,6 +194,8 @@ report. Evaluation receipts bind a corpus summary to an evaluator identity for
 reproducible release comparisons without storing benchmark content; failed or
 leaking summaries cannot produce a release receipt. A checked-in content-free
 fixture provides the first versioned corpus input.
+Context bundles, citations, and text/XML renderers now also carry the verified
+point-in-time `as_of` cutoff used during materialization.
 
 ## Executive judgment
 

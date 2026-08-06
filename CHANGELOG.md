@@ -14,6 +14,7 @@ All notable changes to Marciana are documented in this file.
 - Add evaluator-bound receipts for reproducible context-evaluation releases.
 - Add a checked-in content-free context evaluation fixture.
 - Reject release receipts for failed or leaking evaluation summaries.
+- Expose materialization as-of cutoffs in bundles, citations, and renderers.
 - Add bounded content-free P50/P95/P99 latency percentile snapshots.
 - Add a capability-bound facade path for session-scoped context planning.
 - Add bounded session metadata that binds session, space, and recall-policy

@@ -1,13 +1,13 @@
 use chrono::Utc;
 use grust_memory::MemoryGraphStore;
+use querygraph_memory::GraphStoreMemoryStore;
 use querygraph_memory::context::{
-    materialize_context_plan, plan_context, ContextCandidate, ContextRecipe, ContextView,
-    RecallIntent,
+    ContextCandidate, ContextRecipe, ContextView, RecallIntent, materialize_context_plan,
+    plan_context,
 };
 use querygraph_memory::context_render::{render_text, render_xml};
-use querygraph_memory::GraphStoreMemoryStore;
 use sha2::Digest;
-use typesec_core::policy::{mint_capability_for_id, MintOptions, RequestContext};
+use typesec_core::policy::{MintOptions, RequestContext, mint_capability_for_id};
 use typesec_core::{CanRead, Capability, Resource};
 use typesec_memory::{Label, MemorySpace, MemoryStore, MemoryVault};
 
@@ -89,21 +89,35 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
         .expect("semantic section");
     assert_eq!(semantic.memories.len(), 1);
     assert_eq!(semantic.redacted.len(), 1);
-    assert!(sections
-        .iter()
-        .filter(|section| section.kind != typesec_memory::MemoryKind::Semantic)
-        .all(|section| section.memories.is_empty() && section.redacted.is_empty()));
+    assert!(
+        sections
+            .iter()
+            .filter(|section| section.kind != typesec_memory::MemoryKind::Semantic)
+            .all(|section| section.memories.is_empty() && section.redacted.is_empty())
+    );
     assert!(render_text(&bundle).unwrap().contains(&bundle.plan_digest));
+    assert!(render_text(&bundle).unwrap().contains("as_of="));
     assert!(render_text(&bundle).unwrap().contains("public fact"));
     assert!(render_text(&bundle).unwrap().contains("<redacted>"));
-    assert!(render_xml(&bundle)
-        .unwrap()
-        .contains(&format!("plan=\"{}\"", bundle.plan_digest)));
-    assert!(render_xml(&bundle)
-        .unwrap()
-        .contains(&format!("receipt=\"{}\"", bundle.receipt_digest)));
+    assert!(
+        render_xml(&bundle)
+            .unwrap()
+            .contains(&format!("plan=\"{}\"", bundle.plan_digest))
+    );
+    assert!(
+        render_xml(&bundle)
+            .unwrap()
+            .contains(&format!("receipt=\"{}\"", bundle.receipt_digest))
+    );
     assert!(render_xml(&bundle).unwrap().contains("redacted=\"true\""));
+    assert!(render_xml(&bundle).unwrap().contains("as_of=\""));
     assert_eq!(bundle.citations().len(), 2);
+    assert!(
+        bundle
+            .citations()
+            .iter()
+            .all(|citation| citation.as_of == bundle.as_of)
+    );
     let explanation = bundle.explanation();
     assert_eq!(explanation.plan_digest, bundle.plan_digest);
     assert_eq!(explanation.receipt_digest, bundle.receipt_digest);

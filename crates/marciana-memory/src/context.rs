@@ -65,6 +65,8 @@ pub struct ContextPlan {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextBundle {
     pub plan_digest: String,
+    /// Point-in-time cutoff used by the authorized materialization.
+    pub as_of: DateTime<Utc>,
     /// Content-free digest of the authorized materialization result.
     pub receipt_digest: String,
     pub estimated_tokens: u32,
@@ -78,6 +80,8 @@ pub struct ContextBundle {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextCitation {
     pub id: MemoryId,
+    /// Point-in-time cutoff under which this citation was selected.
+    pub as_of: DateTime<Utc>,
     pub valid_from: Option<DateTime<Utc>>,
     pub provenance_digest: Option<String>,
     pub redacted: bool,
@@ -165,12 +169,14 @@ impl ContextBundle {
             .iter()
             .map(|memory| ContextCitation {
                 id: memory.id.clone(),
+                as_of: self.as_of,
                 valid_from: Some(memory.valid_from),
                 provenance_digest: Some(digest_serialized(&memory.provenance)),
                 redacted: false,
             })
             .chain(self.redacted.iter().map(|memory| ContextCitation {
                 id: memory.id.clone(),
+                as_of: self.as_of,
                 valid_from: None,
                 provenance_digest: None,
                 redacted: true,
@@ -344,6 +350,7 @@ pub fn materialize_context_plan<G: GraphMutationStore>(
     );
     Ok(ContextBundle {
         plan_digest: plan.plan_digest.clone(),
+        as_of: plan.intent.as_of,
         receipt_digest,
         estimated_tokens: plan.estimated_tokens,
         token_budget: plan.intent.token_budget,
