@@ -43,4 +43,5 @@ def summarize(results: Iterable[CaseResult]) -> dict[str, float | int]:
         ),
         "p50_latency_us": median(latencies) if latencies else 0.0,
         "p95_latency_us": percentile(latencies, 95),
+        "p99_latency_us": percentile(latencies, 99),
     }

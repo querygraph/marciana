@@ -13,6 +13,7 @@ class MetricsTests(unittest.TestCase):
         self.assertEqual(report["accuracy"], 1.0)
         self.assertEqual(report["redaction_leaks"], 0)
         self.assertEqual(report["p95_latency_us"], 20.0)
+        self.assertEqual(report["p99_latency_us"], 20.0)
 
     def test_percentile_empty_is_safe(self) -> None:
         self.assertEqual(percentile([], 95), 0.0)

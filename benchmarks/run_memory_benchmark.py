@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import time
 from datetime import date
 from pathlib import Path
@@ -80,7 +81,14 @@ def main() -> None:
         "performance": {
             "p50_speedup": linear["p50_latency_us"] / indexed["p50_latency_us"],
             "p95_speedup": linear["p95_latency_us"] / indexed["p95_latency_us"],
+            "p99_speedup": linear["p99_latency_us"] / indexed["p99_latency_us"],
             "indexed_faster": indexed["p95_latency_us"] < linear["p95_latency_us"],
+        },
+        "environment": {
+            "python": platform.python_version(),
+            "platform": platform.platform(),
+            "records": len(RECORDS),
+            "repeats": args.repeats,
         },
     }
     output = json.dumps(report, indent=2, sort_keys=True)

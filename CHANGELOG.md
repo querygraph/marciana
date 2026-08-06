@@ -12,6 +12,8 @@ All notable changes to Marciana are documented in this file.
 - Kept the durable progress validator clean under strict all-feature Clippy.
 - Made learning APIs pass strict all-feature Clippy with explicit error
   contracts and borrowed evidence input.
+- Extended the memory benchmark report with p99 latency, speedup, and
+  reproducibility metadata required by the evaluation plan.
 
 ### 2026-08-06
 

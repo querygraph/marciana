@@ -416,10 +416,10 @@ and temporal corpus.
 
 The repository now includes a dependency-free benchmark harness under
 `benchmarks/`. It exercises current versus historical recall, abstention,
-redaction safety, deterministic ranking, context-token accounting, and p50/p95
-latency for linear versus indexed retrieval. A 1,000-repeat local run over 502
-records reached 100% smoke accuracy with zero redaction leaks and reduced p50
-lookup time from roughly 437 µs to 5.5 µs. These figures are engineering
+redaction safety, deterministic ranking, context-token accounting, and
+p50/p95/p99 latency for linear versus indexed retrieval. A 1,000-repeat local
+run over 504 records reached 100% smoke accuracy with zero redaction leaks and
+reduced p50 lookup time from roughly 421 µs to 5.3 µs. These figures are engineering
 diagnostics, not a claim against the published vendor results; pinned adapters
 for LoCoMo, LongMemEval, and BEAM remain the next benchmark unit.
 
