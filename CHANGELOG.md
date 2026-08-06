@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Add the source-owned Marciana book manuscript, FirstPair build contract,
+  diagrams, benchmark chapter, enterprise semantic-layer discussion, and
+  publisher-mark-matched cover assets.
 - Advance the Sail compatibility pin to the merged upstream baseline.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
 - Persist and recover vector manifests through guarded Grust commits.
