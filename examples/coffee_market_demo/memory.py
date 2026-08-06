@@ -75,8 +75,26 @@ class QueryGraphMemory:
         return MemoryReceipt(operation="recall", allowed=True, memory_ids=[fact.memory_id for fact in facts]), facts
 
     def improve(self, memory_id: str, replacement: MemoryFact) -> MemoryReceipt:
-        remembered = self.remember(replacement)
-        return MemoryReceipt(operation="improve", allowed=remembered.allowed, memory_ids=[memory_id, *remembered.memory_ids], detail="new assertion retained; old assertion remains historical")
+        body = self._post(
+            "/v1/memory/improve",
+            {
+                "space": "memory/agstack/coffee",
+                "memory_id": memory_id,
+                "replacement": {
+                    "text": replacement.text,
+                    "kind": "semantic",
+                    "purpose": "coffee-market-research",
+                },
+            },
+        )
+        result = body.get("result", body)
+        replacement_id = str(result.get("id", replacement.memory_id))
+        return MemoryReceipt(
+            operation="improve",
+            allowed=True,
+            memory_ids=[memory_id, replacement_id],
+            detail="new assertion supersedes the old assertion; history is retained",
+        )
 
     def forget(self, memory_id: str) -> MemoryReceipt:
         self._post("/v1/memory/forget", {"space": "memory/agstack/coffee", "ids": [memory_id]})

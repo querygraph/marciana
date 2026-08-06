@@ -1,7 +1,11 @@
 from datetime import date
 import unittest
 
-from examples.coffee_market_demo.memory import LocalGovernedMemory, deterministic_id
+from examples.coffee_market_demo.memory import (
+    LocalGovernedMemory,
+    QueryGraphMemory,
+    deterministic_id,
+)
 from examples.coffee_market_demo.models import MemoryFact
 
 
@@ -29,3 +33,22 @@ class DemoModelTests(unittest.TestCase):
         memory.forget(replacement.memory_id)
         _, hits = memory.recall("Honduras coffee price")
         self.assertEqual(hits, [])
+
+    def test_querygraph_improve_uses_supersession_route(self) -> None:
+        calls: list[tuple[str, dict]] = []
+
+        def post(_base_url: str, path: str, payload: dict) -> dict:
+            calls.append((path, payload))
+            return {"result": {"id": "replacement-id"}}
+
+        replacement = MemoryFact(
+            memory_id="replacement-id",
+            text="Honduras coffee price 4.20 USD per kg",
+            source="fixture",
+            observed_on=date(2026, 1, 10),
+            confidence_basis_points=8_000,
+        )
+        receipt = QueryGraphMemory("https://querygraph.test", post).improve("old-id", replacement)
+        self.assertEqual(receipt.memory_ids, ["old-id", "replacement-id"])
+        self.assertEqual(calls[0][0], "/v1/memory/improve")
+        self.assertEqual(calls[0][1]["memory_id"], "old-id")
