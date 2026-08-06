@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added `marciana-catalog`, the native LakeCat proof-to-cognition-source
+  adapter. It preserves LakeCat ownership of proof validation while moving the
+  memory-product translation out of QueryGraph.
+
 - Replaced Marciana's TypeSec and Grust sibling paths with exact reachable
   Git revisions, allowing its workspace to build and test independently of the
   local QueryGraph checkout layout.
