@@ -188,7 +188,8 @@ The context layer now also exposes a deterministic, content-free evaluation
 contract measuring relevance precision/recall, token utility, and forbidden-ID
 leakage against a verified plan; bounded corpora aggregate those measurements
 in stable order for release comparisons, and protected text never enters the
-report.
+report. Evaluation receipts bind a corpus summary to an evaluator identity for
+reproducible release comparisons without storing benchmark content.
 
 ## Executive judgment
 

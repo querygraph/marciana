@@ -510,6 +510,7 @@ pub mod cognition;
 pub mod context;
 pub mod context_render;
 pub mod evaluation;
+pub mod evaluation_receipt;
 mod facade;
 pub mod session;
 #[cfg(feature = "turso")]
@@ -525,6 +526,7 @@ pub use evaluation::{
     ContextEvaluationCase, ContextEvaluationCorpus, ContextEvaluationReport,
     ContextEvaluationSummary, EvaluationError,
 };
+pub use evaluation_receipt::{ContextEvaluationReceipt, EvaluationReceiptError};
 pub use session::{SessionError, SessionMetadata};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;
