@@ -8,9 +8,12 @@ use typesec_memory::{
     MemoryVault,
 };
 
-use crate::api::{ApiError, ForgetRequest, ImproveRequest, RecallRequest, RememberRequest};
-use crate::context::{ContextBundle, ContextError, ContextPlan};
 use crate::GraphStoreMemoryStore;
+use crate::api::{ApiError, ForgetRequest, ImproveRequest, RecallRequest, RememberRequest};
+use crate::context::{
+    ContextBundle, ContextCandidate, ContextError, ContextPlan, RecallIntent, plan_context,
+};
+use crate::session::SessionMetadata;
 
 /// Public facade failures keep validation separate from vault failures.
 #[derive(Debug, thiserror::Error)]
@@ -45,6 +48,28 @@ where
             self.vault, self.space, cap, plan, ceiling, context,
         )
         .map_err(FacadeError::Context)
+    }
+
+    /// Bind product session metadata, plan, and materialize through the same
+    /// capability gate. A session selects only the facade's space and recall
+    /// identity; it cannot mint or widen a capability.
+    pub fn materialize_context_for_session(
+        &self,
+        cap: &Capability<CanRead, MemorySpace>,
+        session: &SessionMetadata,
+        intent: RecallIntent,
+        candidates: Vec<ContextCandidate>,
+        ceiling: Label,
+        context: &RequestContext,
+    ) -> Result<ContextBundle, FacadeError> {
+        if session.space_id() != self.space.resource_id() {
+            return Err(FacadeError::SpaceMismatch);
+        }
+        let bound = session
+            .bind_intent(intent)
+            .map_err(|_| FacadeError::Context(ContextError::InvalidIntent))?;
+        let plan = plan_context(bound, candidates).map_err(FacadeError::Context)?;
+        self.materialize_context(cap, &plan, ceiling, context)
     }
 }
 

@@ -127,7 +127,8 @@ host-owned.
 Session metadata now provides a bounded, content-free product identity for a
 session, space, and recall-policy digest. Binding it changes the deterministic
 recall intent identity only; it does not mint capabilities or create an
-authorization namespace, and materialization remains behind the TypeSec vault.
+authorization namespace. The facade now checks the session's selected space,
+binds the identity before planning, and materializes through the TypeSec vault.
 
 Phase 3 implementation has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

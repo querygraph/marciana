@@ -6,6 +6,7 @@ All notable changes to Marciana are documented in this file.
 
 - Advance the Sail compatibility pin to the merged upstream baseline.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
+- Add a capability-bound facade path for session-scoped context planning.
 - Add bounded session metadata that binds session, space, and recall-policy
   identity into recall planning without changing authorization semantics.
 
