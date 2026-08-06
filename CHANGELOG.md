@@ -45,6 +45,8 @@ All notable changes to Marciana are documented in this file.
   and query types, still before capability authorization.
 - Completed safe lowering for improve replacement drafts and scoped forget ID
   selectors without acquiring capabilities or mutating storage.
+- Added `MemoryFacade`, which executes all four validated requests only through
+  TypeSec capability-bound vault operations.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

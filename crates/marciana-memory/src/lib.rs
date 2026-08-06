@@ -509,12 +509,14 @@ pub mod assertion_recall;
 pub mod cognition;
 pub mod context;
 pub mod context_render;
+mod facade;
 #[cfg(feature = "turso")]
 pub mod turso;
 pub mod vector;
 pub use api::{
     ApiError, ForgetRequest, ImproveRequest, MemoryVerb, RecallRequest, RememberRequest,
 };
+pub use facade::{FacadeError, MemoryFacade};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;
 pub use vector::{Embedder, VectorIndex};
