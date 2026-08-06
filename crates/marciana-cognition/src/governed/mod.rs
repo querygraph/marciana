@@ -19,4 +19,8 @@ pub use authority::{FreshLakeCatAuthority, LakeCatAuthorityError, LakeCatCogniti
 
 #[cfg(feature = "test-support")]
 #[doc(hidden)]
+pub use clock::CognitionClock;
+
+#[cfg(feature = "test-support")]
+#[doc(hidden)]
 pub use intent::intent_claim_limits_for_test;

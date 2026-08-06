@@ -270,7 +270,7 @@ where
     /// This is an internal orchestration seam for the native `improve`
     /// operation and its focused tests. It must not become a caller-driven
     /// proposal API.
-    pub(crate) async fn plan(
+    async fn plan(
         &self,
         read: &Capability<CanRead, MemorySpace>,
     ) -> Result<CognitionProposal, CognitionApplicationError> {
@@ -322,7 +322,7 @@ where
     ///
     /// This internal seam exists to test authoritative failure modes. Public
     /// callers use [`Self::improve`] and never receive a proposal.
-    pub(crate) async fn apply(
+    async fn apply(
         &self,
         write: &Capability<CanWrite, MemorySpace>,
         proposal: &CognitionProposal,
@@ -361,6 +361,27 @@ where
             receipt,
             receipt_token,
         })
+    }
+
+    /// Test-only planning seam for focused authoritative failure tests.
+    #[cfg(feature = "test-support")]
+    #[doc(hidden)]
+    pub async fn plan_for_test(
+        &self,
+        read: &Capability<CanRead, MemorySpace>,
+    ) -> Result<CognitionProposal, CognitionApplicationError> {
+        self.plan(read).await
+    }
+
+    /// Test-only application seam for focused authoritative failure tests.
+    #[cfg(feature = "test-support")]
+    #[doc(hidden)]
+    pub async fn apply_for_test(
+        &self,
+        write: &Capability<CanWrite, MemorySpace>,
+        proposal: &CognitionProposal,
+    ) -> Result<GovernedCognitionResult, CognitionApplicationError> {
+        self.apply(write, proposal).await
     }
 
     async fn revalidate_authority(&self) -> Result<String, CognitionApplicationError> {
