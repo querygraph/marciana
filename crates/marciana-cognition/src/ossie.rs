@@ -69,7 +69,9 @@ struct OssieDocumentSummary {
     namespace: String,
     name: String,
     version: u32,
-    metrics: Vec<String>,
+    // Metric (name, expression) pairs: the expression is accepted semantic
+    // content, so it must be bound into the digest alongside the name.
+    metrics: Vec<(String, String)>,
     dimensions: Vec<String>,
     relationships: Vec<String>,
 }
@@ -134,11 +136,17 @@ impl OssieAdapter {
             })
             .collect();
         let schema = SchemaDefinition::new(identity, fields, edges)?;
+        let mut metrics = document
+            .metrics
+            .iter()
+            .map(|metric| (metric.name.clone(), metric.expression.clone()))
+            .collect::<Vec<_>>();
+        metrics.sort_unstable();
         let summary = OssieDocumentSummary {
             namespace: document.namespace,
             name: document.name,
             version: document.version,
-            metrics: sorted_names(document.metrics.iter().map(|item| item.name.as_str())),
+            metrics,
             dimensions: sorted_names(document.dimensions.iter().map(|item| item.name.as_str())),
             relationships: sorted_names(
                 document.relationships.iter().map(|item| item.name.as_str()),
@@ -167,7 +175,12 @@ impl OssieAdapter {
         dimensions: impl IntoIterator<Item = String>,
     ) -> Result<OssieQueryPlan, OssieError> {
         let metric = metric.into();
-        if !binding.document.metrics.iter().any(|name| name == &metric) {
+        if !binding
+            .document
+            .metrics
+            .iter()
+            .any(|(name, _)| name == &metric)
+        {
             return Err(OssieError::UnknownMetric);
         }
         let mut dimensions = dimensions.into_iter().collect::<Vec<_>>();
@@ -299,7 +312,10 @@ fn valid_component(value: &str) -> bool {
 }
 
 fn validate_text(value: &str) -> Result<(), ()> {
-    if value.is_empty() || value.len() > MAX_TEXT || value.contains(['\n', '\r']) {
+    if value.is_empty()
+        || value.len() > MAX_TEXT
+        || value.bytes().any(|byte| byte.is_ascii_control())
+    {
         Err(())
     } else {
         Ok(())
@@ -314,21 +330,38 @@ fn sorted_names<'a>(values: impl Iterator<Item = &'a str>) -> Vec<String> {
 
 fn binding_digest(source_manifest: &str, document: &OssieDocumentSummary, schema: &str) -> String {
     let mut hasher = Sha256::new();
-    hasher.update(b"querygraph.marciana.ossie-binding.v1\0");
+    hasher.update(b"querygraph.marciana.ossie-binding.v2\0");
     update_text(&mut hasher, source_manifest);
     update_text(&mut hasher, &document.namespace);
     update_text(&mut hasher, &document.name);
     hasher.update(document.version.to_be_bytes());
     update_text(&mut hasher, schema);
-    for name in document
-        .metrics
-        .iter()
-        .chain(document.dimensions.iter())
-        .chain(document.relationships.iter())
-    {
+    update_section(&mut hasher, "metrics", document.metrics.len());
+    for (name, expression) in &document.metrics {
+        update_text(&mut hasher, name);
+        update_text(&mut hasher, expression);
+    }
+    update_section(&mut hasher, "dimensions", document.dimensions.len());
+    for name in &document.dimensions {
+        update_text(&mut hasher, name);
+    }
+    update_section(&mut hasher, "relationships", document.relationships.len());
+    for name in &document.relationships {
         update_text(&mut hasher, name);
     }
     format!("sha256:{:x}", hasher.finalize())
+}
+
+// Labeled, counted section boundaries keep names in one section from
+// colliding with names in the next under the flat byte stream.
+fn update_section(hasher: &mut Sha256, label: &str, count: usize) {
+    hasher.update(label.as_bytes());
+    hasher.update([0]);
+    hasher.update(
+        u64::try_from(count)
+            .expect("bounded section count")
+            .to_be_bytes(),
+    );
 }
 
 fn update_text(hasher: &mut Sha256, value: &str) {

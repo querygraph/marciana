@@ -4,6 +4,15 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Preserve vector manifest membership when re-indexing an existing record
+  fails; rollback now removes only newly inserted members.
+- Bind Ossie metric expressions and labeled, count-prefixed sections into
+  binding digests under a v2 domain tag, and reject control characters in
+  Ossie text fields.
+- Validate query and reason digests with the single authoritative hex-checking
+  validator.
+- Validate cognition progress leases against trusted time instead of
+  worker-supplied timestamps.
 - Deliver the MARCIANA-ADVERSARIAL-v1 benchmark: an eighteen-case adversarial
   corpus with a versioned manifest, a deterministic policy-aware reference
   backend with durable replay protection and idempotent receipts, hard-gate
@@ -171,8 +180,6 @@ All notable changes to Marciana are documented in this file.
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local
   verification artifacts.
-
-### 2026-08-06
 
 - Added lease-bound, digest-only cognition progress to the durable scheduler.
   Progress phases and counters are bounded, timestamp-monotonic, persisted
@@ -361,8 +368,6 @@ All notable changes to Marciana are documented in this file.
 - Recorded QueryGraph's opaque `improve` containment step: callers no longer
   receive a governed cognition proposal while the behavior-preserving
   composition is prepared for its later move into Marciana.
-
-### 2026-08-06
 
 - Transplanted `querygraph-memory` into standalone Marciana with preserved
   commit history, modular cognition modules, separate tests, and a compiling

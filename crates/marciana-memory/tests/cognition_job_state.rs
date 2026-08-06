@@ -36,7 +36,7 @@ async fn progress_is_lease_bound_bounded_and_digest_only() {
         updated_at: at(2),
     };
     let updated = store
-        .update_cognition_progress(&key, lease.token(), progress)
+        .update_cognition_progress(&key, lease.token(), progress, at(2))
         .expect("update progress");
     assert_eq!(updated.progress.phase, CognitionProgressPhase::Scanning);
     assert_eq!(updated.progress.completed_units, 2);
@@ -56,8 +56,40 @@ async fn progress_is_lease_bound_bounded_and_digest_only() {
                 detail_digest: None,
                 updated_at: at(3),
             },
+            at(3),
         )
         .expect_err("stale token must not update progress");
+    assert!(matches!(err, CognitionStateError::StaleLease));
+}
+
+#[tokio::test]
+async fn expired_lease_cannot_backdate_progress_updates() {
+    let dir = tempfile::tempdir().expect("temporary database");
+    let store = TursoMemoryStore::open_with_config(config(&dir, "cognition_progress_expiry"))
+        .expect("open store");
+    let key = job_key("tenant/progress-expiry");
+    store
+        .submit_cognition_job(&key, "worker/owner", &digest("request"), 2, at(0))
+        .expect("submit job");
+    let lease = store
+        .acquire_cognition_lease(&key, "worker/owner", at(1), Duration::minutes(5))
+        .expect("acquire lease");
+    // The worker backdates updated_at inside the lease window, but the trusted
+    // clock is past expiry: the lease must be stale regardless.
+    let err = store
+        .update_cognition_progress(
+            &key,
+            lease.token(),
+            CognitionProgress {
+                phase: CognitionProgressPhase::Scanning,
+                completed_units: 1,
+                total_units: Some(3),
+                detail_digest: None,
+                updated_at: at(2),
+            },
+            at(1) + Duration::minutes(6),
+        )
+        .expect_err("expired lease must not update progress");
     assert!(matches!(err, CognitionStateError::StaleLease));
 }
 

@@ -257,11 +257,16 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
     }
 
     /// Update digest-safe progress while holding the active lease.
+    ///
+    /// The lease is validated against the caller-independent `now`, never the
+    /// worker-supplied progress timestamp, so an expired lease cannot keep
+    /// writing progress by backdating `updated_at`.
     pub fn update_cognition_progress(
         &self,
         key: &CognitionIdempotencyKey,
         token: &str,
         progress: super::CognitionProgress,
+        now: DateTime<Utc>,
     ) -> Result<CognitionJob, CognitionStateError> {
         validate_job_key(key)?;
         validate_bearer_token(token)?;
@@ -269,15 +274,15 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         let (node, mut job) = self
             .load_job_node(key)?
             .ok_or(CognitionStateError::NotFound)?;
-        validate_lease(&job, token, progress.updated_at)?;
+        validate_transition_time(&job, now)?;
+        validate_lease(&job, token, now)?;
         if progress.updated_at < job.progress.updated_at {
             return Err(CognitionStateError::InvalidTransition(
                 "progress timestamp regressed".into(),
             ));
         }
-        let updated_at = progress.updated_at;
         job.progress = progress;
-        advance_job(&mut job, updated_at)?;
+        advance_job(&mut job, now)?;
         self.transition_job(key, node, &job)?;
         Ok(job)
     }

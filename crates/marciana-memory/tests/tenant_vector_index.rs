@@ -10,6 +10,9 @@ struct EmbedderStub {
 impl Embedder for EmbedderStub {
     fn embed(&self, text: &str) -> Result<Vec<f32>, IndexError> {
         self.calls.fetch_add(1, Ordering::Relaxed);
+        if text.contains("poison") {
+            return Err(IndexError::Backend("embedder rejected content".into()));
+        }
         Ok(vec![if text.contains("coffee") { 1.0 } else { 0.0 }])
     }
 
@@ -45,6 +48,37 @@ fn scoped_index_binds_tenant_and_embedding_space() {
     );
     index.remove_for("tenant:coffee", &id("m1")).unwrap();
     assert!(index.manifest().indexed_ids().next().is_none());
+}
+
+#[test]
+fn failed_reindex_preserves_prior_manifest_membership() {
+    let index = TenantVectorIndex::new(
+        EmbedderStub {
+            calls: AtomicUsize::new(0),
+        },
+        "tenant:coffee",
+        "model-v1:384",
+    )
+    .expect("scoped index");
+    index
+        .index_for("tenant:coffee", &id("m1"), Label::Public, "coffee price")
+        .expect("index");
+    assert!(matches!(
+        index.index_for("tenant:coffee", &id("m1"), Label::Public, "poison"),
+        Err(TenantIndexError::Index(_))
+    ));
+    // The old vector is still searchable, so membership must survive the
+    // failed re-index; only a newly inserted id is rolled back.
+    assert_eq!(index.manifest().indexed_ids().collect::<Vec<_>>(), ["m1"]);
+    assert_eq!(
+        index.search_for("tenant:coffee", "coffee", 1).unwrap(),
+        vec![id("m1")]
+    );
+    assert!(matches!(
+        index.index_for("tenant:coffee", &id("m2"), Label::Public, "poison"),
+        Err(TenantIndexError::Index(_))
+    ));
+    assert_eq!(index.manifest().indexed_ids().collect::<Vec<_>>(), ["m1"]);
 }
 
 #[test]

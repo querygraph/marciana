@@ -43,6 +43,50 @@ fn query_plans_are_order_independent_and_bound_to_the_import() {
 }
 
 #[test]
+fn metric_expressions_are_bound_into_the_binding_digest() {
+    let binding = OssieAdapter::import_json("lakecat:agstack/coffee/v1", MODEL).expect("binding");
+    let reexpressed = MODEL.replace("avg(price_usd_per_kg)", "max(price_usd_per_kg)");
+    let other =
+        OssieAdapter::import_json("lakecat:agstack/coffee/v1", &reexpressed).expect("binding");
+    assert_ne!(binding.digest(), other.digest());
+}
+
+#[test]
+fn section_boundaries_are_bound_into_the_binding_digest() {
+    let metric_heavy = r#"
+{
+  "namespace": "agstack",
+  "name": "boundary",
+  "version": 1,
+  "metrics": [{"name": "alpha", "expression": ""}, {"name": "beta", "expression": ""}],
+  "dimensions": []
+}
+"#;
+    let split = r#"
+{
+  "namespace": "agstack",
+  "name": "boundary",
+  "version": 1,
+  "metrics": [{"name": "alpha", "expression": ""}],
+  "dimensions": [{"name": "beta", "role": ""}]
+}
+"#;
+    let first = OssieAdapter::import_json("lakecat:agstack/boundary/v1", metric_heavy)
+        .expect("metric-heavy binding");
+    let second =
+        OssieAdapter::import_json("lakecat:agstack/boundary/v1", split).expect("split binding");
+    assert_ne!(first.digest(), second.digest());
+}
+
+#[test]
+fn rejects_control_characters_in_the_source_manifest() {
+    assert_eq!(
+        OssieAdapter::import_json("lakecat:agstack\tcoffee", MODEL).expect_err("control character"),
+        OssieError::InvalidSourceManifest
+    );
+}
+
+#[test]
 fn rejects_unknown_semantics_and_duplicate_names() {
     let binding = OssieAdapter::import_json("lakecat:agstack/coffee/v1", MODEL).expect("binding");
     assert_eq!(

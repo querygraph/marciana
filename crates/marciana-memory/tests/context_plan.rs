@@ -2,10 +2,11 @@ use chrono::{TimeZone, Utc};
 use querygraph_memory::context::{
     ContextCandidate, ContextError, ContextRecipe, ContextView, RecallIntent, plan_context,
 };
+use sha2::Digest;
 use typesec_memory::MemoryId;
 
 fn digest(label: &str) -> String {
-    format!("sha256:{}", format!("{label:0<64}")[..64].to_owned())
+    format!("sha256:{:x}", sha2::Sha256::digest(label.as_bytes()))
 }
 
 #[test]
@@ -103,6 +104,47 @@ fn plan_validation_rejects_tampered_digest_and_duplicate_candidates() {
     duplicate.candidates.push(duplicate.candidates[0].clone());
     assert!(matches!(
         duplicate.validate(),
+        Err(ContextError::InvalidCandidate)
+    ));
+}
+
+#[test]
+fn non_hex_digests_are_rejected_even_with_valid_shape() {
+    // Correct "sha256:" prefix and 71-byte length, but not hexadecimal.
+    let shaped_not_hex = format!("sha256:{}", "z".repeat(64));
+    let intent = RecallIntent {
+        query_digest: shaped_not_hex.clone(),
+        working_set_digest: None,
+        pinned_memory_ids: Vec::new(),
+        view: ContextView::Assertions,
+        recipe: ContextRecipe::Ranked,
+        as_of: Utc.timestamp_opt(10, 0).unwrap(),
+        token_budget: 5,
+    };
+    assert!(matches!(
+        intent.validate(),
+        Err(ContextError::InvalidIntent)
+    ));
+
+    let valid_intent = RecallIntent {
+        query_digest: digest("query"),
+        working_set_digest: None,
+        pinned_memory_ids: Vec::new(),
+        view: ContextView::Assertions,
+        recipe: ContextRecipe::Ranked,
+        as_of: Utc.timestamp_opt(10, 0).unwrap(),
+        token_budget: 5,
+    };
+    assert!(matches!(
+        plan_context(
+            valid_intent,
+            vec![ContextCandidate {
+                id: MemoryId::from_string("mem-a"),
+                score_basis_points: 1,
+                estimated_tokens: 1,
+                reason_digest: shaped_not_hex,
+            }]
+        ),
         Err(ContextError::InvalidCandidate)
     ));
 }

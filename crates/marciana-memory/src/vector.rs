@@ -178,22 +178,30 @@ impl<E: Embedder> TenantVectorIndex<E> {
         let batch =
             VectorRepairBatch::new(&self.scope, vec![VectorRepairOperation::Index(id.clone())])
                 .map_err(TenantIndexError::Manifest)?;
-        self.manifest
-            .write()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .apply(&batch)
-            .map_err(TenantIndexError::Manifest)?;
-        self.index.index(id, label, text).map_err(|error| {
-            let rollback = VectorRepairBatch::new(
-                &self.scope,
-                vec![VectorRepairOperation::Remove(id.clone())],
-            )
-            .expect("canonical rollback batch");
-            self.manifest
+        let was_member = {
+            let mut manifest = self
+                .manifest
                 .write()
-                .unwrap_or_else(std::sync::PoisonError::into_inner)
-                .apply(&rollback)
-                .expect("manifest rollback remains valid");
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            let was_member = manifest.contains(id);
+            manifest.apply(&batch).map_err(TenantIndexError::Manifest)?;
+            was_member
+        };
+        self.index.index(id, label, text).map_err(|error| {
+            // A failed re-index must not erase membership that predates this
+            // call: the previously indexed vector is still searchable.
+            if !was_member {
+                let rollback = VectorRepairBatch::new(
+                    &self.scope,
+                    vec![VectorRepairOperation::Remove(id.clone())],
+                )
+                .expect("canonical rollback batch");
+                self.manifest
+                    .write()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .apply(&rollback)
+                    .expect("manifest rollback remains valid");
+            }
             TenantIndexError::Index(error)
         })
     }

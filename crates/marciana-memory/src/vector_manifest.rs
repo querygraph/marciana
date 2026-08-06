@@ -64,6 +64,12 @@ impl VectorIndexManifest {
         self.indexed_ids.iter().map(String::as_str)
     }
 
+    /// Whether `id` is currently a manifest member.
+    #[must_use]
+    pub fn contains(&self, id: &MemoryId) -> bool {
+        self.indexed_ids.contains(id.as_str())
+    }
+
     #[must_use]
     pub fn digest(&self) -> &str {
         &self.digest

@@ -210,7 +210,7 @@ fn digest_serialized<T: serde::Serialize>(value: &T) -> String {
 
 impl RecallIntent {
     pub fn validate(&self) -> Result<(), ContextError> {
-        if !self.query_digest.starts_with("sha256:") || self.query_digest.len() != 71 {
+        if !is_digest(&self.query_digest) {
             return Err(ContextError::InvalidIntent);
         }
         if self.token_budget == 0 || self.token_budget > 64_000 {
@@ -405,10 +405,7 @@ fn context_materialization_digest(
 fn validate_candidates(candidates: &[ContextCandidate]) -> Result<(), ContextError> {
     let mut ids = Vec::with_capacity(candidates.len());
     for candidate in candidates {
-        if candidate.estimated_tokens == 0
-            || candidate.reason_digest.len() != 71
-            || !candidate.reason_digest.starts_with("sha256:")
-        {
+        if candidate.estimated_tokens == 0 || !is_digest(&candidate.reason_digest) {
             return Err(ContextError::InvalidCandidate);
         }
         ids.push(candidate.id.as_str());
