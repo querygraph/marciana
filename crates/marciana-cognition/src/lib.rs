@@ -6,6 +6,7 @@ mod binding_error;
 mod cost;
 mod encryption_boundary;
 mod engine_binding;
+mod formation_explanation;
 mod formation_profile;
 mod governed;
 mod health;
@@ -27,6 +28,7 @@ pub use binding_error::CognitionBindingError;
 pub use cost::{CostError, CostRates, CostSample, CostSnapshot, TenantCostAccounting};
 pub use encryption_boundary::{EncryptionBoundary, EncryptionBoundaryError};
 pub use engine_binding::CognitionEngineBinding;
+pub use formation_explanation::{FormationExplanation, FormationExplanationError};
 pub use formation_profile::{
     FormationBinding, FormationBudgetError, FormationCapability, FormationProfile,
     FormationProvider, FormationRegistry, FormationRegistryError, FormationResourceBudget,
