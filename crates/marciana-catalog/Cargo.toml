@@ -6,11 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Marciana adapters for LakeCat-governed cognition sources"
-publish = false
-
 [dependencies]
-lakecat-core = { git = "https://github.com/querygraph/lakecat.git", rev = "415d131ac60efd50bb92ffc9027b5dd9ee2d22cf", version = "0.3.0" }
-querygraph-memory = { path = "../marciana-memory", version = "0.12.0" }
+lakecat-core = "0.3.0"
+querygraph-memory = { path = "../marciana-memory", version = "0.12.1" }
 thiserror = { workspace = true }
 
 [dev-dependencies]

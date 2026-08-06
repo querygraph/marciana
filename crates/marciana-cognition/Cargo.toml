@@ -6,30 +6,28 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Marciana cognition composition primitives"
-publish = false
-
 [features]
 test-support = []
 
 [dependencies]
 async-trait = { workspace = true }
 chrono = { version = "0.4", features = ["serde"] }
-grust = { package = "grust-graph", git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0", features = ["sail"] }
-lakecat-core = { git = "https://github.com/querygraph/lakecat.git", rev = "415d131ac60efd50bb92ffc9027b5dd9ee2d22cf", version = "0.3.0" }
-marciana-catalog = { path = "../marciana-catalog", version = "0.12.0" }
-querygraph-memory = { path = "../marciana-memory", version = "0.12.0", features = ["sail"] }
+grust = { package = "grust-graph", version = "0.12.1", features = ["sail"] }
+lakecat-core = "0.3.0"
+marciana-catalog = { path = "../marciana-catalog", version = "0.12.1" }
+querygraph-memory = { path = "../marciana-memory", version = "0.12.1", features = ["sail"] }
 serde_json = { workspace = true }
 serde = { workspace = true }
 sha2 = "0.10"
 tokio = { workspace = true }
-typesec-core = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
-typesec-integrations = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
-typesec-memory = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
+typesec-core = "0.13.1"
+typesec-integrations = "0.13.1"
+typesec-memory = "0.13.1"
 thiserror = { workspace = true }
 
 [dev-dependencies]
 async-trait = { workspace = true }
-typesec-core = { git = "https://github.com/querygraph/typesec.git", branch = "main", version = "0.13.0" }
+typesec-core = "0.13.1"
 
 [lints]
 workspace = true

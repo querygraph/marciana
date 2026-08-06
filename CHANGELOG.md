@@ -4,6 +4,10 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Prepare the `0.12.1` registry release for `querygraph-memory`,
+  `marciana-catalog`, `marciana-cognition`, and `marciana-ledger`, replacing
+  development Git dependencies with released TypeSec, Grust, and LakeCat
+  crates.
 - Track TypeSec main for active QueryGraph integration so qg-rust and Marciana
   share one TypeSec dependency universe during development.
 - Stamp the adversarial-benchmark blog textpack with its versioned link and
