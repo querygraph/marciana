@@ -1756,6 +1756,8 @@ dependencies = [
  "async-trait",
  "grust-graph",
  "querygraph-memory",
+ "thiserror",
+ "typesec-core",
  "typesec-memory",
 ]
 

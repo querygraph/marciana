@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added Marciana's fixed public mapping for TypeSec protected-memory failures.
+  Callers receive stable, non-disclosing categories rather than policy details,
+  record identifiers, or backend-controlled text.
+
 - Added `marciana-cognition` with the closed host-selected engine binding.
   Only fixed reference and live Sail profiles can receive protected cognition
   input; arbitrary engine implementations cannot self-assign trusted identity.

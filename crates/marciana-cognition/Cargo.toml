@@ -14,9 +14,11 @@ test-support = []
 grust = { package = "grust-graph", git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0", features = ["sail"] }
 querygraph-memory = { path = "../marciana-memory", version = "0.12.0", features = ["sail"] }
 typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
+thiserror = { workspace = true }
 
 [dev-dependencies]
 async-trait = { workspace = true }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
 
 [lints]
 workspace = true
