@@ -1,6 +1,7 @@
 use chrono::{TimeZone, Utc};
 use marciana_cognition::{
-    FeedbackDataset, FeedbackRecord, Observation, ObservationStatus, Procedure, ProcedureStatus,
+    EvaluationReport, FeedbackDataset, FeedbackRecord, Observation, ObservationStatus, Procedure,
+    ProcedureStatus,
 };
 use sha2::Digest;
 
@@ -32,9 +33,10 @@ fn procedures_cannot_activate_without_evaluation_and_approval() {
     let mut procedure = Procedure::propose(digest("procedure")).expect("procedure");
     assert_eq!(procedure.status, ProcedureStatus::Proposed);
     assert!(procedure.activate().is_err());
-    procedure
-        .record_evaluation(digest("evaluation"))
-        .expect("evaluate");
+    let report =
+        EvaluationReport::new(procedure.procedure_digest.clone(), digest("dataset"), 8_000)
+            .expect("evaluation report");
+    procedure.record_evaluation(&report).expect("evaluate");
     procedure.approve().expect("approve");
     procedure.activate().expect("activate");
     procedure.rollback().expect("rollback");

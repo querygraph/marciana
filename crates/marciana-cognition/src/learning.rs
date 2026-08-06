@@ -101,6 +101,42 @@ pub struct FeedbackDataset {
     pub records: Vec<FeedbackRecord>,
 }
 
+/// A thresholded offline evaluation bound to one procedure and dataset.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EvaluationReport {
+    pub report_digest: String,
+    pub procedure_digest: String,
+    pub dataset_digest: String,
+    pub score_basis_points: u16,
+    pub passed: bool,
+}
+
+impl EvaluationReport {
+    pub fn new(
+        procedure_digest: String,
+        dataset_digest: String,
+        score_basis_points: u16,
+    ) -> Result<Self, LearningError> {
+        if !is_digest(&procedure_digest)
+            || !is_digest(&dataset_digest)
+            || score_basis_points > 10_000
+        {
+            return Err(LearningError::InvalidFeedback);
+        }
+        let passed = score_basis_points >= 7_000;
+        let report_digest = digest(&format!(
+            "evaluation-v1|{procedure_digest}|{dataset_digest}|{score_basis_points}|{passed}"
+        ));
+        Ok(Self {
+            report_digest,
+            procedure_digest,
+            dataset_digest,
+            score_basis_points,
+            passed,
+        })
+    }
+}
+
 impl FeedbackDataset {
     pub fn new(mut records: Vec<FeedbackRecord>) -> Result<Self, LearningError> {
         if records.is_empty() || records.len() > MAX_FEEDBACK {
@@ -156,11 +192,14 @@ impl Procedure {
         })
     }
 
-    pub fn record_evaluation(&mut self, evaluation_digest: String) -> Result<(), LearningError> {
-        if self.status != ProcedureStatus::Proposed || !is_digest(&evaluation_digest) {
+    pub fn record_evaluation(&mut self, report: &EvaluationReport) -> Result<(), LearningError> {
+        if self.status != ProcedureStatus::Proposed
+            || report.procedure_digest != self.procedure_digest
+            || !report.passed
+        {
             return Err(LearningError::InvalidTransition);
         }
-        self.evaluation_digest = Some(evaluation_digest);
+        self.evaluation_digest = Some(report.report_digest.clone());
         self.status = ProcedureStatus::Evaluated;
         Ok(())
     }

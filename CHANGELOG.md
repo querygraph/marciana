@@ -36,6 +36,9 @@ All notable changes to Marciana are documented in this file.
   bounded order-stable feedback datasets, and procedure activation gated by
   evaluation and approval.
 
+- Bound procedure evaluation to a specific dataset and procedure digest with
+  a fixed passing threshold before approval or activation is possible.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

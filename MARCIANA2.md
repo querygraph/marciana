@@ -71,6 +71,9 @@ evidence and lifecycle transitions, bounded feedback datasets with stable
 identity, and versioned procedures that cannot activate until evaluated and
 approved. These artifacts remain proposal metadata; they do not create a
 second memory mutation path.
+Procedure evaluation is now a thresholded report bound to both the procedure
+and feedback-dataset identities, so an unrelated or failing report cannot
+unlock activation.
 
 ## Executive judgment
 
