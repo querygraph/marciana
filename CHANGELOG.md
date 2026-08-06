@@ -39,6 +39,10 @@ All notable changes to Marciana are documented in this file.
   transitions, preventing migration from fabricating a self-causal belief
   change while keeping ordinary lifecycle transitions fully evidenced.
 
+- Added a fail-closed adapter from actual legacy `RELATES` edges and trusted
+  source records to retry-stable assertion projections, preserving the source
+  record's half-open historical validity without exposing its content.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

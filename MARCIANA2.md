@@ -18,9 +18,11 @@ Grust graph-mutation plan with distinct assertion-node and relationship IDs;
 only the existing TypeSec-authorized guarded commit may submit that plan. A
 retry-stable legacy relation conversion now maps baseline structural edges to
 explicit assertions, preserving historical validity with TypeSec-compatible
-half-open intervals. The next Phase 1 unit is its guarded durable adapter;
-it must consume these types rather than reproduce their validation or state
-rules.
+half-open intervals. `querygraph-memory` now binds that conversion to the
+actual legacy edge and trusted source-record shape, returning only inert
+mutations for the pre-existing guarded commit. The next Phase 1 unit is the
+versioned durable migration runner; it must consume these types rather than
+reproduce their validation or state rules.
 
 ## Executive judgment
 

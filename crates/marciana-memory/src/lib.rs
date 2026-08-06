@@ -49,7 +49,7 @@ use typesec_memory::{MemoryId, MemoryStore, StoreBatchOp, StoreError, StoreQuery
 const RECORD_LABEL: &str = "MemoryRecord";
 const ENTITY_LABEL: &str = "MemoryEntity";
 const MENTIONS: &str = "MENTIONS";
-const RELATES: &str = "RELATES";
+pub(crate) const RELATES: &str = "RELATES";
 
 /// `typesec-memory`'s `MemoryStore` over any Grust [`GraphMutationStore`].
 pub struct GraphStoreMemoryStore<G: GraphMutationStore> {
