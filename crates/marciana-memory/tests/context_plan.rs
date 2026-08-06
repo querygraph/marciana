@@ -1,6 +1,6 @@
 use chrono::{TimeZone, Utc};
 use querygraph_memory::context::{
-    ContextCandidate, ContextRecipe, ContextView, RecallIntent, plan_context,
+    plan_context, ContextCandidate, ContextError, ContextRecipe, ContextView, RecallIntent,
 };
 use typesec_memory::MemoryId;
 
@@ -54,4 +54,49 @@ fn planning_is_deterministic_and_content_free() {
             .plan_digest,
         ""
     );
+}
+
+#[test]
+fn plan_validation_rejects_tampered_digest_and_duplicate_candidates() {
+    let intent = RecallIntent {
+        query_digest: digest("query"),
+        view: ContextView::Episodes,
+        recipe: ContextRecipe::Ranked,
+        as_of: Utc.timestamp_opt(10, 0).unwrap(),
+        token_budget: 5,
+    };
+    let mut plan = plan_context(
+        intent,
+        vec![ContextCandidate {
+            id: MemoryId::from_string("mem-a"),
+            score_basis_points: 1,
+            estimated_tokens: 1,
+            reason_digest: digest("a"),
+        }],
+    )
+    .unwrap();
+    plan.plan_digest = digest("tampered");
+    assert!(matches!(plan.validate(), Err(ContextError::PlanDigest)));
+
+    let mut duplicate = plan_context(
+        RecallIntent {
+            query_digest: digest("query-2"),
+            view: ContextView::Episodes,
+            recipe: ContextRecipe::Ranked,
+            as_of: Utc.timestamp_opt(10, 0).unwrap(),
+            token_budget: 5,
+        },
+        vec![ContextCandidate {
+            id: MemoryId::from_string("mem-a"),
+            score_basis_points: 1,
+            estimated_tokens: 1,
+            reason_digest: digest("a"),
+        }],
+    )
+    .unwrap();
+    duplicate.candidates.push(duplicate.candidates[0].clone());
+    assert!(matches!(
+        duplicate.validate(),
+        Err(ContextError::InvalidCandidate)
+    ));
 }

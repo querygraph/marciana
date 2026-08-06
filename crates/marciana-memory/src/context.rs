@@ -87,6 +87,23 @@ pub struct ContextExplanation {
     pub truncated: bool,
 }
 
+/// Fixed, non-content errors for context planning and plan verification.
+#[derive(Debug, thiserror::Error)]
+pub enum ContextError {
+    #[error("context intent is invalid")]
+    InvalidIntent,
+    #[error("context candidate metadata is invalid")]
+    InvalidCandidate,
+    #[error("context plan exceeds its fixed candidate bound")]
+    CandidateLimit,
+    #[error("context plan token accounting is invalid")]
+    TokenAccounting,
+    #[error("context plan digest is invalid")]
+    PlanDigest,
+    #[error(transparent)]
+    Memory(#[from] MemoryError),
+}
+
 impl ContextBundle {
     /// Return stable citations without exposing a redacted candidate's content.
     #[must_use]
@@ -131,12 +148,50 @@ fn digest_serialized<T: serde::Serialize>(value: &T) -> String {
 }
 
 impl RecallIntent {
-    pub fn validate(&self) -> Result<(), &'static str> {
+    pub fn validate(&self) -> Result<(), ContextError> {
         if !self.query_digest.starts_with("sha256:") || self.query_digest.len() != 71 {
-            return Err("query digest must be canonical SHA-256");
+            return Err(ContextError::InvalidIntent);
         }
         if self.token_budget == 0 || self.token_budget > 64_000 {
-            return Err("token budget is outside its fixed bound");
+            return Err(ContextError::InvalidIntent);
+        }
+        Ok(())
+    }
+}
+
+impl ContextPlan {
+    /// Verify the content-free integrity and token accounting of a plan.
+    ///
+    /// # Errors
+    ///
+    /// Returns a fixed [`ContextError`] when a caller modifies candidate
+    /// metadata, ordering, accounting, or the plan digest.
+    pub fn validate(&self) -> Result<(), ContextError> {
+        self.intent.validate()?;
+        validate_candidates(&self.candidates)?;
+        if self.candidates.windows(2).any(|pair| {
+            pair[0].score_basis_points < pair[1].score_basis_points
+                || (pair[0].score_basis_points == pair[1].score_basis_points
+                    && pair[0].id > pair[1].id)
+        }) {
+            return Err(ContextError::InvalidCandidate);
+        }
+        if self.considered_candidates < self.candidates.len() {
+            return Err(ContextError::TokenAccounting);
+        }
+        let mut used = 0_u32;
+        for candidate in &self.candidates {
+            if candidate.estimated_tokens > self.intent.token_budget.saturating_sub(used) {
+                return Err(ContextError::TokenAccounting);
+            }
+            used = used.saturating_add(candidate.estimated_tokens);
+        }
+        if used != self.estimated_tokens {
+            return Err(ContextError::TokenAccounting);
+        }
+        let expected = context_plan_digest(&self.intent, &self.candidates, used);
+        if expected != self.plan_digest {
+            return Err(ContextError::PlanDigest);
         }
         Ok(())
     }
@@ -146,18 +201,12 @@ impl RecallIntent {
 pub fn plan_context(
     intent: RecallIntent,
     mut candidates: Vec<ContextCandidate>,
-) -> Result<ContextPlan, &'static str> {
+) -> Result<ContextPlan, ContextError> {
     intent.validate()?;
     if candidates.len() > 100_000 {
-        return Err("candidate set exceeds its fixed bound");
+        return Err(ContextError::CandidateLimit);
     }
-    if candidates.iter().any(|candidate| {
-        candidate.estimated_tokens == 0
-            || candidate.reason_digest.len() != 71
-            || !candidate.reason_digest.starts_with("sha256:")
-    }) {
-        return Err("candidate metadata is not canonical");
-    }
+    validate_candidates(&candidates)?;
     candidates.sort_by(|left, right| {
         right
             .score_basis_points
@@ -173,23 +222,7 @@ pub fn plan_context(
         }
         fits
     });
-    let mut hasher = Sha256::new();
-    hasher.update(b"querygraph.marciana.context-plan.v1\0");
-    hasher.update(intent.query_digest.as_bytes());
-    hasher.update(
-        format!(
-            "{:?}|{:?}|{}|{}",
-            intent.view, intent.recipe, intent.as_of, used
-        )
-        .as_bytes(),
-    );
-    for candidate in &candidates {
-        hasher.update(candidate.id.as_str().as_bytes());
-        hasher.update(candidate.score_basis_points.to_be_bytes());
-        hasher.update(candidate.estimated_tokens.to_be_bytes());
-        hasher.update(candidate.reason_digest.as_bytes());
-    }
-    let digest = format!("sha256:{:x}", hasher.finalize());
+    let digest = context_plan_digest(&intent, &candidates, used);
     Ok(ContextPlan {
         intent,
         candidates,
@@ -207,7 +240,8 @@ pub fn materialize_context_plan<G: GraphMutationStore>(
     plan: &ContextPlan,
     ceiling: Label,
     context: &RequestContext,
-) -> Result<ContextBundle, MemoryError> {
+) -> Result<ContextBundle, ContextError> {
+    plan.validate()?;
     let ids = plan.candidates.iter().map(|candidate| candidate.id.clone());
     let (memories, redacted) =
         vault.recall_ids_at(space, capability, ids, plan.intent.as_of, ceiling, context)?;
@@ -219,4 +253,46 @@ pub fn materialize_context_plan<G: GraphMutationStore>(
         memories,
         redacted,
     })
+}
+
+fn validate_candidates(candidates: &[ContextCandidate]) -> Result<(), ContextError> {
+    let mut ids = Vec::with_capacity(candidates.len());
+    for candidate in candidates {
+        if candidate.estimated_tokens == 0
+            || candidate.reason_digest.len() != 71
+            || !candidate.reason_digest.starts_with("sha256:")
+        {
+            return Err(ContextError::InvalidCandidate);
+        }
+        ids.push(candidate.id.as_str());
+    }
+    ids.sort_unstable();
+    if ids.windows(2).any(|pair| pair[0] == pair[1]) {
+        return Err(ContextError::InvalidCandidate);
+    }
+    Ok(())
+}
+
+fn context_plan_digest(
+    intent: &RecallIntent,
+    candidates: &[ContextCandidate],
+    estimated_tokens: u32,
+) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(b"querygraph.marciana.context-plan.v1\0");
+    hasher.update(intent.query_digest.as_bytes());
+    hasher.update(
+        format!(
+            "{:?}|{:?}|{}|{}",
+            intent.view, intent.recipe, intent.as_of, estimated_tokens
+        )
+        .as_bytes(),
+    );
+    for candidate in candidates {
+        hasher.update(candidate.id.as_str().as_bytes());
+        hasher.update(candidate.score_basis_points.to_be_bytes());
+        hasher.update(candidate.estimated_tokens.to_be_bytes());
+        hasher.update(candidate.reason_digest.as_bytes());
+    }
+    format!("sha256:{:x}", hasher.finalize())
 }

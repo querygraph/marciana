@@ -61,6 +61,10 @@ possible.
 The governed cognition application now resolves that registry against the
 host-selected engine and checks source and proposal ceilings before any
 protected materialization or authoritative commit.
+Context materialization now verifies the planner's canonical candidate set,
+token accounting, and digest before invoking the TypeSec vault, preventing a
+caller-supplied plan from changing the authorized context under the same
+receipt identity.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
