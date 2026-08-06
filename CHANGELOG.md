@@ -46,6 +46,11 @@ All notable changes to Marciana are documented in this file.
 - Refreshed the recorded Sail compatibility baseline to upstream merge
   `2c1b2e45` from `lakehq/sail#2374`.
 
+- Added an end-to-end Pydantic AI v2 Honduras coffee-market demo under
+  `examples/coffee_market_demo`, with Dataverse loading, optional Sail Spark
+  Connect execution, TypeDID/QueryGraph memory seams, and remember/recall/
+  improve/forget agent turns.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

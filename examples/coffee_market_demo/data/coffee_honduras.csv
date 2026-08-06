@@ -1,0 +1,4 @@
+observation_id,country,commodity,market,price_usd_per_kg,observed_on,source,note
+hn-2025-01,Honduras,coffee,San Pedro Sula,3.80,2025-01-10,fixture,Historical washed arabica reference
+hn-2026-01,Honduras,coffee,San Pedro Sula,4.20,2026-01-10,fixture,Current washed arabica reference
+hn-soil-01,Honduras,coffee,Comayagua,,2025-06-01,agstack-palefire,Volcanic soil and altitude support quality

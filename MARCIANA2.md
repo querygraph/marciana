@@ -75,6 +75,12 @@ Procedure evaluation is now a thresholded report bound to both the procedure
 and feedback-dataset identities, so an unrelated or failing report cannot
 unlock activation.
 
+The product integration phase now includes a provider-free Pydantic AI v2
+coffee-market demonstration under `examples/coffee_market_demo`. It loads a
+Dataverse-shaped Honduras fixture (or a configured native Dataverse dataset),
+can write/query Sail over Spark Connect, and exercises governed memory verbs
+through typed agent tools while preserving historical price observations.
+
 ## Executive judgment
 
 Marciana should not become another memory extraction framework. Its defensible

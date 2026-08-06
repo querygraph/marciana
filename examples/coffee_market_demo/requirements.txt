@@ -1,0 +1,5 @@
+pydantic>=2.7
+pydantic-ai-slim>=2,<3
+# Live Sail loading only:
+# pyspark>=4.1
+# querygraph[crypto] from ../querygraph/qg-python

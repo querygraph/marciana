@@ -1,0 +1,31 @@
+from datetime import date
+import unittest
+
+from examples.coffee_market_demo.memory import LocalGovernedMemory, deterministic_id
+from examples.coffee_market_demo.models import MemoryFact
+
+
+class DemoModelTests(unittest.TestCase):
+    def test_local_memory_remember_improve_and_forget(self) -> None:
+        memory = LocalGovernedMemory()
+        first = MemoryFact(
+            memory_id=deterministic_id("old"),
+            text="Honduras coffee price 3.80 USD per kg",
+            source="fixture",
+            observed_on=date(2025, 1, 10),
+            confidence_basis_points=8000,
+        )
+        replacement = first.model_copy(
+            update={
+                "memory_id": deterministic_id("new"),
+                "text": "Honduras coffee price 4.20 USD per kg",
+                "observed_on": date(2026, 1, 10),
+            }
+        )
+        memory.remember(first)
+        memory.improve(first.memory_id, replacement)
+        _, hits = memory.recall("Honduras coffee price")
+        self.assertEqual([hit.memory_id for hit in hits], [replacement.memory_id])
+        memory.forget(replacement.memory_id)
+        _, hits = memory.recall("Honduras coffee price")
+        self.assertEqual(hits, [])
