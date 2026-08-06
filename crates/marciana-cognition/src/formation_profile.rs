@@ -29,6 +29,16 @@ pub enum FormationProvider {
     SailV1,
 }
 
+/// Closed scheduling modes for formation jobs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FormationRunMode {
+    /// Durable background work with normal lease/retry semantics.
+    Background,
+    /// Opt-in proposal generation on an agent hot path; it never authorizes
+    /// direct memory mutation.
+    HotPathProposal,
+}
+
 /// Native operation capability exposed by a trusted formation provider.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FormationCapability {
@@ -112,6 +122,20 @@ impl FormationRegistry {
         profile: FormationProfile,
         provider: FormationProvider,
     ) -> Result<FormationBinding, FormationRegistryError> {
+        self.resolve_for_mode(profile, provider, FormationRunMode::Background)
+    }
+
+    /// Resolve a profile for an explicit closed scheduling mode.
+    ///
+    /// # Errors
+    /// Returns [`FormationRegistryError::ModeNotAllowed`] when a background
+    /// profile is asked to run on the hot path.
+    pub fn resolve_for_mode(
+        self,
+        profile: FormationProfile,
+        provider: FormationProvider,
+        mode: FormationRunMode,
+    ) -> Result<FormationBinding, FormationRegistryError> {
         let capability = profile.capability();
         if !provider.supports(capability) {
             return Err(FormationRegistryError::UnsupportedCapability {
@@ -119,7 +143,10 @@ impl FormationRegistry {
                 capability,
             });
         }
-        Ok(profile.bind(provider))
+        if !profile.supports_mode(mode) {
+            return Err(FormationRegistryError::ModeNotAllowed { profile, mode });
+        }
+        Ok(profile.bind_for_mode(provider, mode))
     }
 }
 
@@ -130,6 +157,11 @@ pub enum FormationRegistryError {
     UnsupportedCapability {
         provider: FormationProvider,
         capability: FormationCapability,
+    },
+    #[error("formation profile is not allowed in the selected run mode")]
+    ModeNotAllowed {
+        profile: FormationProfile,
+        mode: FormationRunMode,
     },
 }
 
@@ -147,12 +179,24 @@ pub struct FormationBinding {
     pub capability: FormationCapability,
     /// Explicit provider resource ceiling.
     pub budget: FormationResourceBudget,
+    /// Closed scheduler mode bound into this provider/profile contract.
+    pub run_mode: FormationRunMode,
 }
 
 impl FormationProfile {
     /// Resolve one closed profile against one trusted provider family.
     #[must_use]
     pub const fn bind(self, provider: FormationProvider) -> FormationBinding {
+        self.bind_for_mode(provider, FormationRunMode::Background)
+    }
+
+    /// Bind one profile to a provider and already-validated run mode.
+    #[must_use]
+    pub const fn bind_for_mode(
+        self,
+        provider: FormationProvider,
+        run_mode: FormationRunMode,
+    ) -> FormationBinding {
         FormationBinding {
             profile: self,
             provider,
@@ -163,6 +207,7 @@ impl FormationProfile {
             max_output_records: FormationResourceBudget::DEFAULT.max_output_records,
             capability: self.capability(),
             budget: FormationResourceBudget::DEFAULT,
+            run_mode,
         }
     }
     /// Canonical profile identity for signed job bindings.
@@ -205,6 +250,18 @@ impl FormationProfile {
     #[must_use]
     pub const fn schema_version(self) -> &'static str {
         "1"
+    }
+
+    /// Whether this profile may run in the selected closed scheduler mode.
+    #[must_use]
+    pub const fn supports_mode(self, mode: FormationRunMode) -> bool {
+        match mode {
+            FormationRunMode::Background => true,
+            FormationRunMode::HotPathProposal => !matches!(
+                self,
+                Self::BackgroundDeduplicationV1 | Self::BackgroundReconciliationV1
+            ),
+        }
     }
 }
 

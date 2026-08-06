@@ -4,7 +4,7 @@ use querygraph_memory::cognition::CognitionOperation;
 
 use crate::{
     FormationCapability, FormationProfile, FormationProvider, FormationRegistry,
-    FormationResourceBudget,
+    FormationRegistryError, FormationResourceBudget, FormationRunMode,
 };
 
 #[test]
@@ -54,6 +54,7 @@ fn binding_is_closed_and_bounded_for_each_provider() {
     assert_eq!(binding.max_source_records, 10_000);
     assert_eq!(binding.max_output_records, 10_000);
     assert_eq!(binding.capability, FormationCapability::Reconcile);
+    assert_eq!(binding.run_mode, FormationRunMode::Background);
     assert_eq!(
         binding.budget,
         FormationResourceBudget {
@@ -91,4 +92,32 @@ fn provider_budget_checks_source_and_output_boundaries() {
         .expect("inclusive output bound");
     assert!(budget.check_source_records(3).is_err());
     assert!(budget.check_output_records(4).is_err());
+}
+
+#[test]
+fn hot_path_is_an_explicit_proposal_mode_for_non_background_profiles() {
+    let registry = FormationRegistry;
+    let binding = registry
+        .resolve_for_mode(
+            FormationProfile::ConversationDeduplicationV1,
+            FormationProvider::ReferenceV1,
+            FormationRunMode::HotPathProposal,
+        )
+        .expect("hot-path proposal mode");
+    assert_eq!(binding.run_mode, FormationRunMode::HotPathProposal);
+    assert!(
+        !FormationProfile::BackgroundDeduplicationV1
+            .supports_mode(FormationRunMode::HotPathProposal)
+    );
+    assert_eq!(
+        registry.resolve_for_mode(
+            FormationProfile::BackgroundDeduplicationV1,
+            FormationProvider::ReferenceV1,
+            FormationRunMode::HotPathProposal,
+        ),
+        Err(FormationRegistryError::ModeNotAllowed {
+            profile: FormationProfile::BackgroundDeduplicationV1,
+            mode: FormationRunMode::HotPathProposal,
+        })
+    );
 }

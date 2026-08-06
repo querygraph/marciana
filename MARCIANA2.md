@@ -111,6 +111,10 @@ without weakening the existing exact-schema validator.
 The cognition layer now also has an operator-owned immutable ontology registry
 for typed fields and edges; declarations are bounded, canonicalized, resolved
 by exact identity, and digest-bound before any formation integration.
+Formation profiles now also carry an explicit closed run mode. Background is
+the default, background-only profiles reject hot-path requests, and eligible
+profiles can opt into hot-path proposal generation without bypassing the
+existing TypeSec-authorized commit path.
 The vector layer now also exposes a tenant-checked index seam: every index,
 search, hybrid-rank, and removal operation carries the exact tenant, while a
 content-free scope digest binds that tenant to the embedding-space identity

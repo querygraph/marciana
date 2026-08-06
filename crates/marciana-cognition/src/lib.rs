@@ -30,6 +30,7 @@ pub use engine_binding::CognitionEngineBinding;
 pub use formation_profile::{
     FormationBinding, FormationBudgetError, FormationCapability, FormationProfile,
     FormationProvider, FormationRegistry, FormationRegistryError, FormationResourceBudget,
+    FormationRunMode,
 };
 #[cfg(feature = "test-support")]
 #[doc(hidden)]
