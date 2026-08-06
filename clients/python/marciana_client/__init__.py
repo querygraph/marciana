@@ -5,6 +5,7 @@ only validates stable request/receipt shapes and routes them.
 """
 
 from .client import MarcianaClient, MemoryTransport
+from .mcp import McpMemoryAdapter, McpTool
 from .models import (
     ForgetRequest,
     ImproveRequest,
@@ -17,6 +18,8 @@ __all__ = [
     "ForgetRequest",
     "ImproveRequest",
     "MarcianaClient",
+    "McpMemoryAdapter",
+    "McpTool",
     "MemoryReceipt",
     "MemoryTransport",
     "RecallRequest",

@@ -29,6 +29,8 @@ All notable changes to Marciana are documented in this file.
 - Added a transport-neutral typed Python client boundary for remember, recall,
   improve, and forget, with strict Pydantic v2 wire models and tests.
 - Added independent wheel build metadata for the Python client.
+- Added a thin MCP tool registry/dispatcher over the typed Python client,
+  preserving host-owned transport and authorization.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local

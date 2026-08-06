@@ -13,3 +13,6 @@ PYTHONPATH=clients/python uv run --python 3.13 --with 'pydantic>=2.7,<3' \
 
 The `pyproject.toml` also contains the package build metadata for publishing
 the client independently from the Rust workspace.
+
+`marciana_client.mcp` provides a thin MCP tool registry and dispatcher over the
+same client. A host still owns MCP transport, credentials, and policy.

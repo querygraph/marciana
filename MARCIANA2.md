@@ -89,6 +89,8 @@ The first thin Python client boundary now lives under
 shapes while leaving signing, authorization, and storage to the injected
 transport. A matching independently buildable TypeScript client now lives under
 `clients/typescript`.
+The Python client also exposes a thin `mcp` tool registry/dispatcher; MCP host
+transport, credentials, and policy remain outside Marciana's adapter.
 
 ## Executive judgment
 
