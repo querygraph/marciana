@@ -69,6 +69,16 @@ workers receive an authorized immutable input bundle and emit inert proposals.
 TypeSec reauthorizes and validates a proposal before Marciana maps the prepared
 commit into one atomic Grust operation.
 
+A LakeCat governed-scan proof identifies an authorized catalog snapshot; it
+does not prove that arbitrary caller-supplied text came from that snapshot.
+Marciana's trusted LakeCat adapter therefore owns scan execution,
+row-to-`MemoryDraft` translation, and an exact per-scan draft allowlist. Each
+governed write presents TypeSec with the proof evidence and a one-use binding
+to the domain-separated digest of the exact draft. TypeSec attaches the opaque
+source scope only after its host verifier consumes that binding. Public APIs
+must never accept a proof plus an independently supplied draft as equivalent
+evidence.
+
 Queues, outboxes, audit records, and logs contain identifiers or digests, not
 memory plaintext, reusable authorization material, raw lease tokens, or raw
 worker and failure data.

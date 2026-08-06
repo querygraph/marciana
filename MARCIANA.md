@@ -95,7 +95,10 @@ The active goal is complete only when all of these conditions hold:
 - all four native verbs share the same capability, policy, validation,
   mutation, and recovery authorities without alternate bypasses;
 - catalog-backed cognition requires valid LakeCat governed-scan evidence, and
-  local-only operation remains isolated behind its declared feature boundary;
+  Marciana's trusted adapter—not a caller—derives the exact governed drafts
+  from that scan and binds each write once; a proof cannot bless independently
+  supplied text, and local-only operation remains isolated behind its declared
+  feature boundary;
 - stale inputs, changed digests, revoked authority, label mismatches,
   idempotency collisions, malformed proposals, and provider failures fail
   closed without partial authoritative mutation;

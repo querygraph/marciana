@@ -6,6 +6,9 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-05
 
+- Defined the governed-ingestion boundary: Marciana's trusted LakeCat adapter
+  must derive and one-time bind exact drafts from an authorized scan, because a
+  scan proof alone never authorizes independently supplied memory content.
 - Established `MARCIANA.md` as the canonical active delivery record for the
   standalone extraction, current cross-stack status, execution order, and
   acceptance gates.
