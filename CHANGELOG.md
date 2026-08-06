@@ -6,19 +6,23 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Completed the first verified executable Marciana baseline: clean Marciana
+  and qg-rust clones pass their full declared test, doctest, and strict Clippy
+  gates using exact remote dependencies; the recorded QueryGraph Sail source
+  passes the bounded live executor, backend, and cognition gates.
+
 - Adopted the verified remotely reachable QueryGraph Sail revision as the
   production baseline. Generic upstream Sail contribution remains active but
   no longer blocks Marciana delivery.
 
-- Recorded the draft canonical Sail upstream path for the reviewed generic
-  Delta `MERGE` correction; release remains pending its merge and exact-source
-  validation.
+- Recorded the upstream Sail contribution path for the reviewed generic Delta
+  `MERGE` correction; upstream acceptance is not a Marciana release blocker.
 
 - Recorded the bounded Grust Sail harness and its terminal executor, backend,
   and cognition parity/secrecy results against the local Sail binary.
 
 - Recorded QueryGraph's completed switch to the native Marciana governed
-  application and the remaining cross-stack compatibility and recovery gates.
+  application and its verified compatibility and recovery gates.
 
 - Added native cognition unit coverage for canonical source-selection and
   field-mapping digest boundaries, including duplicate and ambiguous mapping
@@ -60,8 +64,8 @@ All notable changes to Marciana are documented in this file.
   local QueryGraph checkout layout.
 
 - Recorded passing fresh-clone gates for Marciana and qg-rust, including the
-  exact Git-pinned stack revisions and the remaining requirement to land the
-  reviewed generic Sail correction in canonical upstream before release.
+  exact Git-pinned stack revisions and the non-blocking generic Sail upstream
+  contribution.
 
 - Recorded the passing focused local Sail integration gate for the Grust
   cognition substrate while retaining the requirement for a remotely reachable

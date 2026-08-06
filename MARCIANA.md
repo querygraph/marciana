@@ -1,6 +1,6 @@
 # Marciana Delivery Goal and Status
 
-**Status:** active implementation goal
+**Status:** verified production baseline
 
 **Updated:** 2026-08-06
 
@@ -45,13 +45,13 @@ authorization or mutation path.
 | TypeSec and TypeDID | The cognition authority, exact governed-source scope, manifest-only reauthorization, prepared-commit and proposal-free recovery, versioned receipt evidence, and non-disclosing diagnostics are reachable as `1926f18` and pass the owning repository's release gates. | Retain these conformance gates in the cross-stack baseline. |
 | LakeCat | Owner-bound governed-scan proof v2, catalog identity, strict decoding, snapshot/source-scope digests, and opaque revalidation results are reachable as `415d131`; core and book gates pass. | Include the service API gate in the clean-clone matrix. |
 | Grust | Durable cognition scheduler/store, leases, guarded commit/recovery, ID-only outbox, typed no-change outcome, and Sail executor are reachable as `3bbd715`; the bounded Sail integration harness is reachable as `e20d69c`. The QueryGraph Sail baseline at `d97f7e59` passes all 26 executor tests, two live backend tests, and Marciana memory's two cognition parity/secrecy tests through that wrapper. | Retain the bounded gate in the release matrix. |
-| QueryGraph | qg-rust now consumes the native Marciana governed application and has removed all nine former production composition modules at `efd6245`. Its public cognition entry point remains one opaque `improve(read, write)` operation; explicit feature-gated Marciana test seams preserve focused adversarial checks. The active full suite passes 71 tests plus doctests and strict Clippy using exact reachable Git revisions. | Run the full compatibility and service-recovery matrix against the native crate. |
+| QueryGraph | qg-rust now consumes the native Marciana governed application and has removed all nine former production composition modules at `efd6245`. Its public cognition entry point remains one opaque `improve(read, write)` operation; explicit feature-gated Marciana test seams preserve focused adversarial checks. A fresh clone passes its active 71-test suite plus doctests and strict Clippy using exact reachable Git revisions. | Refresh only when a new explicit compatibility baseline is selected. |
 | Sail | The supported production baseline is remotely reachable QueryGraph Sail revision `d97f7e59`, recorded in `compat/sail-revision.txt`; its explicit binary passes the bounded live gate. The generic Delta `MERGE` correction remains contributed upstream at [lakehq/sail#2374](https://github.com/lakehq/sail/pull/2374), but upstream acceptance is not a delivery dependency. | Refresh and validate a newer QueryGraph Sail revision only as a new explicit baseline. |
-| Marciana | `querygraph-memory` has been transplanted with preserved Git history into `crates/marciana-memory`; its Grust and TypeSec dependencies now use exact reachable Git revisions. The native `marciana-catalog` crate owns LakeCat proof-to-cognition-source translation and cognition-specific catalog/table-identity validation; `marciana-cognition` owns the closed fixed-profile engine binding, non-disclosing error boundaries, complete opaque governed `improve` composition, and native intent-digest boundary tests at `08d2309`. The durable scheduler returns staged work only as its proposal digest, forbidding post-restart re-planning; focused native tests and strict Clippy checks pass. | Run the full compatibility and service-recovery matrix against the native crate. |
+| Marciana | `querygraph-memory` has been transplanted with preserved Git history into `crates/marciana-memory`; its Grust and TypeSec dependencies now use exact reachable Git revisions. The native `marciana-catalog` crate owns LakeCat proof-to-cognition-source translation and cognition-specific catalog/table-identity validation; `marciana-cognition` owns the closed fixed-profile engine binding, non-disclosing error boundaries, complete opaque governed `improve` composition, and native intent-digest boundary tests at `08d2309`. The durable scheduler returns staged work only as its proposal digest, forbidding post-restart re-planning. A fresh clone passes 72 unit tests, the persistence, recovery, atomic-commit, outbox, adversarial, and native-cognition integration suites, doctests, and strict Clippy. | Refresh only when a new explicit compatibility baseline is selected. |
 
-No executable Marciana compatibility baseline is claimed yet. The status above
-describes work in owning repositories; it does not turn local branches or
-sibling checkout paths into released dependencies.
+The first executable Marciana compatibility baseline is now claimed. It uses
+only exact remotely reachable Git revisions and the recorded QueryGraph Sail
+revision; it does not depend on local branches or sibling checkout paths.
 
 ## Required execution order
 
@@ -71,8 +71,7 @@ sibling checkout paths into released dependencies.
    suites from exact Git revisions.
 5. Switch qg-rust to standalone Marciana and prove route, wire, denial,
    receipt, database reopen, retry, and recovery compatibility before removing
-   the former Grust copy. **The review candidate is complete; merge and
-   canonical Sail policy remain.**
+   the former Grust copy. **Complete in the verified baseline.**
 6. Complete and expose the native `remember`, `recall`, `improve`, and
    `forget` lifecycle through one shared domain implementation and thin
    embedded, service, Sail, LakeCat, and QueryGraph adapters.

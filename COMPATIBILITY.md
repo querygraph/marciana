@@ -9,17 +9,17 @@ maintain competing pins.
 `querygraph-memory` has been transplanted into
 `crates/marciana-memory` with its behavior-preserving history. Its TypeSec and
 Grust dependencies are exact public Git revisions, so Marciana itself no
-longer requires sibling checkouts. This is still an extraction baseline, not a
-released compatibility matrix.
+longer requires sibling checkouts. This is the first verified executable
+baseline, not yet a versioned crate release.
 
 | Component | Required compatibility datum | Current scaffold status |
 |---|---|---|
-| Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Transplanted Git-pinned baseline; no public four-verb facade or released schema range yet |
+| Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Git-pinned, native governed `improve` baseline; the broader public four-verb facade is scheduled in `MARCIANA2.md` |
 | TypeSec | Contract version, conformance fixture version, exact release or revision | Exact reachable revision `1926f18c` is pinned by Marciana |
 | Grust | Core/backend version and guarded-commit capability | Exact reachable revision `3bbd715` is pinned by Marciana |
 | LakeCat | Governed-proof schema and exact release or revision | Exact reachable revision `415d131` is ready for the QueryGraph adapter pin |
 | Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail revision recorded below; it passed the live gate |
-| QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `c5ecf76` pins the standalone Marciana stack; a fresh clone passes all 101 tests and the compile-fail doctest |
+| QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `efd6245` consumes standalone Marciana; a fresh clone passes its active 71-test suite, doctests, and strict Clippy |
 | Clients | Rust/Python/JavaScript fixture versions | Not yet established |
 
 The linked Sail pin records reachable QueryGraph Sail revision `d97f7e59`. On
@@ -43,11 +43,13 @@ Every integration baseline and release candidate must:
 6. prove the declared setup from a clean clone without sibling path
    dependencies.
 
-The extraction candidate has passed that clean-clone gate twice on 2026-08-06:
-Marciana's full `querygraph-memory` suite and qg-rust's 71-test suite plus
-doctests were built from fresh clones using only the exact Git revisions named
-above. The result becomes a release baseline after the stack review branches
-are merged and the recorded Sail live gate is repeated from source.
+The verified baseline passed the clean-clone gate on 2026-08-06: Marciana's
+full workspace (including 72 `querygraph-memory` unit tests, integration
+recovery/commit/outbox suites, doctests, and strict Clippy) and qg-rust's
+active 71-test suite plus doctests and strict Clippy were built from fresh
+clones using only the exact Git revisions named above. The recorded Sail live
+gate was run from the selected QueryGraph Sail source. Merge status and
+upstream Sail acceptance do not alter this baseline.
 
 Generic Sail changes are contributed upstream. Marciana consumes exact
 remotely reachable QueryGraph Sail revisions and never establishes a private
