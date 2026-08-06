@@ -39,6 +39,12 @@ All notable changes to Marciana are documented in this file.
   Ossie text fields.
 - Validate query and reason digests with the single authoritative hex-checking
   validator.
+
+## 0.12.1 — 2026-08-06
+
+- Published `querygraph-memory`, `marciana-catalog`, `marciana-cognition`, and
+  `marciana-ledger` against released TypeSec 0.13.1, Grust 0.12.1, and LakeCat
+  0.3.0 crates.
 - Validate cognition progress leases against trusted time instead of
   worker-supplied timestamps.
 - Align the Python and TypeScript clients and the coffee demo to the pinned

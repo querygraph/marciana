@@ -7,20 +7,17 @@ maintain competing pins.
 ## Extraction baseline
 
 `querygraph-memory` has been transplanted into
-`crates/marciana-memory` with its behavior-preserving history. Its TypeSec and
-Grust dependencies are exact public Git revisions, so Marciana itself no
-longer requires sibling checkouts. This is the first verified executable
-baseline, not yet a versioned crate release.
-During active QueryGraph integration, Marciana's TypeSec dependencies follow
-the TypeSec `main` branch; release candidates must restore reviewed exact
-reachable revisions in the release matrix.
+`crates/marciana-memory` with its behavior-preserving history. The 0.12.1
+release resolves TypeSec 0.13.1, Grust 0.12.1, and LakeCat 0.3.0 from crates.io;
+the lockfile records the exact registry checksums and no sibling checkout is
+required.
 
 | Component | Required compatibility datum | Current scaffold status |
 |---|---|---|
 | Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Git-pinned native governed `improve` baseline plus validation-only Rust four-verb request contracts; vault-backed facade execution remains scheduled in `MARCIANA2.md` |
-| TypeSec | Contract version, conformance fixture version, exact release or revision | Exact reachable revision `14bd5427` is pinned by Marciana, including vault-authorized ranked candidate materialization |
-| Grust | Core/backend version and guarded-commit capability | Exact reachable revision `3bbd715` is pinned by Marciana |
-| LakeCat | Governed-proof schema and exact release or revision | Exact reachable revision `415d131` is ready for the QueryGraph adapter pin |
+| TypeSec | Contract version, conformance fixture version, exact release or revision | Released 0.13.1, including vault-authorized ranked candidate materialization |
+| Grust | Core/backend version and guarded-commit capability | Released 0.12.1 graph, Sail, Turso, Cypher, SQL-core, and memory crates |
+| LakeCat | Governed-proof schema and exact release or revision | Released 0.3.0 core crate and qglake bundle |
 | Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail revision recorded below; it passed the live gate |
 | QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `efd6245` consumes standalone Marciana; a fresh clone passes its active 71-test suite, doctests, and strict Clippy |
 | Clients | Rust/Python/JavaScript fixture versions | Shared `compat/fixtures/api_remember_v1.json`, Python client `0.1.0` (Pydantic `>=2.7,<3`), and TypeScript client `0.1.0` (Node ESM, TypeScript `^5.7`) are independently buildable; coordinated release publication remains pending |
