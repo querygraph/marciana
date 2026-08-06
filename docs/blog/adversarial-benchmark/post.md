@@ -13,13 +13,17 @@ That question is: **what happens when the memory is lying to you, and the
 request path is trying to break you?**
 
 Today we are publishing
-[MARCIANA-ADVERSARIAL-v1](https://github.com/querygraph/marciana/blob/main/docs/benchmark/MARCIANA-ADVERSARIAL-v1.md),
+[MARCIANA-ADVERSARIAL-v1](https://github.com/querygraph/adversarial-cognition),
 a deterministic adversarial cognition benchmark for
 [Marciana](https://github.com/querygraph/marciana) and any comparable
-memory system that wants to plug in. It runs in CI on every push, its
-corpus is pinned by content digest, and its release policy has a property
-we think every memory benchmark should steal: **safety failures are hard
-gates that must be zero — they are never averaged into a score.**
+memory system that wants to plug in. It began as Marciana's release gate and
+now lives as a standalone project —
+[querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition)
+— with executable adapters for open-source memory systems. It runs in CI on
+every push, its corpus is pinned by content digest, and its release policy
+has a property we think every memory benchmark should steal: **safety
+failures are hard gates that must be zero — they are never averaged into a
+score.**
 
 ## A rounding error is not a security policy
 
@@ -47,12 +51,12 @@ Quality — accuracy by category, abstention behavior, latency percentiles,
 formation and restart cost — is reported separately, in the same JSON
 report, and never traded against a gate. The full mapping is about eighty
 lines of readable Python in
-[`adversarial_report.py`](https://github.com/querygraph/marciana/blob/main/benchmarks/adversarial_report.py).
+[`adversarial_report.py`](https://github.com/querygraph/adversarial-cognition/blob/main/adversarial_cognition/report.py).
 
 ## Eighteen ways to attack a memory
 
 The corpus
-([`adversarial_cases.py`](https://github.com/querygraph/marciana/blob/main/benchmarks/adversarial_cases.py))
+([`adversarial_cases.py`](https://github.com/querygraph/adversarial-cognition/blob/main/adversarial_cognition/cases.py))
 holds eighteen cases across eleven categories, every one with explicit
 expectations: an expected decision, an expected ranked prefix, a
 mandatory-abstention flag, and — the workhorse — a set of **forbidden IDs**
@@ -87,7 +91,7 @@ audit trail that varies between identical runs is not an audit trail.
 
 The corpus itself is versioned by content: a manifest of every expectation
 is pinned with its SHA-256 digest in a
-[committed fixture](https://github.com/querygraph/marciana/blob/main/benchmarks/fixtures/marciana-adversarial-v1/manifest.json),
+[committed fixture](https://github.com/querygraph/adversarial-cognition/blob/main/fixtures/marciana-adversarial-v1/manifest.json),
 the runner refuses to execute a corpus that doesn't match its pin, and the
 digest is stamped into every report. Nobody — including us — gets to
 quietly adjust an expectation after the fact.
@@ -96,7 +100,7 @@ quietly adjust an expectation after the fact.
 
 The system under test in the reference run is a deliberately small,
 dependency-free model of Marciana's authority boundary
-([`adversarial_backend.py`](https://github.com/querygraph/marciana/blob/main/benchmarks/adversarial_backend.py),
+([`backend.py`](https://github.com/querygraph/adversarial-cognition/blob/main/adversarial_cognition/backend.py),
 about two hundred lines). It implements authorization before ranking,
 valid-time filtering, digest-bound proposals, durable nonces, idempotent
 receipts, and cascading forget — and nothing else. It is not the Rust
@@ -115,7 +119,7 @@ push, not a quarterly report.
 
 The benchmark enumerates six comparative systems — Mem0, Zep, Letta,
 Cognee, Graphiti, and Akka + Fluree — through an explicit adapter protocol
-([`adversarial_adapters.py`](https://github.com/querygraph/marciana/blob/main/benchmarks/adversarial_adapters.py)).
+([`adapters.py`](https://github.com/querygraph/adversarial-cognition/blob/main/adversarial_cognition/adapters.py)).
 The rules are strict and symmetric:
 
 - A system executes **only** when an adapter command is explicitly
@@ -146,49 +150,89 @@ The five public corpora are handled with the same honesty: pinned to exact
 source revisions (including the MemGPT DMR dataset and Letta-Evals),
 normalized offline only from explicitly configured local fixtures, never
 downloaded at run time, and inventoried in every report
-([`adversarial_corpora.py`](https://github.com/querygraph/marciana/blob/main/benchmarks/adversarial_corpora.py)).
+([`corpora.py`](https://github.com/querygraph/adversarial-cognition/blob/main/adversarial_cognition/corpora.py)).
 
-## The recorded run
+## Running real systems
 
-On the recorded 2026-08-06 reference run (Darwin arm64, 18 cases, 100
-repeats):
+Talk is cheap, so the standalone repository ships executable adapters for
+open-source memory systems, each running the benchmark through the system's
+own API against a **local** stack — [Ollama](https://ollama.com) for the
+model and embedder, a Fluree container for the ledger — so anyone can
+reproduce a run with no keys and no hosted service. The adapters share one
+rule that keeps the comparison fair: an adapter claims only the capabilities
+its system actually enforces and declares the rest `"supported": false`. It
+never re-implements a security check the system lacks. A capability a system
+cannot back is a benchmark failure; a capability it never claimed is simply
+excluded from its accuracy.
 
-| Measurement | Value |
-|-------------|-------|
-| Status | **pass** |
-| Hard gates (all nine) | **0** |
-| Accuracy, all eleven categories | 100% |
-| P50 / P95 / P99 per case run | 36.1 µs / 49.9 µs / 57.8 µs |
-| Formation / restart | 20.4 µs / 0.4 µs |
+Marciana's deterministic reference passes all eighteen cases with every hard
+gate at zero. Two comparative systems, run 2026-08-06 on local hardware:
 
-All six comparative systems and all five public corpora reported
-`unavailable` — accurately, because nothing was configured. Those numbers
-are engineering diagnostics of the deterministic reference backend, not a
-hosted-system claim, and the report that says so contains bounded IDs,
-digests, counts, and timings only. A structural check rejects any string
+| System | Supported | Correct | Notable |
+|--------|:---------:|:-------:|---------|
+| Marciana (reference) | 18 | 18 | All nine hard gates zero |
+| Akka + Fluree | 16 | 16 | Every claimed capability holds |
+| Letta 0.16.8 | 9 | 7 | No input-robustness boundary |
+
+**Akka + Fluree** treats Fluree as the semantic-ledger authority and the
+adapter as the actor/service tier. Every capability it claims is executed by
+the ledger itself: authorization and temporal filters as SPARQL `FILTER`s,
+ranking as a `COUNT` aggregation, nonce claims and digest-guarded improves as
+`INSERT … WHERE FILTER NOT EXISTS` transactions, forget as a derived-cascade
+tombstone join. It passes all sixteen capabilities it claims — including
+every safety gate — and honestly declares the two it cannot enforce
+(clearance and purpose), because this Fluree build ships no policy engine and
+the adapter refuses to fake one.
+
+**Letta**, driven through its archival-memory path, passes retrieval,
+isolation, temporal, restart reproducibility, and injection containment. But
+the adversarial cases found something a retrieval score never would: Letta
+has **no input-robustness boundary at the memory layer**. An empty query
+returns every memory instead of abstaining, and a 16 KB query is accepted and
+answered rather than rejected. Both cases require only the retrieval
+capability Letta claims, so both are scored — and both fail. That is the
+benchmark doing its job: not "Letta is bad at recall" (it is fine at recall),
+but "Letta's memory API has no guard against malformed or oversized input" —
+exactly the kind of finding a governed deployment needs before it trusts a
+memory layer.
+
+Adapters for Mem0, Graphiti (over embedded Kuzu), and Cognee ship in the
+same repository and run against the same local stack; their results depend on
+the local model and are recorded in
+[`docs/RESULTS.md`](https://github.com/querygraph/adversarial-cognition/blob/main/docs/RESULTS.md)
+as each run lands. None of these systems ships the full governed boundary,
+and the adapters make exactly which parts each one enforces — and which it
+does not — legible instead of hidden.
+
+Every number here is an engineering diagnostic on the stated local host, not
+a hosted-service or vendor claim, and every report contains bounded IDs,
+digests, counts, and timings only — a structural check rejects any string
 long enough to be memory plaintext, and a test asserts no seeded phrase
 appears in a rendered report.
 
 ## Run it yourself
 
 ```sh
-git clone https://github.com/querygraph/marciana
-cd marciana
-python3 -m unittest discover -s benchmarks -p 'test_*.py' -q
-python3 benchmarks/run_adversarial_benchmark.py
+git clone https://github.com/querygraph/adversarial-cognition
+cd adversarial-cognition
+python3 -m unittest discover -s tests -p 'test_*.py' -q
+python3 run_benchmark.py
 ```
 
-No dependencies, no network, no keys. The runner prints the gate summary,
-writes the JSON report, and exits non-zero unless every gate is zero.
+The core is dependency-free — no network, no keys. The runner prints the
+gate summary, writes the JSON report, and exits non-zero unless every gate
+is zero. To run the OSS adapters, `docker compose up -d` for the Fluree
+ledger and point Ollama at a local model; each adapter's README documents
+its setup.
 
 If you build or operate a memory system on the comparative list — or one
-that should be — the adapter contract is one JSON-in, JSON-out command,
-documented in
-[`adversarial-cognition-benchmark.md`](https://github.com/querygraph/marciana/blob/main/adversarial-cognition-benchmark.md).
-We would genuinely like to publish comparative results from
-vendor-authored adapters, with your version string in the report and your
-unsupported cases declared rather than guessed. The full design — threat
-model, case-by-case expectations, gate mapping, report schema, fairness
-policy, and limitations — is in the
-[benchmark document](https://github.com/querygraph/marciana/blob/main/docs/benchmark/MARCIANA-ADVERSARIAL-v1.md),
+that should be — the adapter contract is a small `MemorySystem` interface
+and a JSON-in, JSON-out command, documented in
+[the adapters guide](https://github.com/querygraph/adversarial-cognition/blob/main/adapters/README.md).
+We would genuinely like to publish comparative results from vendor-authored
+adapters, with your version string in the report and your unsupported cases
+declared rather than guessed. The full design — threat model, case-by-case
+expectations, gate mapping, report schema, fairness policy, and limitations
+— is in the
+[benchmark document](https://github.com/querygraph/adversarial-cognition/blob/main/docs/MARCIANA-ADVERSARIAL-v1.md),
 also published as a PDF alongside it.

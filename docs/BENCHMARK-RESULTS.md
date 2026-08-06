@@ -59,6 +59,16 @@ fixture path was configured. These figures are local engineering
 diagnostics on the deterministic reference backend, not a hosted-system or
 vendor-comparison claim.
 
+Cross-system comparative results now live in the standalone benchmark
+repository,
+[querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition/blob/main/docs/RESULTS.md),
+where executable OSS adapters run each system against the corpus. Recorded
+there (2026-08-06, local host): Akka + Fluree passes all sixteen
+capabilities it claims (clearance and purpose honestly unsupported), and
+Letta 0.16.8 passes seven of nine supported cases — the two failures
+surfacing that its memory layer rejects neither empty nor oversized
+queries. Those runs are diagnostics on local hardware, not vendor claims.
+
 ## Reproduce
 
 ```bash

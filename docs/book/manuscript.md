@@ -776,6 +776,19 @@ silently substituted. The recorded reference run passes with every gate at
 zero and 100% category accuracy; the full document, including the threat
 model and a fairness section answering anticipated objections, lives at
 `docs/benchmark/MARCIANA-ADVERSARIAL-v1.md` with a rendered PDF beside it.
+
+The benchmark is now maintained as a standalone project,
+[querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition),
+with executable adapters that run open-source memory systems against the
+corpus on a local Ollama-and-Fluree stack; Marciana continues to gate its
+releases on the same suite. The first comparative runs are instructive: an
+Akka-with-Fluree port, using Fluree as the semantic-ledger authority, passes
+every capability it claims through guarded SPARQL transactions and honestly
+declares clearance and purpose unsupported, while Letta passes retrieval and
+isolation but is caught with no guard against empty or oversized queries at
+the memory layer. The adapters make exactly which parts of the governed
+boundary each system enforces — and which it does not — legible instead of
+hidden.
 Every result remains content-free outside its authorized environment: the
 report carries bounded IDs, digests, counts, and timings, and a structural
 check rejects anything plaintext-sized.

@@ -4,6 +4,13 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Factor the adversarial cognition benchmark out to the standalone project
+  querygraph/adversarial-cognition and point Marciana's benchmark document,
+  book, blog post, and results docs at it; Marciana keeps the vendored suite
+  as its release gate.
+- Record the first cross-system comparative runs (Akka + Fluree, Letta) from
+  the standalone repository's executable OSS adapters in the docs and blog.
+
 - Prepare the `0.12.1` registry release for `querygraph-memory`,
   `marciana-catalog`, `marciana-cognition`, and `marciana-ledger`, replacing
   development Git dependencies with released TypeSec, Grust, and LakeCat

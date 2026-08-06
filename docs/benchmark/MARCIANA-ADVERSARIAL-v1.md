@@ -27,11 +27,13 @@ separately. On the recorded 2026-08-06 reference run, all nine gates held at
 zero, accuracy was 100% across eleven scenario categories, and the
 deterministic reference path measured 36.1 µs P50 per full case run.
 
-Everything described here is implemented and versioned in the
-[Marciana repository](https://github.com/querygraph/marciana): the corpus,
-the reference backend, the runner, the comparative-system adapter protocol,
-and the report schema. The suite runs in CI on every push, and the runner
-exits non-zero if any hard gate breaks.
+The benchmark is now maintained as a standalone project at
+[querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition),
+where the corpus, the reference backend, the runner, the comparative-system
+adapter protocol, the report schema, and executable OSS-system adapters
+live and run in CI. It continues to gate Marciana releases. This document is
+Marciana's copy of the design; see the standalone repository for the OSS
+adapters and the recorded cross-system results.
 
 # Why an adversarial benchmark
 

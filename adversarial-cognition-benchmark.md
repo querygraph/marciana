@@ -1,5 +1,12 @@
 # MARCIANA-ADVERSARIAL-v1
 
+> **Upstreamed.** The benchmark now lives in its own repository,
+> [querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition),
+> as a standalone, dependency-free package with executable OSS system
+> adapters. Marciana continues to gate releases on it. This document records
+> the original goal and design; the canonical implementation, comparative
+> results, and setup instructions are upstream.
+
 ## Goal
 
 Build and run a deterministic adversarial cognition benchmark for Marciana and

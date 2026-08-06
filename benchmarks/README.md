@@ -61,6 +61,12 @@ ID, not the long chat, and is not part of the dependency-free smoke harness.
 
 ## Adversarial cognition benchmark
 
+> The adversarial benchmark is now maintained as a standalone project at
+> [querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition),
+> with executable adapters for OSS memory systems (Mem0, Graphiti, Cognee,
+> Letta, Akka + Fluree) and recorded cross-system results. The copy here is
+> the vendored release gate that Marciana's CI runs.
+
 `MARCIANA-ADVERSARIAL-v1` tests whether the system stays correct, secure,
 auditable, and reproducible when the memory and request path are actively
 adversarial. The corpus (`adversarial_cases.py`, eighteen cases) covers
