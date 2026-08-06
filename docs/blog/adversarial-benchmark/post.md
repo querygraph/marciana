@@ -1,6 +1,6 @@
 # MARCIANA-ADVERSARIAL-v1: benchmarking cognition under attack
 
-![Venetian galleys race across the evening Adriatic toward Rovinj, led by the Bucintoro flying the banner of St Mark with Marciana lettered on its side.](headboard.png)
+![Plato disputing with Diogenes over the rug at an Academy symposium — the original adversarial gesture.](headboard.png)
 
 Every memory benchmark we could find asks some version of the same
 question: *did the system remember the right thing?* LoCoMo asks it across
@@ -52,6 +52,38 @@ formation and restart cost — is reported separately, in the same JSON
 report, and never traded against a gate. The full mapping is about eighty
 lines of readable Python in
 [`adversarial_report.py`](https://github.com/querygraph/adversarial-cognition/blob/main/adversarial_cognition/report.py).
+
+## Why "unforgeable," not just "careful"
+
+It would be easy to read the nine gates as a checklist of things to
+carefully implement — validate this, rate-limit that. That undersells what
+the reference system actually does. Marciana's boundary isn't a set of
+careful checks bolted onto a memory store; it rests on identity and
+authority that a model, or an attacker, cannot fabricate in the first
+place.
+
+**TypeDID** binds a cryptographic identity to every request. There is no
+anonymous default and no ambient authority — a request without a TypeDID
+has no scope at all, so "who is asking" is never a string an attacker can
+copy, only an identity they would have to forge. **TypeSec** then holds the
+only capability that may reveal or mutate protected memory: a
+non-cloneable, single-purpose token of authority that must be *held* to
+act, not a permission flag that code merely checks. Cognition may propose
+anything against that boundary — an improvement, a forgotten fact, a
+plausible-sounding update — but a proposal is inert data until TypeSec
+reauthorizes it and Grust commits it atomically. The model is never the
+authority.
+
+That is why a forged source digest doesn't just score badly here — it is
+*rejected*, and a replayed nonce doesn't just look suspicious — it *cannot
+mutate state*, in session or after a restart. And because every commit
+produces a receipt that is a deterministic function of what actually
+happened, two identical runs must produce identical receipts; the
+benchmark treats disagreement between them as a hard gate failure, because
+an audit trail that can drift between identical runs isn't an audit trail.
+The gates in this benchmark are not a coding-discipline checklist. They are
+what unforgeable identity and capability-gated authority look like when you
+attack them on purpose.
 
 ## Eighteen ways to attack a memory
 
@@ -223,6 +255,77 @@ digests, counts, and timings only — a structural check rejects any string
 long enough to be memory plaintext, and a test asserts no seeded phrase
 appears in a rendered report.
 
+**The pattern across the table is the finding.** Every open-source system
+here recalls facts well — none of the failures above are recall failures.
+What separates them is what happens when the request path stops
+cooperating. Akka + Fluree holds because a real ledger enforces the
+properties directly. Marciana holds because the vault, not the model, is
+the authority. The other four are all fine memory libraries that were never
+built to survive an adversary: Mem0's only scoping axis is `user_id`, so it
+cannot express clearance within a tenant; Letta, Graphiti, and Cognee all
+happily embed and answer a query with no upper bound on its size. None of
+this shows up on a recall benchmark. It only shows up when something is
+trying to break the boundary on purpose — which is the entire premise of
+this project.
+
+## A home at adversari.al
+
+The benchmark now has a home:
+**[adversari.al](https://adversari.al)** is a growing collection of
+adversarial benchmarks for the QueryGraph stack — Marciana's cognition
+layer today, with LakeCat's governed catalog and TypeSec's capability
+boundary in preparation. The site's thesis is the same one this post has
+been arguing: identity and authority that cannot be forged is what makes a
+boundary worth benchmarking in the first place.
+
+**[adversari.al/cognition](https://adversari.al/cognition)** is the
+canonical results page for MARCIANA-ADVERSARIAL-v1 — the nine gates, the
+full six-system comparison table, and the same fairness argument made
+above, with the corpus digest and every link to the repository and the
+raw results.
+
+## The book: *Adversarial Cognition*
+
+If this post is the pitch, the book is the argument in full. **[*Adversarial
+Cognition: Governed Memory and Unforgeable Lineage in the QueryGraph
+Stack*](https://firstpair.org/adversarial-cognition)** assumes no prior
+knowledge of QueryGraph and builds up from a single throwaway sentence — "the
+price is 4.20 USD/kg" — to everything a memory system has to get right to
+carry that sentence responsibly: evidence, identity, time, policy, and a
+commit that can be recovered and audited. It spends real time on the
+foundations this post has only sketched — TypeDID identity, the TypeSec
+capability-gated vault, the composite governed-scan proof, and why receipts
+distinguish every phase's digest and timestamp so one can never be reused
+as evidence for another — before turning to the enterprise case for
+governed cognition and this benchmark's full results.
+
+Read it online at the [hosted FirstPair
+reader](https://firstpair.org/read/adversarial-cognition/), or download the
+[PDF](https://adversari.al/book/adversarial-cognition.pdf) and
+[EPUB](https://adversari.al/book/adversarial-cognition.epub) directly from
+adversari.al.
+
+## Get involved
+
+This is a young benchmark and we would rather it be contested than
+ignored. The most useful contribution right now is a **vendor-authored
+adapter** for a system that isn't in the comparison yet — Zep, LangMem, or
+anything else that calls itself a memory layer. The contract is small: a
+`MemorySystem` interface with a declared capability set and a JSON-in,
+JSON-out command, documented in the [adapters
+guide](https://github.com/querygraph/adversarial-cognition/blob/main/adapters/README.md).
+Your adapter reports its own version string and declares exactly what your
+system enforces; we will never fake a capability on your behalf, and we
+would genuinely like to publish your numbers next to ours.
+
+Beyond adapters: new adversarial cases, sharper fairness objections we
+haven't thought of, bugs in the reference backend, or a stronger claim for
+an existing system are all welcome as issues or pull requests against
+[querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition).
+If you think a gate is wrong, or missing, say so — the corpus is versioned
+by digest precisely so that changing it is a visible, reviewable act, not a
+quiet edit.
+
 ## Run it yourself
 
 ```sh
@@ -248,14 +351,10 @@ pinned dependencies inside the image, runs every system against the corpus,
 and writes the report and results. Each adapter's README documents its
 capability claims.
 
-If you build or operate a memory system on the comparative list — or one
-that should be — the adapter contract is a small `MemorySystem` interface
-and a JSON-in, JSON-out command, documented in
-[the adapters guide](https://github.com/querygraph/adversarial-cognition/blob/main/adapters/README.md).
-We would genuinely like to publish comparative results from vendor-authored
-adapters, with your version string in the report and your unsupported cases
-declared rather than guessed. The full design — threat model, case-by-case
-expectations, gate mapping, report schema, fairness policy, and limitations
-— is in the
-[benchmark document](https://github.com/querygraph/adversarial-cognition/blob/main/docs/MARCIANA-ADVERSARIAL-v1.md),
-also published as a PDF alongside it.
+The full design — threat model, case-by-case expectations, gate mapping,
+report schema, fairness policy, and limitations — is in the [benchmark
+document](https://github.com/querygraph/adversarial-cognition/blob/main/docs/MARCIANA-ADVERSARIAL-v1.md),
+also published as a PDF alongside it, and at greater length in [the
+book](https://firstpair.org/adversarial-cognition). Start at
+[adversari.al/cognition](https://adversari.al/cognition) if you just want
+the results.

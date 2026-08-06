@@ -4,6 +4,13 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Update the adversarial-benchmark blog post with the completed six-system
+  comparison, a dedicated section on why the boundary is unforgeable rather
+  than merely careful, links to the new adversari.al site and the
+  *Adversarial Cognition* FirstPair book, and an invitation for
+  vendor-authored adapters and other contributions. Replace the headboard
+  with the Plato-Diogenes rug-dispute illustration and keep the Venetian
+  galleys headboard as `headboard-rovinj.png`.
 - Factor the adversarial cognition benchmark out to the standalone project
   querygraph/adversarial-cognition and point Marciana's benchmark document,
   book, blog post, and results docs at it; Marciana keeps the vendored suite
