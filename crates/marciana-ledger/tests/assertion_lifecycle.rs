@@ -1,7 +1,7 @@
 use chrono::{TimeZone, Utc};
 use marciana_ledger::{
-    Assertion, AssertionId, AssertionLineage, AssertionState, AssertionTransition, Confidence,
-    LedgerError, LegacyRelation, TemporalInterval, TransitionEvidence,
+    Assertion, AssertionId, AssertionLineage, AssertionQuery, AssertionState, AssertionTransition,
+    Confidence, LedgerError, LegacyRelation, TemporalInterval, TransitionEvidence,
 };
 
 const DIGEST: &str = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -225,5 +225,51 @@ fn legacy_import_requires_source_evidence_without_fabricated_assertion_cause() {
     assert!(matches!(
         relation,
         Err(LedgerError::InvalidTransitionEvidence)
+    ));
+}
+
+#[test]
+fn candidate_queries_are_deterministic_and_keep_history_distinct_from_current_validity() {
+    let ended = LegacyRelation::new(
+        "legacy-edge:record-1:1",
+        "account:acme",
+        "locatedIn",
+        "place:venice",
+        Confidence::from_basis_points(10_000).unwrap(),
+        at(0),
+        at(1),
+        TemporalInterval::new(at(0), Some(at(3))).unwrap(),
+        AssertionLineage::new(
+            "episode:legacy-1",
+            "record:1",
+            "legacy-relates-v1",
+            "assertion-v1",
+        )
+        .unwrap(),
+        TransitionEvidence::import(vec![DIGEST.into()]).unwrap(),
+    )
+    .unwrap()
+    .migrate()
+    .unwrap();
+    let active = assertion();
+    let assertions = vec![active, ended.clone()];
+
+    assert_eq!(
+        AssertionQuery::current_at(at(2)).select(&assertions),
+        vec![&ended]
+    );
+    assert_eq!(
+        AssertionQuery::current_at(at(4)).select(&assertions),
+        Vec::<&Assertion>::new()
+    );
+    assert_eq!(
+        AssertionQuery::states_at(at(4), [AssertionState::Current])
+            .unwrap()
+            .select(&assertions),
+        vec![&ended]
+    );
+    assert!(matches!(
+        AssertionQuery::states_at(at(4), []),
+        Err(LedgerError::InvalidQuery)
     ));
 }

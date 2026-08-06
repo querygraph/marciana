@@ -17,4 +17,6 @@ pub enum LedgerError {
     InvalidTransition,
     #[error("assertion transition evidence is invalid")]
     InvalidTransitionEvidence,
+    #[error("assertion query is invalid")]
+    InvalidQuery,
 }

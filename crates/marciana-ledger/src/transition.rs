@@ -5,7 +5,7 @@ use crate::{AssertionId, LedgerError};
 
 /// A belief state is separate from its structural subject-predicate-object
 /// projection. History is retained through state transitions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum AssertionState {
     Proposed,

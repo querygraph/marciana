@@ -26,8 +26,11 @@ explicit deployment migration authority and returns no source values. The
 baseline neighborhood read remains unchanged before and after migration,
 providing mixed-version read coverage. The runner now uses Grust's durable
 guarded idempotency protocol, including persistent Turso verification. The
-remaining Phase 1 work is assertion-aware recall; it must consume these types
-rather than reproduce their validation or state rules.
+ledger now supplies deterministic assertion candidate queries that separate
+state-history inspection from current-validity selection without materializing
+protected content. The remaining Phase 1 work is connecting those candidate
+IDs to TypeSec-authorized recall; it must consume these types rather than
+reproduce their validation or state rules.
 
 ## Executive judgment
 

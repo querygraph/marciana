@@ -54,6 +54,10 @@ All notable changes to Marciana are documented in this file.
 - Moved assertion migration onto Grust's durable guarded-commit protocol and
   verified idempotent migration against persistent Turso storage.
 
+- Added deterministic, content-free assertion candidate queries for as-of
+  lifecycle inspection and currently valid beliefs, preserving the vault as
+  the only protected-content materialization boundary.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

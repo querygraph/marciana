@@ -7,11 +7,13 @@
 mod assertion;
 mod error;
 mod migration;
+mod query;
 mod temporal;
 mod transition;
 
 pub use assertion::{Assertion, AssertionId, AssertionLineage, Confidence};
 pub use error::LedgerError;
 pub use migration::LegacyRelation;
+pub use query::AssertionQuery;
 pub use temporal::TemporalInterval;
 pub use transition::{AssertionState, AssertionTransition, TransitionEvidence};
