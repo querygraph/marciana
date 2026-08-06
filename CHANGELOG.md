@@ -14,6 +14,7 @@ All notable changes to Marciana are documented in this file.
 - Keep the evaluation formulas portable across PDF, EPUB, and HTML renderers.
 - Let Pandoc provide the single canonical heading-numbering scheme in every
   edition.
+- Add the tracked QueryGraph blog headboard to the FirstPair book configuration.
 - Advance the Sail compatibility pin to the merged upstream baseline.
 - Add scope-bound vector manifests and atomic ID-only repair batches.
 - Persist and recover vector manifests through guarded Grust commits.
