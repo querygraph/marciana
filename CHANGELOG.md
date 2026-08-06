@@ -6,6 +6,16 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Completed MARCIANA2 Phase 1's assertion-safe baseline: deterministic
+  assertion candidates now materialize only through TypeSec's capability-gated
+  ranked-ID recall, preserving purpose, validity, retention, quarantine, and
+  clearance checks. Legacy-import evidence also round-trips through strict
+  durable decoding.
+
+- Updated the TypeSec compatibility pin to `14bd5427`, which supplies the
+  vault-owned ranked candidate materialization primitive used by assertion
+  recall.
+
 - Added `marciana-ledger`, the canonical assertion domain for MARCIANA2 Phase
   1. Assertions now have collision-resistant identity independent of their
   structural graph triplet, bounded lineage and temporal validity, and a

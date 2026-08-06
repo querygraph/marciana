@@ -16,7 +16,7 @@ use typesec_memory::StoredRecord;
 
 use crate::RELATES;
 
-const ASSERTION_LABEL: &str = "MemoryAssertion";
+pub(crate) const ASSERTION_LABEL: &str = "MemoryAssertion";
 const ENTITY_LABEL: &str = "MemoryEntity";
 const SUBJECT_EDGE: &str = "ASSERTS_SUBJECT";
 const OBJECT_EDGE: &str = "ASSERTS_OBJECT";
@@ -132,6 +132,16 @@ pub fn project_legacy_relation(
 
 fn assertion_node_id(assertion: &Assertion) -> NodeId {
     NodeId::from(format!("assertion:{}", assertion.id()).as_str())
+}
+
+pub(crate) fn decode_assertion_node(node: &Node) -> Result<Assertion, AssertionProjectionError> {
+    if node.label.as_str() != ASSERTION_LABEL {
+        return Err(AssertionProjectionError::LegacyInput);
+    }
+    let Some(Value::Json(payload)) = node.props.get("assertion") else {
+        return Err(AssertionProjectionError::LegacyInput);
+    };
+    serde_json::from_value(payload.clone()).map_err(|_| AssertionProjectionError::LegacyInput)
 }
 
 fn entity_node_id(name: &str) -> NodeId {

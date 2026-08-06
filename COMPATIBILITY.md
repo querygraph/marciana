@@ -15,7 +15,7 @@ baseline, not yet a versioned crate release.
 | Component | Required compatibility datum | Current scaffold status |
 |---|---|---|
 | Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Git-pinned, native governed `improve` baseline; the broader public four-verb facade is scheduled in `MARCIANA2.md` |
-| TypeSec | Contract version, conformance fixture version, exact release or revision | Exact reachable revision `1926f18c` is pinned by Marciana |
+| TypeSec | Contract version, conformance fixture version, exact release or revision | Exact reachable revision `14bd5427` is pinned by Marciana, including vault-authorized ranked candidate materialization |
 | Grust | Core/backend version and guarded-commit capability | Exact reachable revision `3bbd715` is pinned by Marciana |
 | LakeCat | Governed-proof schema and exact release or revision | Exact reachable revision `415d131` is ready for the QueryGraph adapter pin |
 | Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail revision recorded below; it passed the live gate |

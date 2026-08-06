@@ -20,7 +20,8 @@ grust-turso = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b
 grust-sail = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0", optional = true }
 # TypeSec remains the security-contract owner. Pin its reviewed source rather
 # than relying on the developer's sibling checkout.
-typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
+typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
 marciana-ledger = { path = "../marciana-ledger" }
 chrono = { version = "0.4", features = ["serde"] }
 serde_json = { workspace = true }
@@ -36,8 +37,8 @@ arrow = { version = "58.1.0", features = ["ipc_compression"], optional = true }
 [dev-dependencies]
 grust-memory = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0" }
 tempfile = { workspace = true }
-typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0", features = ["conformance"] }
-typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
-typesec-rbac = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0", default-features = false }
+typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0", features = ["conformance"] }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
+typesec-rbac = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0", default-features = false }
 static_assertions = "1"
 tokio = { workspace = true, features = ["test-util"] }

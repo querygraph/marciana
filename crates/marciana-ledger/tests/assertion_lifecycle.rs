@@ -199,6 +199,10 @@ fn legacy_migration_is_retry_stable_and_keeps_ended_validity_historical() {
     assert_eq!(first.state(), AssertionState::Current);
     assert!(first.is_current_at(at(2)));
     assert!(!first.is_current_at(at(3)));
+    assert_eq!(
+        serde_json::from_value::<Assertion>(serde_json::to_value(&first).unwrap()).unwrap(),
+        first
+    );
 }
 
 #[test]

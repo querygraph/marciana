@@ -47,6 +47,8 @@ use grust_core::prelude::{
 use sha2::{Digest, Sha256};
 use typesec_memory::{MemoryId, MemoryStore, StoreBatchOp, StoreError, StoreQuery, StoredRecord};
 
+use marciana_ledger::AssertionQuery;
+
 const RECORD_LABEL: &str = "MemoryRecord";
 const ENTITY_LABEL: &str = "MemoryEntity";
 const MENTIONS: &str = "MENTIONS";
@@ -77,6 +79,39 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
     /// Borrow the underlying Grust store.
     pub fn graph(&self) -> &G {
         &self.graph
+    }
+
+    /// Return deterministic source-record identifiers selected by assertion
+    /// state. This ranking step never returns protected record content.
+    ///
+    /// # Errors
+    ///
+    /// Returns a fixed backend error if an assertion projection is malformed
+    /// or cannot be read.
+    pub fn assertion_candidate_ids(
+        &self,
+        query: &AssertionQuery,
+    ) -> Result<Vec<MemoryId>, StoreError> {
+        let nodes = self
+            .run(self.graph.traverse(Traversal {
+                start: Start::NodesByLabel(assertion_projection::ASSERTION_LABEL.into()),
+                steps: Vec::new(),
+                limit: None,
+            }))
+            .map_err(|_| assertion_candidate_error())?;
+        let assertions = nodes
+            .iter()
+            .map(assertion_projection::decode_assertion_node)
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|_| assertion_candidate_error())?;
+        let mut ids = Vec::new();
+        for assertion in query.select(&assertions) {
+            let id = MemoryId::from_string(assertion.lineage().source_record_id().to_owned());
+            if !ids.contains(&id) {
+                ids.push(id);
+            }
+        }
+        Ok(ids)
     }
 
     /// Adds assertion projections for legacy `RELATES` edges in one backend
@@ -432,6 +467,10 @@ fn legacy_migration_error() -> StoreError {
     StoreError::Backend("legacy assertion migration failed".into())
 }
 
+fn assertion_candidate_error() -> StoreError {
+    StoreError::Backend("assertion candidate lookup failed".into())
+}
+
 fn legacy_migration_digest(domain: &str, values: &[&[u8]]) -> String {
     let mut hasher = Sha256::new();
     hasher.update(domain.as_bytes());
@@ -465,6 +504,7 @@ fn decode_record(node: &Node) -> Result<StoredRecord, StoreError> {
 
 pub mod analytics;
 pub mod assertion_projection;
+pub mod assertion_recall;
 pub mod cognition;
 #[cfg(feature = "turso")]
 pub mod turso;

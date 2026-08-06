@@ -19,14 +19,14 @@ marciana-catalog = { path = "../marciana-catalog", version = "0.12.0" }
 querygraph-memory = { path = "../marciana-memory", version = "0.12.0", features = ["sail"] }
 serde_json = { workspace = true }
 tokio = { workspace = true }
-typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
-typesec-integrations = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
-typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
+typesec-integrations = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
+typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
 thiserror = { workspace = true }
 
 [dev-dependencies]
 async-trait = { workspace = true }
-typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "14bd54272c6df2846e86bcaa5d52b3ef14658f24", version = "0.13.0" }
 
 [lints]
 workspace = true

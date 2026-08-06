@@ -28,9 +28,12 @@ providing mixed-version read coverage. The runner now uses Grust's durable
 guarded idempotency protocol, including persistent Turso verification. The
 ledger now supplies deterministic assertion candidate queries that separate
 state-history inspection from current-validity selection without materializing
-protected content. The remaining Phase 1 work is connecting those candidate
-IDs to TypeSec-authorized recall; it must consume these types rather than
-reproduce their validation or state rules.
+protected content. Assertion-derived source IDs now flow through TypeSec's
+capability-gated candidate recall, which applies the existing purpose,
+validity, retention, quarantine, and clearance gate before returning content.
+Phase 1's ledger, migration, and authorized assertion recall baseline is
+complete; later phases extend it through formation and context products rather
+than a parallel memory path.
 
 ## Executive judgment
 

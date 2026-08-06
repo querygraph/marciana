@@ -65,7 +65,12 @@ struct TransitionEvidenceWire {
 impl<'de> Deserialize<'de> for TransitionEvidence {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let wire = TransitionEvidenceWire::deserialize(deserializer)?;
-        Self::new(wire.causing_assertions, wire.evidence_digests).map_err(de::Error::custom)
+        let evidence = if wire.causing_assertions.is_empty() {
+            Self::import(wire.evidence_digests)
+        } else {
+            Self::new(wire.causing_assertions, wire.evidence_digests)
+        };
+        evidence.map_err(de::Error::custom)
     }
 }
 
