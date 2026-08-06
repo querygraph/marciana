@@ -4,6 +4,7 @@ mod audit_export;
 mod backup;
 mod binding_error;
 mod cost;
+mod encryption_boundary;
 mod engine_binding;
 mod formation_profile;
 mod governed;
@@ -21,6 +22,7 @@ pub use audit_export::{AuditExportError, AuditExportRecord};
 pub use backup::{BackupManifest, RestoreError};
 pub use binding_error::CognitionBindingError;
 pub use cost::{CostError, CostRates, CostSample, CostSnapshot, TenantCostAccounting};
+pub use encryption_boundary::{EncryptionBoundary, EncryptionBoundaryError};
 pub use engine_binding::CognitionEngineBinding;
 pub use formation_profile::{
     FormationBinding, FormationBudgetError, FormationCapability, FormationProfile,

@@ -92,6 +92,8 @@ All notable changes to Marciana are documented in this file.
   microcredit rates, operation separation, and saturating usage snapshots.
 - Added deterministic operation-scoped SLO evaluation over content-free metrics,
   with conservative latency and denial-rate checks.
+- Added a digest-only tenant/encryption-key boundary contract with exact scope
+  matching and monotonic key-revision rotation; key material remains host-owned.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

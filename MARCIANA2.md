@@ -98,6 +98,10 @@ than wrapping and snapshots contain no request or memory content.
 Operation metrics now also have an explicit SLO evaluator with per-verb
 latency and denial-rate targets, conservative rounding, and content-free
 compliance reports for host dashboards.
+Encryption-boundary groundwork now binds tenant identity, non-secret key
+identity, and monotonic key revision into a stable digest; exact matching is
+required before host-managed persistence, while key material remains outside
+Marciana.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
