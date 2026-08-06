@@ -1,4 +1,6 @@
+import json
 import unittest
+from pathlib import Path
 
 from marciana_client import (
     ForgetRequest,
@@ -41,6 +43,11 @@ class ClientTests(unittest.TestCase):
             RememberRequest(space="tenant/coffee", text="", purpose="research")
         with self.assertRaises(ValueError):
             RecallRequest(space="tenant coffee", query="price", purpose="research")
+
+    def test_shared_wire_fixture_uses_snake_case(self) -> None:
+        fixture = json.loads(Path("compat/fixtures/api_remember_v1.json").read_text())
+        self.assertEqual(fixture["space_id"], "memory/user:alice/semantic")
+        self.assertNotIn("spaceId", fixture)
 
 
 if __name__ == "__main__":

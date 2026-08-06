@@ -57,6 +57,8 @@ All notable changes to Marciana are documented in this file.
   contract for memory IDs and receipts.
 - Added strict serde derives and a checked-in Rust four-verb wire fixture with
   unknown-field rejection.
+- Centralized the remember wire fixture under `compat/fixtures` and added
+  Python/TypeScript consumers to prevent cross-client schema drift.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

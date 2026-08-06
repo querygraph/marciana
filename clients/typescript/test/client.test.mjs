@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 import { MarcianaClient } from "../dist/index.js";
 
 test("routes a typed remember request through injected transport", async () => {
@@ -18,4 +19,10 @@ test("routes a typed remember request through injected transport", async () => {
 test("rejects invalid identities before transport", async () => {
   const client = new MarcianaClient({ post: async () => { throw new Error("transport called"); } });
   await assert.rejects(() => client.recall({ space: "tenant coffee", query: "price", purpose: "research" }), /invalid memory identity/);
+});
+
+test("shared fixture uses the Rust/Python snake_case wire", async () => {
+  const fixture = JSON.parse(await readFile("../../compat/fixtures/api_remember_v1.json", "utf8"));
+  assert.equal(fixture.space_id, "memory/user:alice/semantic");
+  assert.equal(fixture.spaceId, undefined);
 });

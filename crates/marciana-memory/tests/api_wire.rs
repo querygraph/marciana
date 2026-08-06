@@ -3,7 +3,7 @@ use querygraph_memory::{ForgetRequest, ImproveRequest, RecallRequest, RememberRe
 #[test]
 fn four_verb_wire_fixture_is_strict_and_snake_case() {
     let remember: RememberRequest =
-        serde_json::from_str(include_str!("fixtures/api_remember_v1.json"))
+        serde_json::from_str(include_str!("../../../compat/fixtures/api_remember_v1.json"))
             .expect("remember fixture");
     assert_eq!(remember.space_id, "memory/user:alice/semantic");
     let encoded = serde_json::to_value(&remember).expect("serialize remember");
@@ -13,7 +13,7 @@ fn four_verb_wire_fixture_is_strict_and_snake_case() {
     let improve: ImproveRequest = serde_json::from_value(serde_json::json!({
         "space_id": "memory/user:alice/semantic",
         "memory_id": "mem-old",
-        "replacement": serde_json::from_str::<RememberRequest>(include_str!("fixtures/api_remember_v1.json")).unwrap(),
+        "replacement": serde_json::from_str::<RememberRequest>(include_str!("../../../compat/fixtures/api_remember_v1.json")).unwrap(),
     }))
     .expect("improve request");
     assert_eq!(improve.memory_id, "mem-old");
