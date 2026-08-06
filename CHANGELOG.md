@@ -10,6 +10,8 @@ All notable changes to Marciana are documented in this file.
   upstream Sail binary (or uses an explicit `SAIL_ENDPOINT`) before running
   Marciana's ignored live cognition tests.
 - Kept the durable progress validator clean under strict all-feature Clippy.
+- Made learning APIs pass strict all-feature Clippy with explicit error
+  contracts and borrowed evidence input.
 
 ### 2026-08-06
 

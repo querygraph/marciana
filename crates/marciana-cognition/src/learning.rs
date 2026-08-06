@@ -28,8 +28,12 @@ pub struct Observation {
 }
 
 impl Observation {
+    /// Creates a proposed observation from digest-only evidence.
+    ///
+    /// # Errors
+    /// Returns an error when evidence, support, or confidence bounds fail.
     pub fn propose(
-        evidence_digests: Vec<String>,
+        evidence_digests: &[String],
         support_count: u32,
         confidence_basis_points: u16,
         valid_from: DateTime<Utc>,
@@ -45,7 +49,7 @@ impl Observation {
         {
             return Err(LearningError::InvalidEvidence);
         }
-        let mut canonical = evidence_digests.clone();
+        let mut canonical = evidence_digests.to_owned();
         canonical.sort();
         let observation_digest = digest(&format!(
             "observation-v1|{canonical:?}|{support_count}|{confidence_basis_points}|{valid_from}"
@@ -61,6 +65,10 @@ impl Observation {
         })
     }
 
+    /// Advances the observation through its allowed lifecycle.
+    ///
+    /// # Errors
+    /// Returns an error for backdated, terminal, or otherwise invalid transitions.
     pub fn transition(
         &mut self,
         next: ObservationStatus,
@@ -71,9 +79,10 @@ impl Observation {
         }
         let allowed = matches!(
             (self.status, next),
-            (ObservationStatus::Proposed, ObservationStatus::Accepted)
-                | (ObservationStatus::Proposed, ObservationStatus::Rejected)
-                | (ObservationStatus::Accepted, ObservationStatus::Expired)
+            (
+                ObservationStatus::Proposed,
+                ObservationStatus::Accepted | ObservationStatus::Rejected
+            ) | (ObservationStatus::Accepted, ObservationStatus::Expired)
         );
         if !allowed {
             return Err(LearningError::InvalidTransition);
@@ -112,6 +121,10 @@ pub struct EvaluationReport {
 }
 
 impl EvaluationReport {
+    /// Creates a thresholded report bound to one procedure and dataset.
+    ///
+    /// # Errors
+    /// Returns an error when either identity or the score is invalid.
     pub fn new(
         procedure_digest: String,
         dataset_digest: String,
@@ -138,6 +151,10 @@ impl EvaluationReport {
 }
 
 impl FeedbackDataset {
+    /// Canonicalizes and bounds a feedback corpus.
+    ///
+    /// # Errors
+    /// Returns an error when records are empty, oversized, or malformed.
     pub fn new(mut records: Vec<FeedbackRecord>) -> Result<Self, LearningError> {
         if records.is_empty() || records.len() > MAX_FEEDBACK {
             return Err(LearningError::Bounds);
@@ -180,6 +197,10 @@ pub struct Procedure {
 }
 
 impl Procedure {
+    /// Proposes a procedure by digest without retaining its plaintext.
+    ///
+    /// # Errors
+    /// Returns an error when the procedure identity is not canonical.
     pub fn propose(procedure_digest: String) -> Result<Self, LearningError> {
         if !is_digest(&procedure_digest) {
             return Err(LearningError::InvalidProcedure);
@@ -192,6 +213,10 @@ impl Procedure {
         })
     }
 
+    /// Attaches a passing evaluation for this exact procedure.
+    ///
+    /// # Errors
+    /// Returns an error when the report is unrelated, failing, or out of order.
     pub fn record_evaluation(&mut self, report: &EvaluationReport) -> Result<(), LearningError> {
         if self.status != ProcedureStatus::Proposed
             || report.procedure_digest != self.procedure_digest
@@ -204,6 +229,10 @@ impl Procedure {
         Ok(())
     }
 
+    /// Approves a procedure after a passing evaluation.
+    ///
+    /// # Errors
+    /// Returns an error unless the procedure is evaluated.
     pub fn approve(&mut self) -> Result<(), LearningError> {
         if self.status != ProcedureStatus::Evaluated {
             return Err(LearningError::InvalidTransition);
@@ -212,6 +241,10 @@ impl Procedure {
         Ok(())
     }
 
+    /// Activates an approved, evaluated procedure.
+    ///
+    /// # Errors
+    /// Returns an error unless a passing evaluation is attached.
     pub fn activate(&mut self) -> Result<(), LearningError> {
         if self.status != ProcedureStatus::Approved || self.evaluation_digest.is_none() {
             return Err(LearningError::InvalidTransition);
@@ -220,6 +253,10 @@ impl Procedure {
         Ok(())
     }
 
+    /// Rolls back an active procedure.
+    ///
+    /// # Errors
+    /// Returns an error unless the procedure is active.
     pub fn rollback(&mut self) -> Result<(), LearningError> {
         if self.status != ProcedureStatus::Active {
             return Err(LearningError::InvalidTransition);

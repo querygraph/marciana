@@ -12,8 +12,8 @@ fn digest(value: &str) -> String {
 #[test]
 fn observations_require_evidence_and_follow_a_closed_lifecycle() {
     let at = Utc.with_ymd_and_hms(2026, 8, 6, 12, 0, 0).unwrap();
-    let mut observation =
-        Observation::propose(vec![digest("a"), digest("b")], 2, 8_500, at).expect("proposal");
+    let evidence = vec![digest("a"), digest("b")];
+    let mut observation = Observation::propose(&evidence, 2, 8_500, at).expect("proposal");
     observation
         .transition(ObservationStatus::Accepted, at)
         .expect("accept");
