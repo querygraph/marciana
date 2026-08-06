@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use grust_core::prelude::GraphMutationStore;
 use sha2::{Digest, Sha256};
 use typesec_core::policy::RequestContext;
-use typesec_core::{CanRead, Capability};
+use typesec_core::{CanRead, Capability, Resource};
 use typesec_memory::{
     Label, MemoryError, MemoryId, MemoryKind, MemorySpace, MemoryVault, RecalledMemory, RedactedHit,
 };
@@ -291,7 +291,14 @@ pub fn materialize_context_plan<G: GraphMutationStore>(
     let ids = plan.candidates.iter().map(|candidate| candidate.id.clone());
     let (memories, redacted) =
         vault.recall_ids_at(space, capability, ids, plan.intent.as_of, ceiling, context)?;
-    let receipt_digest = context_materialization_digest(&plan.plan_digest, &memories, &redacted);
+    let receipt_digest = context_materialization_digest(
+        &plan.plan_digest,
+        space.resource_id(),
+        ceiling,
+        context.purpose.as_deref(),
+        &memories,
+        &redacted,
+    );
     Ok(ContextBundle {
         plan_digest: plan.plan_digest.clone(),
         receipt_digest,
@@ -305,6 +312,9 @@ pub fn materialize_context_plan<G: GraphMutationStore>(
 
 fn context_materialization_digest(
     plan_digest: &str,
+    space_id: &str,
+    ceiling: Label,
+    purpose: Option<&str>,
     memories: &[RecalledMemory],
     redacted: &[RedactedHit],
 ) -> String {
@@ -321,6 +331,12 @@ fn context_materialization_digest(
     let mut hasher = Sha256::new();
     hasher.update(b"querygraph.marciana.context-materialization.v1\0");
     hasher.update(plan_digest.as_bytes());
+    hasher.update(b"space\0");
+    hasher.update(space_id.as_bytes());
+    hasher.update(b"ceiling\0");
+    hasher.update(ceiling.name().as_bytes());
+    hasher.update(b"purpose\0");
+    hasher.update(purpose.unwrap_or_default().as_bytes());
     hasher.update(b"visible\0");
     for id in visible {
         hasher.update(id.as_bytes());

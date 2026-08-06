@@ -75,6 +75,8 @@ All notable changes to Marciana are documented in this file.
   while preserving redacted results as metadata-only entries.
 - Added a content-free materialization receipt digest bound to the plan and
   visible/redacted IDs; text and XML renderers now carry both identities.
+- Bound materialization receipts to the target space, clearance ceiling, and
+  request purpose so equal result sets cannot be confused across policies.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

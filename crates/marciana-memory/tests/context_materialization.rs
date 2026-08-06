@@ -97,6 +97,9 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     assert!(render_xml(&bundle)
         .unwrap()
         .contains(&format!("plan=\"{}\"", bundle.plan_digest)));
+    assert!(render_xml(&bundle)
+        .unwrap()
+        .contains(&format!("receipt=\"{}\"", bundle.receipt_digest)));
     assert!(render_xml(&bundle).unwrap().contains("redacted=\"true\""));
     assert_eq!(bundle.citations().len(), 2);
     let explanation = bundle.explanation();
@@ -114,6 +117,16 @@ fn materialization_reuses_the_vault_gate_and_reports_redactions() {
     )
     .unwrap();
     assert_eq!(replay.receipt_digest, bundle.receipt_digest);
+    let different_purpose = materialize_context_plan(
+        &vault,
+        &space,
+        &capability,
+        &plan,
+        Label::Public,
+        &RequestContext::new().with_purpose("audit"),
+    )
+    .unwrap();
+    assert_ne!(different_purpose.receipt_digest, bundle.receipt_digest);
 }
 
 fn support_record(id: &str, text: &str, label: &str) -> typesec_memory::StoredRecord {

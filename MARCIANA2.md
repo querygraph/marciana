@@ -74,6 +74,8 @@ moving content outside the vault gate.
 Each materialized bundle now carries a deterministic, content-free receipt
 digest bound to its plan and visible/redacted IDs; renderers expose both the
 plan and materialization identities.
+Receipt derivation also binds the target space, clearance ceiling, and request
+purpose, without persisting or echoing arbitrary protected context values.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
