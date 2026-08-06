@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Add the Marciana 2 release post with Ossie, benchmark, cognition, and
+  end-to-end coffee-market coverage, including a generated library headboard.
 - Add the source-owned Marciana book manuscript, FirstPair build contract,
   diagrams, benchmark chapter, enterprise semantic-layer discussion, and
   publisher-mark-matched cover assets.

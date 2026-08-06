@@ -1,0 +1,10 @@
+flowchart LR
+  A[Agent or chat] --> D[TypeDID identity]
+  D --> P[TypeSec + ODRL policy]
+  P --> M[Marciana cognition]
+  M --> G[Grust memory graph]
+  G --> S[Sail execution]
+  S --> L[LakeCat catalog + lineage]
+  L --> C[Semantic Croissant + Ossie ontology]
+  C --> M
+  M --> E[Auditable receipt]
