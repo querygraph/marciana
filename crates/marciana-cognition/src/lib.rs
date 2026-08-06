@@ -4,6 +4,7 @@ mod binding_error;
 mod engine_binding;
 mod formation_profile;
 mod governed;
+mod health;
 mod learning;
 mod memory_error;
 
@@ -29,6 +30,7 @@ pub use governed::{
 pub use governed::{
     CONTEXT_REQUEST_DIGEST, CONTEXT_SUBJECT, PrimedAuthorityVerifier, current_policy_decision_id,
 };
+pub use health::{ComponentHealth, ComponentState, HealthError, HealthSnapshot};
 pub use learning::{
     EvaluationReport, FeedbackDataset, FeedbackRecord, LearningError, Observation,
     ObservationStatus, Procedure, ProcedureStatus,

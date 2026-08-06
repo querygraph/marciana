@@ -94,6 +94,9 @@ transport, credentials, and policy remain outside Marciana's adapter.
 The Sail-feature live cognition target also compiles against the pinned Grust
 bindings; execution remains an explicitly separate endpoint-gated acceptance
 step.
+The cognition crate now also exposes a content-free `HealthSnapshot` for
+operator/readiness integrations; it reports only bounded component names,
+revisions, and states.
 
 ## Executive judgment
 

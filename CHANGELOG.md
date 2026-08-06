@@ -33,6 +33,8 @@ All notable changes to Marciana are documented in this file.
   preserving host-owned transport and authorization.
 - Verified compilation of the Sail-feature live cognition target against the
   recorded Grust bindings; live endpoint execution remains explicitly pending.
+- Added a content-free, bounded health snapshot for operational integrations;
+  readiness exposes component revisions without protected memory data.
 - Added an independently buildable TypeScript client with strict four-verb
   request validation, injected transport, and Node tests.
 - Ignored generated TypeScript build and dependency directories as local
