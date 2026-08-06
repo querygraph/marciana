@@ -1,6 +1,6 @@
 # Marciana 2: A Governed Memory System Plan
 
-**Status:** Phase 1 in progress; accepted design constraints preserved
+**Status:** Phase 2 in progress; accepted design constraints preserved
 
 **Reviewed:** 2026-08-05
 
@@ -41,8 +41,13 @@ exactly one existing native cognition operation; no profile may supply a
 model-chosen operation or executor identity. The signed TypeDID cognition
 intent now requires the profile, validates its exact operation before source
 materialization, and carries it in the verified request digest already bound
-to durable job state. The next Phase 2 unit adds progress, cancellation, and
-bounded retry semantics to the profile-runner surface.
+to durable job state. The profile-runner surface now has durable, lease-bound
+progress. Progress is closed-phase, bounded, timestamp-monotonic, and stores
+only optional SHA-256 detail identities; job schema v3 preserves it through
+restart without persisting worker or model text. Existing cancellation and
+bounded retry semantics remain unchanged. The next Phase 2 unit is a
+declarative profile-runner/provider registry with explicit capability and
+resource budgets.
 
 ## Executive judgment
 

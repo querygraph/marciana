@@ -8,12 +8,58 @@ use chrono::Duration;
 use grust_core::prelude::{GraphStore, Start, Traversal};
 use querygraph_memory::TursoMemoryStore;
 use querygraph_memory::cognition::{
-    CognitionJobClaim, CognitionJobClaimRequest, CognitionJobStatus, CognitionStateError,
-    MAX_COGNITION_BEARER_TOKEN_BYTES, MAX_COGNITION_FAILURE_BYTES,
+    CognitionJobClaim, CognitionJobClaimRequest, CognitionJobStatus, CognitionProgress,
+    CognitionProgressPhase, CognitionStateError, MAX_COGNITION_BEARER_TOKEN_BYTES,
+    MAX_COGNITION_FAILURE_BYTES,
 };
 use typesec_memory::{MemoryContent, MemoryDraft, MemoryStore, Provenance};
 
 use support::{at, config, digest, proposal, record};
+
+#[tokio::test]
+async fn progress_is_lease_bound_bounded_and_digest_only() {
+    let dir = tempfile::tempdir().expect("temporary database");
+    let store =
+        TursoMemoryStore::open_with_config(config(&dir, "cognition_progress")).expect("open store");
+    let key = job_key("tenant/progress");
+    store
+        .submit_cognition_job(&key, "worker/owner", &digest("request"), 2, at(0))
+        .expect("submit job");
+    let lease = store
+        .acquire_cognition_lease(&key, "worker/owner", at(1), Duration::minutes(5))
+        .expect("acquire lease");
+    let progress = CognitionProgress {
+        phase: CognitionProgressPhase::Scanning,
+        completed_units: 2,
+        total_units: Some(3),
+        detail_digest: Some(digest("scan")),
+        updated_at: at(2),
+    };
+    let updated = store
+        .update_cognition_progress(&key, lease.token(), progress)
+        .expect("update progress");
+    assert_eq!(updated.progress.phase, CognitionProgressPhase::Scanning);
+    assert_eq!(updated.progress.completed_units, 2);
+    assert!(
+        serde_json::to_string(&updated)
+            .expect("serialize progress")
+            .contains("sha256:")
+    );
+    let err = store
+        .update_cognition_progress(
+            &key,
+            "sha256:stale",
+            CognitionProgress {
+                phase: CognitionProgressPhase::Planning,
+                completed_units: 3,
+                total_units: Some(3),
+                detail_digest: None,
+                updated_at: at(3),
+            },
+        )
+        .expect_err("stale token must not update progress");
+    assert!(matches!(err, CognitionStateError::StaleLease));
+}
 
 #[tokio::test]
 async fn staged_proposal_digest_survives_reopen_without_proposal_content() {

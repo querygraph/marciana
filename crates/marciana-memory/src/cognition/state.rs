@@ -6,7 +6,7 @@ use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use typesec_memory::CognitionIdempotencyKey;
 
-pub(super) const JOB_SCHEMA_VERSION: u32 = 2;
+pub(super) const JOB_SCHEMA_VERSION: u32 = 3;
 
 /// Scheduler lifecycle persisted in the graph.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -85,6 +85,8 @@ pub struct CognitionJob {
     /// A completed job uses the TypeSec audit's `prepared_at`. The authoritative
     /// backend commit time exists only in the committed outcome and receipt.
     pub transitioned_at: DateTime<Utc>,
+    /// Bounded, digest-only operational progress for the active attempt.
+    pub progress: super::CognitionProgress,
 }
 
 /// Bearer lease returned to a cognition worker.

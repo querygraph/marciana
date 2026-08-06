@@ -67,6 +67,7 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
             last_error_digest: None,
             created_at: now,
             transitioned_at: now,
+            progress: super::CognitionProgress::queued(now),
         };
         match self.create_job(key, &job) {
             Ok(()) => Ok(job),
@@ -253,6 +254,32 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
             job.attempts,
             expires_at,
         ))
+    }
+
+    /// Update digest-safe progress while holding the active lease.
+    pub fn update_cognition_progress(
+        &self,
+        key: &CognitionIdempotencyKey,
+        token: &str,
+        progress: super::CognitionProgress,
+    ) -> Result<CognitionJob, CognitionStateError> {
+        validate_job_key(key)?;
+        validate_bearer_token(token)?;
+        progress.validate()?;
+        let (node, mut job) = self
+            .load_job_node(key)?
+            .ok_or(CognitionStateError::NotFound)?;
+        validate_lease(&job, token, progress.updated_at)?;
+        if progress.updated_at < job.progress.updated_at {
+            return Err(CognitionStateError::InvalidTransition(
+                "progress timestamp regressed".into(),
+            ));
+        }
+        let updated_at = progress.updated_at;
+        job.progress = progress;
+        advance_job(&mut job, updated_at)?;
+        self.transition_job(key, node, &job)?;
+        Ok(job)
     }
 
     /// Persist only a proposal's canonical identity and mark its job ready.

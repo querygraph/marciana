@@ -37,6 +37,12 @@ pub(super) fn validate_persisted_job(
     if job.created_at > job.transitioned_at {
         return Err(corrupt("transition timestamp predates creation"));
     }
+    job.progress
+        .validate()
+        .map_err(|error| corrupt(error.to_string()))?;
+    if job.progress.updated_at < job.created_at || job.progress.updated_at > job.transitioned_at {
+        return Err(corrupt("progress timestamp is outside job lifetime"));
+    }
 
     let expects_lease = matches!(
         job.status,

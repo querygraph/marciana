@@ -1,7 +1,7 @@
 {
   "proposalSchemaVersion": 4,
   "auditSchemaVersion": 3,
-  "jobSchemaVersion": 2,
+  "jobSchemaVersion": 3,
   "outcomeSchemaVersion": 3,
   "auditFields": [
     "affectedIds",
@@ -32,6 +32,7 @@
     "lease",
     "maxAttempts",
     "ownerDigest",
+    "progress",
     "proposalDigest",
     "revision",
     "schemaVersion",

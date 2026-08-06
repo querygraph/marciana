@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Added lease-bound, digest-only cognition progress to the durable scheduler.
+  Progress phases and counters are bounded, timestamp-monotonic, persisted
+  under job schema v3, and never carry worker or model text.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.
