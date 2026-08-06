@@ -41,9 +41,10 @@ use std::future::Future;
 
 use chrono::{DateTime, Utc};
 use grust_core::prelude::{
-    Direction, Edge, EdgeQuery, GraphMutation, GraphMutationStore, Node, NodeId, Start, Step,
-    Traversal, Value,
+    Direction, Edge, EdgeQuery, GraphCommitStore, GraphMutation, GraphMutationStore,
+    GuardedGraphCommit, Node, NodeId, Start, Step, Traversal, Value,
 };
+use sha2::{Digest, Sha256};
 use typesec_memory::{MemoryId, MemoryStore, StoreBatchOp, StoreError, StoreQuery, StoredRecord};
 
 const RECORD_LABEL: &str = "MemoryRecord";
@@ -88,7 +89,10 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
     /// Returns a fixed backend error when the legacy graph cannot be read,
     /// validated, or atomically projected. It never includes record or edge
     /// values in the diagnostic.
-    pub fn migrate_legacy_assertions(&self) -> Result<AssertionMigrationReport, StoreError> {
+    pub fn migrate_legacy_assertions(&self) -> Result<AssertionMigrationReport, StoreError>
+    where
+        G: GraphCommitStore,
+    {
         let edges = self
             .run(self.graph.get_edges(EdgeQuery {
                 from: None,
@@ -96,8 +100,7 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
                 label: Some(RELATES.into()),
             }))
             .map_err(|_| legacy_migration_error())?;
-        let mut mutations = Vec::new();
-        let mut migrated = 0;
+        let mut planned = Vec::new();
         for edge in edges {
             let record_id = legacy_record_id(&edge).ok_or_else(legacy_migration_error)?;
             let record = self
@@ -115,15 +118,34 @@ impl<G: GraphMutationStore> GraphStoreMemoryStore<G> {
                 .map_err(|_| legacy_migration_error())?
                 .is_none()
             {
-                mutations.extend(projection);
-                migrated += 1;
+                planned.push((assertion_node.as_str().to_owned(), projection));
             }
         }
-        if !mutations.is_empty() {
-            self.run(self.graph.apply_mutations(&mutations))
-                .map_err(|_| legacy_migration_error())?;
+        if planned.is_empty() {
+            return Ok(AssertionMigrationReport { migrated: 0 });
         }
-        Ok(AssertionMigrationReport { migrated })
+        planned.sort_by(|left, right| left.0.cmp(&right.0));
+        let request = legacy_migration_digest(
+            "querygraph.marciana.assertion-migration.request.v1",
+            &planned
+                .iter()
+                .map(|(id, _)| id.as_bytes())
+                .collect::<Vec<_>>(),
+        );
+        let ledger_key = format!("marciana-assertion-migration:{}", &request[7..]);
+        let migrated = planned.len();
+        let mutations = planned
+            .into_iter()
+            .flat_map(|(_, mutations)| mutations)
+            .collect();
+        let commit = GuardedGraphCommit::new(ledger_key, request, mutations);
+        let receipt = self
+            .bridge
+            .run(self.graph.commit_guarded(&commit))
+            .map_err(|_| legacy_migration_error())?;
+        Ok(AssertionMigrationReport {
+            migrated: if receipt.replayed { 0 } else { migrated },
+        })
     }
 
     fn run<T: Send>(
@@ -408,6 +430,17 @@ fn legacy_record_id(edge: &Edge) -> Option<MemoryId> {
 
 fn legacy_migration_error() -> StoreError {
     StoreError::Backend("legacy assertion migration failed".into())
+}
+
+fn legacy_migration_digest(domain: &str, values: &[&[u8]]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(domain.as_bytes());
+    hasher.update([0]);
+    for value in values {
+        hasher.update((value.len() as u64).to_be_bytes());
+        hasher.update(value);
+    }
+    format!("sha256:{:x}", hasher.finalize())
 }
 
 fn encode_record(record: &StoredRecord) -> Result<Node, StoreError> {

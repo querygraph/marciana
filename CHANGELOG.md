@@ -51,6 +51,9 @@ All notable changes to Marciana are documented in this file.
   neighborhood read behavior, allowing mixed-version deployment before the
   assertion-aware recall API is introduced.
 
+- Moved assertion migration onto Grust's durable guarded-commit protocol and
+  verified idempotent migration against persistent Turso storage.
+
 - Completed the first verified executable Marciana baseline: clean Marciana
   and qg-rust clones pass their full declared test, doctest, and strict Clippy
   gates using exact remote dependencies; the recorded QueryGraph Sail source

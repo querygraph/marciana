@@ -1,11 +1,9 @@
 use chrono::{TimeZone, Utc};
 use grust_core::prelude::{Edge, GraphMutation, NodeId, Value};
-use grust_memory::MemoryGraphStore;
 use marciana_ledger::{Assertion, AssertionId, AssertionLineage, Confidence, TemporalInterval};
-use querygraph_memory::{
-    GraphStoreMemoryStore,
-    assertion_projection::{project_assertion, project_legacy_relation},
-};
+use querygraph_memory::assertion_projection::{project_assertion, project_legacy_relation};
+#[cfg(feature = "turso")]
+use querygraph_memory::{TursoMemoryStore, turso::TursoConfig};
 use typesec_memory::{EntityRef, MemoryStore, StoredRecord};
 
 fn assertion() -> Assertion {
@@ -112,9 +110,20 @@ fn legacy_relation_migration_is_retry_stable_and_preserves_half_open_validity() 
     assert_eq!(payload["validity"]["validTo"], "2026-08-06T12:00:03Z");
 }
 
+#[cfg(feature = "turso")]
 #[test]
 fn storage_migration_is_idempotent() {
-    let store = GraphStoreMemoryStore::new(MemoryGraphStore::default());
+    let directory = tempfile::tempdir().unwrap();
+    let store = TursoMemoryStore::open_with_config(TursoConfig {
+        path: directory
+            .path()
+            .join("migration.db")
+            .to_string_lossy()
+            .into_owned(),
+        table_prefix: "assertion_migration".into(),
+        ..TursoConfig::default()
+    })
+    .unwrap();
     let mut source = record();
     source
         .entities
