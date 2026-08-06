@@ -5,8 +5,8 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Capability-safe TypeSec memory and governed cognition over Grust"
-# Kept private until the next Grust release makes an explicit distribution
-# decision and replaces the sibling TypeSec paths with registry-versioned deps.
+# This product crate is distributed from Marciana's exact Git revision until
+# the coordinated crate-release line is versioned.
 publish = false
 
 [features]
@@ -15,12 +15,12 @@ turso = ["dep:grust-turso"]
 sail = ["dep:arrow", "dep:grust-sail"]
 
 [dependencies]
-grust-core = { path = "../../../grust/crates/grust-core", version = "0.12.0" }
-grust-turso = { path = "../../../grust/crates/grust-turso", version = "0.12.0", optional = true }
-grust-sail = { path = "../../../grust/crates/grust-sail", version = "0.12.0", optional = true }
-# The security contract this crate implements against. Sibling checkout, the
-# mirror image of typesec's ../grust path deps; CI checks out both repos.
-typesec-memory = { path = "../../../typesec/crates/typesec-memory" }
+grust-core = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0" }
+grust-turso = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0", optional = true }
+grust-sail = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0", optional = true }
+# TypeSec remains the security-contract owner. Pin its reviewed source rather
+# than relying on the developer's sibling checkout.
+typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
 chrono = { version = "0.4", features = ["serde"] }
 serde_json = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
@@ -33,10 +33,10 @@ async-trait = { workspace = true }
 arrow = { version = "58.1.0", features = ["ipc_compression"], optional = true }
 
 [dev-dependencies]
-grust-memory = { path = "../../../grust/crates/grust-memory", version = "0.12.0" }
+grust-memory = { git = "https://github.com/querygraph/grust.git", rev = "3bbd715b5e9aae66d83b68feebb85d9e16f61271", version = "0.12.0" }
 tempfile = { workspace = true }
-typesec-memory = { path = "../../../typesec/crates/typesec-memory", features = ["conformance"] }
-typesec-core = { path = "../../../typesec/crates/typesec-core" }
-typesec-rbac = { path = "../../../typesec/crates/typesec-rbac", default-features = false }
+typesec-memory = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0", features = ["conformance"] }
+typesec-core = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0" }
+typesec-rbac = { git = "https://github.com/querygraph/typesec.git", rev = "1926f18c1d9aab640b16d530214c31f9d1492da6", version = "0.13.0", default-features = false }
 static_assertions = "1"
 tokio = { workspace = true, features = ["test-util"] }

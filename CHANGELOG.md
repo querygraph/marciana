@@ -6,6 +6,10 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Replaced Marciana's TypeSec and Grust sibling paths with exact reachable
+  Git revisions, allowing its workspace to build and test independently of the
+  local QueryGraph checkout layout.
+
 - Recorded the passing focused local Sail integration gate for the Grust
   cognition substrate while retaining the requirement for a remotely reachable
   Sail revision before Marciana claims an executable compatibility baseline.

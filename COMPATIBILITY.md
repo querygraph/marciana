@@ -7,17 +7,17 @@ maintain competing pins.
 ## Extraction baseline
 
 `querygraph-memory` has been transplanted into
-`crates/marciana-memory` with its behavior-preserving history. qg-rust resolves
-that crate from this standalone checkout for local development. This is an
-extraction baseline, not a released compatibility matrix: its current sibling
-path dependencies prevent a clean clone from building.
+`crates/marciana-memory` with its behavior-preserving history. Its TypeSec and
+Grust dependencies are exact public Git revisions, so Marciana itself no
+longer requires sibling checkouts. This is still an extraction baseline, not a
+released compatibility matrix.
 
 | Component | Required compatibility datum | Current scaffold status |
 |---|---|---|
-| Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Transplanted local development baseline; no public four-verb facade or released schema range yet |
-| TypeSec | Contract version, conformance fixture version, exact release or revision | Required owner changes exist locally, but no remotely reachable pin has been selected |
-| Grust | Core/backend version and guarded-commit capability | Required owner changes exist locally, but no remotely reachable pin has been selected |
-| LakeCat | Governed-proof schema and exact release or revision | Required for catalog-backed cognition; required owner changes exist locally, but no remotely reachable pin has been selected |
+| Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Transplanted Git-pinned baseline; no public four-verb facade or released schema range yet |
+| TypeSec | Contract version, conformance fixture version, exact release or revision | Exact reachable revision `1926f18c` is pinned by Marciana |
+| Grust | Core/backend version and guarded-commit capability | Exact reachable revision `3bbd715` is pinned by Marciana |
+| LakeCat | Governed-proof schema and exact release or revision | Exact reachable revision `415d131` is ready for the QueryGraph adapter pin |
 | Sail | Exact current canonical-upstream revision and Arrow input/output schema | Canonical candidate recorded below; local source live gate passed, but the generic correction is not remotely reachable |
 | QueryGraph | Supported route/wire baseline and exact version or revision | qg-rust has a local standalone-path cutover; clean-clone and route baseline remain pending |
 | Clients | Rust/Python/JavaScript fixture versions | Not yet established |

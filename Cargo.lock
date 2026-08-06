@@ -1067,6 +1067,7 @@ checksum = "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
 [[package]]
 name = "grust-core"
 version = "0.12.0"
+source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
 dependencies = [
  "async-trait",
  "quick-xml",
@@ -1079,6 +1080,7 @@ dependencies = [
 [[package]]
 name = "grust-cypher"
 version = "0.12.0"
+source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
 dependencies = [
  "async-trait",
  "grust-core",
@@ -1090,6 +1092,7 @@ dependencies = [
 [[package]]
 name = "grust-memory"
 version = "0.12.0"
+source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
 dependencies = [
  "async-trait",
  "grust-core",
@@ -1098,6 +1101,7 @@ dependencies = [
 [[package]]
 name = "grust-sail"
 version = "0.12.0"
+source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
 dependencies = [
  "arrow",
  "async-trait",
@@ -1116,6 +1120,7 @@ dependencies = [
 [[package]]
 name = "grust-sql-core"
 version = "0.12.0"
+source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
 dependencies = [
  "grust-core",
  "serde_json",
@@ -1124,6 +1129,7 @@ dependencies = [
 [[package]]
 name = "grust-turso"
 version = "0.12.0"
+source = "git+https://github.com/querygraph/grust.git?rev=3bbd715b5e9aae66d83b68feebb85d9e16f61271#3bbd715b5e9aae66d83b68feebb85d9e16f61271"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3103,6 +3109,7 @@ checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
 [[package]]
 name = "typesec-core"
 version = "0.13.0"
+source = "git+https://github.com/querygraph/typesec.git?rev=1926f18c1d9aab640b16d530214c31f9d1492da6#1926f18c1d9aab640b16d530214c31f9d1492da6"
 dependencies = [
  "chrono",
  "glob",
@@ -3116,6 +3123,7 @@ dependencies = [
 [[package]]
 name = "typesec-memory"
 version = "0.13.0"
+source = "git+https://github.com/querygraph/typesec.git?rev=1926f18c1d9aab640b16d530214c31f9d1492da6#1926f18c1d9aab640b16d530214c31f9d1492da6"
 dependencies = [
  "chrono",
  "serde",
@@ -3129,6 +3137,7 @@ dependencies = [
 [[package]]
 name = "typesec-rbac"
 version = "0.13.0"
+source = "git+https://github.com/querygraph/typesec.git?rev=1926f18c1d9aab640b16d530214c31f9d1492da6#1926f18c1d9aab640b16d530214c31f9d1492da6"
 dependencies = [
  "garde",
  "glob",
