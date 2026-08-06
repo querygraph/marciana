@@ -166,13 +166,17 @@ cannot back is a benchmark failure; a capability it never claimed is simply
 excluded from its accuracy.
 
 Marciana's deterministic reference passes all eighteen cases with every hard
-gate at zero. Two comparative systems, run 2026-08-06 on local hardware:
+gate at zero. All six systems, run 2026-08-06 on local hardware (Ollama
+`gpt-oss:20b` and `nomic-embed-text`):
 
 | System | Supported | Correct | Notable |
 |--------|:---------:|:-------:|---------|
 | Marciana (reference) | 18 | 18 | All nine hard gates zero |
 | Akka + Fluree | 16 | 16 | Every claimed capability holds |
 | Letta 0.16.8 | 9 | 7 | No input-robustness boundary |
+| Graphiti (Kuzu) | 8 | 6 | Retrieval not token-order stable; no input bound |
+| Mem0 | 9 | 6 | Private memory leaks across clearance within a tenant |
+| Cognee | 8 | 5 | Clearance holds, but errors on empty input; no input bound |
 
 **Akka + Fluree** treats Fluree as the semantic-ledger authority and the
 adapter as the actor/service tier. Every capability it claims is executed by
@@ -196,13 +200,22 @@ but "Letta's memory API has no guard against malformed or oversized input" —
 exactly the kind of finding a governed deployment needs before it trusts a
 memory layer.
 
-Adapters for Mem0, Graphiti (over embedded Kuzu), and Cognee ship in the
-same repository and run against the same local stack; their results depend on
-the local model and are recorded in
+**Mem0, Graphiti, and Cognee** ship as adapters in the same repository and
+run against the same local stack. The adversarial cases surface exactly where
+each one stops: Mem0 scopes by `user_id`, so a lower-clearance principal in
+the same tenant reads the operator's private memory — mem0 has no intra-tenant
+clearance. Graphiti's BM25 ranking is not stable under query-token reordering.
+Cognee is the only one of the three whose clearance (dataset tiers) actually
+withholds private data from the analyst, yet it errors on an empty query
+instead of abstaining. None of these systems ships the full governed
+boundary, and the adapters make exactly which parts each one enforces — and
+which it does not — legible instead of hidden. Every claim each system makes
+is executed by that system; a capability it cannot back is scored as a
+failure, and a capability it never claims is excluded, never faked. Full
+per-case detail and the reproducible Docker stack are in the standalone
+repository's
 [`docs/RESULTS.md`](https://github.com/querygraph/adversarial-cognition/blob/main/docs/RESULTS.md)
-as each run lands. None of these systems ships the full governed boundary,
-and the adapters make exactly which parts each one enforces — and which it
-does not — legible instead of hidden.
+and [`README`](https://github.com/querygraph/adversarial-cognition).
 
 Every number here is an engineering diagnostic on the stated local host, not
 a hosted-service or vendor claim, and every report contains bounded IDs,
@@ -221,9 +234,19 @@ python3 run_benchmark.py
 
 The core is dependency-free — no network, no keys. The runner prints the
 gate summary, writes the JSON report, and exits non-zero unless every gate
-is zero. To run the OSS adapters, `docker compose up -d` for the Fluree
-ledger and point Ollama at a local model; each adapter's README documents
-its setup.
+is zero. To reproduce the **entire** comparative benchmark — every OSS system
+wired to its service — the repository ships a Docker stack:
+
+```sh
+ollama pull gpt-oss:20b nomic-embed-text
+docker compose build
+docker compose run --rm benchmark      # all systems → out/RESULTS.md
+```
+
+Compose brings up Fluree and Letta as services, resolves each adapter's
+pinned dependencies inside the image, runs every system against the corpus,
+and writes the report and results. Each adapter's README documents its
+capability claims.
 
 If you build or operate a memory system on the comparative list — or one
 that should be — the adapter contract is a small `MemorySystem` interface
