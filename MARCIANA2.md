@@ -36,9 +36,11 @@ complete; later phases extend it through formation and context products rather
 than a parallel memory path.
 
 Phase 2 has started with a closed, versioned formation-profile registry.
-`background-deduplication-v1` and `background-reconciliation-v1` each select
-exactly one existing native cognition operation; no profile may supply a
-model-chosen operation or executor identity. The signed TypeDID cognition
+`background-deduplication-v1`, `background-reconciliation-v1`,
+`conversation-deduplication-v1`, `document-deduplication-v1`,
+`json-event-reconciliation-v1`, and `raw-deduplication-v1` each select exactly
+one existing native cognition operation; no profile may supply a model-chosen
+operation or executor identity. The signed TypeDID cognition
 intent now requires the profile, validates its exact operation before source
 materialization, and carries it in the verified request digest already bound
 to durable job state. The profile-runner surface now has durable, lease-bound

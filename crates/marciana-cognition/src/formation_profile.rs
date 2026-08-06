@@ -12,6 +12,14 @@ pub enum FormationProfile {
     BackgroundDeduplicationV1,
     /// Contradiction reconciliation over a governed source selection.
     BackgroundReconciliationV1,
+    /// Conversation turns normalized into duplicate-safe memory candidates.
+    ConversationDeduplicationV1,
+    /// Document records normalized into duplicate-safe memory candidates.
+    DocumentDeduplicationV1,
+    /// JSON events normalized into contradiction-safe memory candidates.
+    JsonEventReconciliationV1,
+    /// Raw records admitted only to duplicate-safe consolidation.
+    RawDeduplicationV1,
 }
 
 /// Trusted executor family selected by deployment composition, never by a job payload.
@@ -53,6 +61,10 @@ impl FormationProfile {
         match self {
             Self::BackgroundDeduplicationV1 => "background-deduplication-v1",
             Self::BackgroundReconciliationV1 => "background-reconciliation-v1",
+            Self::ConversationDeduplicationV1 => "conversation-deduplication-v1",
+            Self::DocumentDeduplicationV1 => "document-deduplication-v1",
+            Self::JsonEventReconciliationV1 => "json-event-reconciliation-v1",
+            Self::RawDeduplicationV1 => "raw-deduplication-v1",
         }
     }
 
@@ -60,8 +72,13 @@ impl FormationProfile {
     #[must_use]
     pub const fn operation(self) -> CognitionOperation {
         match self {
-            Self::BackgroundDeduplicationV1 => CognitionOperation::Deduplicate,
-            Self::BackgroundReconciliationV1 => CognitionOperation::Reconcile,
+            Self::BackgroundDeduplicationV1
+            | Self::ConversationDeduplicationV1
+            | Self::DocumentDeduplicationV1
+            | Self::RawDeduplicationV1 => CognitionOperation::Deduplicate,
+            Self::BackgroundReconciliationV1 | Self::JsonEventReconciliationV1 => {
+                CognitionOperation::Reconcile
+            }
         }
     }
 
@@ -85,6 +102,10 @@ impl FromStr for FormationProfile {
         match value {
             "background-deduplication-v1" => Ok(Self::BackgroundDeduplicationV1),
             "background-reconciliation-v1" => Ok(Self::BackgroundReconciliationV1),
+            "conversation-deduplication-v1" => Ok(Self::ConversationDeduplicationV1),
+            "document-deduplication-v1" => Ok(Self::DocumentDeduplicationV1),
+            "json-event-reconciliation-v1" => Ok(Self::JsonEventReconciliationV1),
+            "raw-deduplication-v1" => Ok(Self::RawDeduplicationV1),
             _ => Err(ParseFormationProfileError),
         }
     }

@@ -16,6 +16,8 @@ All notable changes to Marciana are documented in this file.
   reproducibility metadata required by the evaluation plan.
 - Added a strict, local-only pinned corpus contract for future LoCoMo,
   LongMemEval, and BEAM adapters.
+- Added closed conversation, document, JSON-event, and raw formation profiles;
+  each is bound to an existing native cognition operation.
 
 ### 2026-08-06
 

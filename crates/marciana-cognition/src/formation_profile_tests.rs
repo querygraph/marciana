@@ -15,6 +15,22 @@ fn profiles_are_closed_versioned_and_bound_to_one_operation() {
             FormationProfile::BackgroundReconciliationV1,
             CognitionOperation::Reconcile,
         ),
+        (
+            FormationProfile::ConversationDeduplicationV1,
+            CognitionOperation::Deduplicate,
+        ),
+        (
+            FormationProfile::DocumentDeduplicationV1,
+            CognitionOperation::Deduplicate,
+        ),
+        (
+            FormationProfile::JsonEventReconciliationV1,
+            CognitionOperation::Reconcile,
+        ),
+        (
+            FormationProfile::RawDeduplicationV1,
+            CognitionOperation::Deduplicate,
+        ),
     ];
 
     for (profile, operation) in profiles {
@@ -23,6 +39,7 @@ fn profiles_are_closed_versioned_and_bound_to_one_operation() {
         assert_eq!(profile.schema_version(), "1");
     }
     assert!(FormationProfile::from_str("conversation-v1").is_err());
+    assert!(FormationProfile::from_str("model-chosen-v1").is_err());
 }
 
 #[test]
