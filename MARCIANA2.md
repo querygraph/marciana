@@ -191,7 +191,8 @@ contract measuring relevance precision/recall, token utility, and forbidden-ID
 leakage against a verified plan; bounded corpora aggregate those measurements
 in stable order for release comparisons, and protected text never enters the
 report. Evaluation receipts bind a corpus summary to an evaluator identity for
-reproducible release comparisons without storing benchmark content.
+reproducible release comparisons without storing benchmark content. A checked-
+in content-free fixture provides the first versioned corpus input.
 
 ## Executive judgment
 

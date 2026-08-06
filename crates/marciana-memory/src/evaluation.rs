@@ -2,6 +2,7 @@
 
 use std::collections::BTreeSet;
 
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use typesec_memory::MemoryId;
 
@@ -21,7 +22,7 @@ struct EvaluationMetrics {
 }
 
 /// Expected retrieval behavior for one reproducible evaluation case.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ContextEvaluationCase {
     case_digest: String,
     expected_ids: BTreeSet<String>,
@@ -93,15 +94,34 @@ impl ContextEvaluationCase {
         let expected_ids = id_set(expected_ids)?;
         let forbidden_ids = id_set(forbidden_ids)?;
         if expected_ids.is_disjoint(&forbidden_ids) {
-            Ok(Self {
+            let case = Self {
                 case_digest,
                 expected_ids,
                 forbidden_ids,
                 token_budget,
-            })
+            };
+            case.validate().map(|()| case)
         } else {
             Err(EvaluationError::InvalidCase)
         }
+    }
+
+    /// Validate a decoded fixture before it enters a corpus.
+    pub fn validate(&self) -> Result<(), EvaluationError> {
+        if !is_digest(&self.case_digest)
+            || self.token_budget == 0
+            || self.expected_ids.len() > MAX_EVALUATION_IDS
+            || self.forbidden_ids.len() > MAX_EVALUATION_IDS
+            || self
+                .expected_ids
+                .iter()
+                .chain(self.forbidden_ids.iter())
+                .any(|id| id.is_empty() || id.len() > 256)
+            || !self.expected_ids.is_disjoint(&self.forbidden_ids)
+        {
+            return Err(EvaluationError::InvalidCase);
+        }
+        Ok(())
     }
 
     #[must_use]
@@ -171,6 +191,7 @@ impl ContextEvaluationCorpus {
         }
         let mut digests = BTreeSet::new();
         for case in &cases {
+            case.validate()?;
             if !digests.insert(case.case_digest.clone()) {
                 return Err(EvaluationError::InvalidCorpus);
             }

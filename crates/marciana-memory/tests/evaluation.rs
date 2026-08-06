@@ -94,3 +94,13 @@ fn corpus_summary_is_ordered_and_digest_stable() {
     assert_eq!(summary.average_recall_basis_points, 10_000);
     assert!(summary.summary_digest.starts_with("sha256:"));
 }
+
+#[test]
+fn checked_in_fixture_is_a_valid_content_free_case() {
+    let case: ContextEvaluationCase = serde_json::from_str(include_str!(
+        "../../../compat/fixtures/context_evaluation_v1.json"
+    ))
+    .unwrap();
+    let corpus = ContextEvaluationCorpus::new(vec![case]).unwrap();
+    assert!(corpus.corpus_digest().starts_with("sha256:"));
+}

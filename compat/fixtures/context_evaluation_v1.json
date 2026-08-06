@@ -1,0 +1,6 @@
+{
+  "case_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "expected_ids": ["memory/coffee/honduras-price"],
+  "forbidden_ids": ["memory/coffee/private-contract"],
+  "token_budget": 256
+}
