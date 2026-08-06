@@ -43,6 +43,9 @@ All notable changes to Marciana are documented in this file.
   abstention, redaction safety, token accounting, deterministic ranking, and
   indexed-vs-linear latency, with standalone Python tests and benchmark notes.
 
+- Refreshed the recorded Sail compatibility baseline to upstream merge
+  `2c1b2e45` from `lakehq/sail#2374`.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.
