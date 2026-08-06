@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
+from typing import Iterable
 
 TOKEN = re.compile(r"[a-z0-9]+")
 
@@ -27,26 +28,33 @@ def tokens(value: str) -> frozenset[str]:
     return frozenset(TOKEN.findall(value.lower()))
 
 
+def rank(
+    records: Iterable[Record], query_tokens: frozenset[str], as_of: date
+) -> tuple[list[str], list[str], int]:
+    """Shared deterministic scoring for every backend candidate set."""
+
+    scored: list[tuple[int, str]] = []
+    redacted: list[str] = []
+    for record in records:
+        if not record.visible_at(as_of):
+            continue
+        score = len(query_tokens & tokens(record.text))
+        if score == 0:
+            continue
+        if not record.authorized:
+            redacted.append(record.record_id)
+        else:
+            scored.append((score, record.record_id))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return [record_id for _, record_id in scored], sorted(redacted), len(scored)
+
+
 class LinearBackend:
     def __init__(self, records: list[Record]) -> None:
         self.records = tuple(records)
 
     def search(self, query: str, as_of: date) -> tuple[list[str], list[str], int]:
-        query_tokens = tokens(query)
-        scored: list[tuple[int, str]] = []
-        redacted: list[str] = []
-        for record in self.records:
-            if not record.visible_at(as_of):
-                continue
-            score = len(query_tokens & tokens(record.text))
-            if score == 0:
-                continue
-            if not record.authorized:
-                redacted.append(record.record_id)
-            else:
-                scored.append((score, record.record_id))
-        scored.sort(key=lambda item: (-item[0], item[1]))
-        return [record_id for _, record_id in scored], redacted, len(scored)
+        return rank(self.records, tokens(query), as_of)
 
 
 class IndexedBackend(LinearBackend):
@@ -62,18 +70,6 @@ class IndexedBackend(LinearBackend):
         candidate_indexes = set().union(
             *(self._by_token.get(token, set()) for token in query_tokens)
         )
-        scored: list[tuple[int, str]] = []
-        redacted: list[str] = []
-        for index in candidate_indexes:
-            record = self.records[index]
-            if not record.visible_at(as_of):
-                continue
-            score = len(query_tokens & tokens(record.text))
-            if score == 0:
-                continue
-            if not record.authorized:
-                redacted.append(record.record_id)
-            else:
-                scored.append((score, record.record_id))
-        scored.sort(key=lambda item: (-item[0], item[1]))
-        return [record_id for _, record_id in scored], sorted(redacted), len(scored)
+        return rank(
+            (self.records[index] for index in candidate_indexes), query_tokens, as_of
+        )

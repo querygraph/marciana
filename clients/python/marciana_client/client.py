@@ -39,4 +39,6 @@ class MarcianaClient:
 
     def _call(self, path: str, request: Any, operation: str) -> MemoryReceipt:
         body = self._transport.post(path, request.model_dump(mode="json"))
-        return MemoryReceipt.model_validate({"operation": operation, **body})
+        if body.get("operation", operation) != operation:
+            raise ValueError("memory receipt operation mismatch")
+        return MemoryReceipt.model_validate({**body, "operation": operation})

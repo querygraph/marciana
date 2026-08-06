@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
-import json
 
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.test import TestModel

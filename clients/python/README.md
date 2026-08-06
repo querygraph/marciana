@@ -16,4 +16,9 @@ the client independently from the Rust workspace.
 
 `marciana_client.mcp` provides a thin MCP tool registry and dispatcher over the
 same client. A host still owns MCP transport, credentials, and policy.
-Forget requests use the shared `memory_ids` field.
+
+The request models mirror `crates/marciana-memory/src/api.rs` exactly
+(`space_id`, `memory_ids`, and no client-only fields), because the server
+denies unknown fields. Receipts whose `operation` disagrees with the verb
+that was called are rejected. The shared wire fixture in
+`compat/fixtures/api_remember_v1.json` is round-tripped in the tests.

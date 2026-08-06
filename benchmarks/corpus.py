@@ -16,6 +16,7 @@ from pathlib import Path
 SHA1 = re.compile(r"^[0-9a-f]{40}$")
 MAX_CASES = 100_000
 MAX_ID = 256
+MAX_QUERY = 16_384
 
 
 @dataclass(frozen=True)
@@ -71,6 +72,7 @@ def load_cases(path: Path, source: SourcePin) -> tuple[EvaluationCase, ...]:
             or case_id in seen
             or not isinstance(query, str)
             or not query
+            or len(query) > MAX_QUERY
             or any(not isinstance(identifier, str) or not identifier or len(identifier) > MAX_ID
                    for identifier in expected_ids)
         ):

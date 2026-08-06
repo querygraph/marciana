@@ -5,6 +5,9 @@
   "type": "module",
   "exports": { ".": "./dist/index.js" },
   "files": ["dist"],
-  "scripts": { "build": "tsc -p tsconfig.json" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/client.test.mjs"
+  },
   "devDependencies": { "typescript": "^5.7.0" }
 }

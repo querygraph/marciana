@@ -13,6 +13,18 @@ All notable changes to Marciana are documented in this file.
   validator.
 - Validate cognition progress leases against trusted time instead of
   worker-supplied timestamps.
+- Align the Python and TypeScript clients and the coffee demo to the pinned
+  v1 wire contract: `space_id` field naming, exact four-verb shapes without
+  client-only kind/clearance/mode fields, per-item forget ID validation, and
+  a shared-fixture round-trip test in both clients.
+- Reject mismatched receipt operations in the Python client and validate
+  nested improve replacements and forget ID items in the TypeScript client.
+- Send governed forget from the coffee demo with the shared `memory_ids` and
+  `purpose` fields, report honest receipt outcomes, and make the demo as-of
+  date injectable for deterministic tests.
+- Print a human smoke-benchmark summary without `--json`, share one scoring
+  helper across smoke backends with sorted redactions, and cap corpus query
+  length in the strict loader.
 - Deliver the MARCIANA-ADVERSARIAL-v1 benchmark: an eighteen-case adversarial
   corpus with a versioned manifest, a deterministic policy-aware reference
   backend with durable replay protection and idempotent receipts, hard-gate

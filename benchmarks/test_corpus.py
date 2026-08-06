@@ -22,6 +22,18 @@ class CorpusTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_cases(path, PIN)
 
+    def test_loader_rejects_oversized_queries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "cases.jsonl"
+            oversized = "q" * 16_385
+            path.write_text(
+                '{"case_id":"one","query":"' + oversized
+                + '","as_of":"2026-01-01","expected_ids":[]}\n',
+                encoding="utf-8",
+            )
+            with self.assertRaises(ValueError):
+                load_cases(path, PIN)
+
     def test_loader_normalizes_a_bounded_case(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "cases.jsonl"

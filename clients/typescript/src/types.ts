@@ -1,33 +1,29 @@
-export type MemoryKind = "semantic" | "episodic" | "profile" | "event";
-export type Clearance = "public" | "internal" | "sensitive" | "secret";
-export type ForgetMode = "erase" | "retract";
 export type Operation = "remember" | "recall" | "improve" | "forget";
 
+// The wire matches crates/marciana-memory/src/api.rs exactly: the server
+// denies unknown fields, so these shapes carry no client-only extras.
 export interface RememberRequest {
-  space: string;
+  space_id: string;
   text: string;
   purpose: string;
-  kind?: MemoryKind;
 }
 
 export interface RecallRequest {
-  space: string;
+  space_id: string;
   query: string;
   purpose: string;
-  clearance?: Clearance;
 }
 
 export interface ImproveRequest {
-  space: string;
+  space_id: string;
   memory_id: string;
   replacement: RememberRequest;
 }
 
 export interface ForgetRequest {
-  space: string;
+  space_id: string;
   memory_ids: string[];
   purpose: string;
-  mode?: ForgetMode;
 }
 
 export interface MemoryReceipt {
@@ -39,14 +35,22 @@ export interface MemoryReceipt {
 
 const identity = /^[A-Za-z0-9_:/.-]+$/;
 
+function isIdentity(value: string): boolean {
+  return value.length > 0 && value.length <= 256 && identity.test(value);
+}
+
 export function validateRequest(request: RememberRequest | RecallRequest | ImproveRequest | ForgetRequest): void {
-  const value = request as { space: string; purpose?: string; text?: string; query?: string; memory_id?: string };
-  for (const field of [value.space, value.purpose, value.memory_id]) {
-    if (field !== undefined && (!field || field.length > 256 || !identity.test(field))) {
-      throw new Error("invalid memory identity");
-    }
+  const value = request as { space_id: string; purpose?: string; text?: string; query?: string; memory_id?: string };
+  for (const field of [value.space_id, value.purpose, value.memory_id]) {
+    if (field !== undefined && !isIdentity(field)) throw new Error("invalid memory identity");
   }
   const text = value.text ?? value.query;
   if (text !== undefined && (!text || text.length > 16384)) throw new Error("invalid memory text");
-  if ("memory_ids" in request && (!request.memory_ids.length || request.memory_ids.length > 256)) throw new Error("invalid memory ids");
+  if ("memory_ids" in request) {
+    if (!request.memory_ids.length || request.memory_ids.length > 256) throw new Error("invalid memory ids");
+    for (const id of request.memory_ids) {
+      if (!isIdentity(id)) throw new Error("invalid memory identity");
+    }
+  }
+  if ("replacement" in request) validateRequest(request.replacement);
 }

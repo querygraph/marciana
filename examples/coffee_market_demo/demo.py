@@ -46,11 +46,7 @@ async def run(live: bool, live_model: str | None) -> dict:
     if live:
         memory, credential = live_memory(os.environ["QUERYGRAPH_URL"])
     deps = AgentDeps(name="agronomist", memory=memory, sail=sail, latest_rows=[row.model_dump() for row in rows])
-    agent = build_agent()
-    if live_model:
-        # The provider string is accepted by Pydantic AI v2; deterministic
-        # tool phases remain available for a key-free run.
-        agent = build_agent(live_model)
+    agent = build_agent(live_model)
 
     sail_turn = await tool_turn(agent, deps, "query_sail", "Inspect the loaded Honduras coffee market table.")
     learned = await tool_turn(agent, deps, "remember", "Remember the agronomic coffee facts from the loaded source.")

@@ -47,6 +47,9 @@ def run_cases(backend: LinearBackend, repeats: int) -> dict[str, float | int]:
         for _ in range(repeats):
             ids, hidden, token_count = backend.search(query, as_of)
             returned, redacted, tokens = tuple(ids[:1]), tuple(hidden), token_count
+        # Per-case mean latency: the report percentiles summarize case means,
+        # not raw per-repeat samples, so tail latency within a case is not
+        # captured. This is a documented simplification of the smoke harness.
         elapsed_us = (time.perf_counter_ns() - started) / 1_000
         results.append(
             CaseResult(
@@ -109,7 +112,20 @@ def main() -> None:
         "metadata": metadata.as_dict(),
     }
     output = json.dumps(report, indent=2, sort_keys=True)
-    print(output if args.json else output)
+    if args.json:
+        print(output)
+    else:
+        performance = report["performance"]
+        print(
+            f"{report['benchmark']}: accuracy {indexed['accuracy']:.0%}, "
+            f"redaction leaks {indexed['redaction_leaks']}"
+        )
+        print(
+            f"indexed p50 {indexed['p50_latency_us']:.2f} us "
+            f"({performance['p50_speedup']:.2f}x), "
+            f"p95 {indexed['p95_latency_us']:.2f} us "
+            f"({performance['p95_speedup']:.2f}x)"
+        )
     Path("benchmark-result.json").write_text(output + "\n", encoding="utf-8")
 
 

@@ -56,6 +56,42 @@ class DemoModelTests(unittest.TestCase):
         self.assertEqual(receipt.memory_ids, ["old-id", "replacement-id"])
         self.assertEqual(calls[0][0], "/v1/memory/improve")
         self.assertEqual(calls[0][1]["memory_id"], "old-id")
+        self.assertEqual(
+            calls[0][1]["replacement"],
+            {
+                "space_id": "memory/agstack/coffee",
+                "text": "Honduras coffee price 4.20 USD per kg",
+                "purpose": "coffee-market-research",
+            },
+        )
+        self.assertNotIn("kind", calls[0][1]["replacement"])
+
+    def test_querygraph_forget_sends_the_pinned_wire_fields(self) -> None:
+        calls: list[tuple[str, dict]] = []
+
+        def post(_base_url: str, path: str, payload: dict) -> dict:
+            calls.append((path, payload))
+            return {"allowed": True}
+
+        memory = QueryGraphMemory("https://querygraph.test", post, as_of=date(2026, 1, 10))
+        receipt = memory.forget("old-id")
+        self.assertTrue(receipt.allowed)
+        self.assertEqual(calls[0][0], "/v1/memory/forget")
+        self.assertEqual(
+            calls[0][1],
+            {
+                "space_id": "memory/agstack/coffee",
+                "memory_ids": ["old-id"],
+                "purpose": "coffee-market-research",
+            },
+        )
+
+    def test_querygraph_receipts_reflect_denied_responses(self) -> None:
+        def post(_base_url: str, _path: str, _payload: dict) -> dict:
+            return {"allowed": False, "result": {"id": "m1"}}
+
+        memory = QueryGraphMemory("https://querygraph.test", post, as_of=date(2026, 1, 10))
+        self.assertFalse(memory.forget("m1").allowed)
 
     def test_structured_turn_action_matches_governed_tool(self) -> None:
         deps = AgentDeps(

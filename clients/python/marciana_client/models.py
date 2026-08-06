@@ -1,13 +1,18 @@
-"""Versioned, strict request and receipt shapes for the four verbs."""
+"""Versioned, strict request and receipt shapes for the four verbs.
+
+The wire matches ``crates/marciana-memory/src/api.rs`` exactly: the server
+denies unknown fields, so these models carry no client-only extras.
+"""
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 Text = Field(min_length=1, max_length=16_384)
 Identity = Field(min_length=1, max_length=256, pattern=r"^[A-Za-z0-9_:/.-]+$")
+IdentityStr = Annotated[str, Identity]
 
 
 class WireModel(BaseModel):
@@ -15,30 +20,27 @@ class WireModel(BaseModel):
 
 
 class RememberRequest(WireModel):
-    space: str = Identity
+    space_id: str = Identity
     text: str = Text
     purpose: str = Identity
-    kind: Literal["semantic", "episodic", "profile", "event"] = "semantic"
 
 
 class RecallRequest(WireModel):
-    space: str = Identity
+    space_id: str = Identity
     query: str = Text
     purpose: str = Identity
-    clearance: Literal["public", "internal", "sensitive", "secret"] = "internal"
 
 
 class ImproveRequest(WireModel):
-    space: str = Identity
+    space_id: str = Identity
     memory_id: str = Identity
     replacement: RememberRequest
 
 
 class ForgetRequest(WireModel):
-    space: str = Identity
-    memory_ids: list[str] = Field(min_length=1, max_length=256)
+    space_id: str = Identity
+    memory_ids: list[IdentityStr] = Field(min_length=1, max_length=256)
     purpose: str = Identity
-    mode: Literal["erase", "retract"] = "retract"
 
 
 class MemoryReceipt(WireModel):

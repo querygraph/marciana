@@ -17,7 +17,7 @@ class McpTests(unittest.TestCase):
         )
         receipt = adapter.call(
             "marciana_remember",
-            {"space": "tenant/coffee", "text": "price", "purpose": "research"},
+            {"space_id": "tenant/coffee", "text": "price", "purpose": "research"},
         )
         self.assertEqual(receipt.memory_ids, ["mcp-1"])
 

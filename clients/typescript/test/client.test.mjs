@@ -3,6 +3,8 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import { MarcianaClient } from "../dist/index.js";
 
+const FIXTURE_URL = new URL("../../../compat/fixtures/api_remember_v1.json", import.meta.url);
+
 test("routes a typed remember request through injected transport", async () => {
   const calls = [];
   const client = new MarcianaClient({
@@ -11,20 +13,48 @@ test("routes a typed remember request through injected transport", async () => {
       return { operation: "remember", allowed: true, memory_ids: ["m1"] };
     },
   });
-  const receipt = await client.remember({ space: "tenant/coffee", text: "price", purpose: "research" });
+  const receipt = await client.remember({ space_id: "tenant/coffee", text: "price", purpose: "research" });
   assert.deepEqual(receipt.memory_ids, ["m1"]);
   assert.equal(calls[0][0], "/v1/memory/remember");
 });
 
 test("rejects invalid identities before transport", async () => {
   const client = new MarcianaClient({ post: async () => { throw new Error("transport called"); } });
-  await assert.rejects(() => client.recall({ space: "tenant coffee", query: "price", purpose: "research" }), /invalid memory identity/);
+  await assert.rejects(() => client.recall({ space_id: "tenant coffee", query: "price", purpose: "research" }), /invalid memory identity/);
 });
 
-test("shared fixture uses the Rust/Python snake_case wire", async () => {
-  const fixture = JSON.parse(await readFile("../../compat/fixtures/api_remember_v1.json", "utf8"));
-  assert.equal(fixture.space_id, "memory/user:alice/semantic");
-  assert.equal(fixture.spaceId, undefined);
+test("rejects invalid nested improve replacements before transport", async () => {
+  const client = new MarcianaClient({ post: async () => { throw new Error("transport called"); } });
+  await assert.rejects(
+    () => client.improve({
+      space_id: "tenant/coffee",
+      memory_id: "m1",
+      replacement: { space_id: "tenant/coffee", text: "", purpose: "research" },
+    }),
+    /invalid memory text/,
+  );
+});
+
+test("rejects invalid forget memory ids before transport", async () => {
+  const client = new MarcianaClient({ post: async () => { throw new Error("transport called"); } });
+  await assert.rejects(
+    () => client.forget({ space_id: "tenant/coffee", memory_ids: ["bad id"], purpose: "research" }),
+    /invalid memory identity/,
+  );
+});
+
+test("remember payload round-trips the shared wire fixture", async () => {
+  const fixture = JSON.parse(await readFile(FIXTURE_URL, "utf8"));
+  let payload;
+  const client = new MarcianaClient({
+    async post(_path, body) {
+      payload = body;
+      return { operation: "remember", allowed: true, memory_ids: ["m1"] };
+    },
+  });
+  await client.remember(fixture);
+  assert.deepEqual(payload, fixture);
+  assert.equal(payload.spaceId, undefined);
 });
 
 test("forget sends memory_ids on the shared wire", async () => {
@@ -35,7 +65,7 @@ test("forget sends memory_ids on the shared wire", async () => {
       return { operation: "forget", allowed: true, memory_ids: ["m1"] };
     },
   });
-  await client.forget({ space: "tenant/coffee", memory_ids: ["m1"], purpose: "research" });
+  await client.forget({ space_id: "tenant/coffee", memory_ids: ["m1"], purpose: "research" });
   assert.deepEqual(payload.memory_ids, ["m1"]);
   assert.equal(payload.ids, undefined);
 });
