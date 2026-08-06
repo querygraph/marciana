@@ -41,9 +41,9 @@ what evidence crosses the boundary.
 
 # Part I — The memory problem
 
-## 1. From context windows to durable belief
+## From context windows to durable belief
 
-### 1.1 A prompt is not a memory
+### A prompt is not a memory
 
 A context window is a temporary working set. It can contain a user message,
 retrieved documents, tool results, system instructions, and generated
@@ -70,7 +70,7 @@ from becoming an implicit database administrator.
 | Proposal | What change does cognition suggest? | Model output becomes authority |
 | Commit | Which authorized mutation actually happened? | No recovery, audit, or idempotency |
 
-### 1.2 The four memory verbs
+### The four memory verbs
 
 Marciana begins with four verbs rather than a large surface of framework
 adapters:
@@ -85,7 +85,7 @@ enters the same TypeSec-controlled vault and the same guarded mutation seam.
 Vector search, graph traversal, semantic extraction, and agent tools are ways
 to propose or rank; they are not alternate verbs.
 
-### 1.3 Memory as a typed claim
+### Memory as a typed claim
 
 A useful minimum model is:
 
@@ -104,7 +104,7 @@ not a sentence such as “the model felt sure.” `label` participates in
 information-flow policy. `lifecycle_state` distinguishes current,
 superseded, disputed, retracted, quarantined, and forgotten states.
 
-### 1.4 The memory budget is multidimensional
+### The memory budget is multidimensional
 
 Teams often optimize only token count. A governed system must budget at least
 five resources:
@@ -120,9 +120,9 @@ five resources:
 The planner therefore returns a deterministic plan before the vault returns
 bytes. The plan is an object that can be hashed, evaluated, and authorized.
 
-## 2. First principles of governed memory
+## First principles of governed memory
 
-### 2.1 Identity before intelligence
+### Identity before intelligence
 
 An intelligent extractor cannot repair an ambiguous identity. If two price
 observations share a structural triplet but come from different episodes, they
@@ -130,7 +130,7 @@ must not silently collapse. Marciana's assertion identity includes collision-
 resistant canonical material and bounded source lineage. A retry produces the
 same identity; a genuinely distinct observation produces a different one.
 
-### 2.2 Provenance is a graph, not a string
+### Provenance is a graph, not a string
 
 “Source: Dataverse” is useful metadata but insufficient evidence. A durable
 lineage records the path from an input record through a TypeDID-authenticated
@@ -151,7 +151,7 @@ flowchart LR
 The graph is inspectable without turning an audit endpoint into a side channel.
 Nodes carry identities and digests; protected text remains behind the vault.
 
-### 2.3 Time has two axes
+### Time has two axes
 
 An observation can be valid for a market interval and become known to the
 system later. Recall must answer both “what was true on date X?” and “what did
@@ -167,7 +167,7 @@ same cutoff.
 
 Without both axes, an improved memory can accidentally become a time machine.
 
-### 2.4 Authorization is a data-flow property
+### Authorization is a data-flow property
 
 Security is not a final `if` statement. A sensitive memory can leak through a
 summary, a ranking score, an explanation, an embedding, or an error message.
@@ -175,7 +175,7 @@ Marciana's policy is therefore information-flow oriented: every byte returned
 by context materialization traces to an authorized item, and redacted
 candidates render only bounded metadata.
 
-### 2.5 Mutation must be boring
+### Mutation must be boring
 
 The proposal engine may be sophisticated. The commit engine should be boring:
 validate the exact request digest, verify freshness and capability, check
@@ -184,7 +184,7 @@ The boring boundary is what makes retries, crashes, and audits tractable.
 
 # Part II — The landscape
 
-## 3. Comparative systems review
+## Comparative systems review
 
 The comparison in `MARCIANA2.md` is architectural rather than a leaderboard.
 Products evolve quickly, and their reported scores depend on models, prompts,
@@ -200,7 +200,7 @@ each system teaches Marciana without redefining Marciana's authority model.
 | Letta | Memory blocks as durable agent state | Agent state cannot mint capabilities or bypass policy |
 | LangMem | Hot-path versus background learning and prompt optimization | Cognition creates versioned proposals, never direct activation |
 
-### 3.1 Mem0: ease of formation
+### Mem0: ease of formation
 
 Mem0 demonstrates that developers want an ergonomic “remember this” operation.
 Its add/update/delete vocabulary makes memory approachable. Marciana adopts
@@ -208,7 +208,7 @@ the usability lesson but makes the authority path explicit: a caller creates a
 typed request; TypeDID authenticates its origin; TypeSec checks purpose,
 clearance, retention, and space; Grust commits atomically.
 
-### 3.2 Graphiti: time and contradiction
+### Graphiti: time and contradiction
 
 Graphiti foregrounds temporal facts and graph relationships. Marciana agrees
 that memory is not a bag of vectors. The ledger therefore represents
@@ -216,7 +216,7 @@ assertions, source lineage, validity intervals, and conflict states before
 forming richer projections. A graph edge is a useful projection only when its
 assertion identity and historical status remain recoverable.
 
-### 3.3 Zep: context as a product
+### Zep: context as a product
 
 Zep makes context assembly visible as a product surface. Marciana's planner
 follows this insight: retrieval is not the same as injection. The planner
@@ -224,7 +224,7 @@ selects candidate IDs and estimates tokens; only a capability-bound
 materializer can reveal content. This makes a context bundle testable without
 shipping a protected fixture into a benchmark report.
 
-### 3.4 Cognee: pipelines without a second store universe
+### Cognee: pipelines without a second store universe
 
 Cognee's adapters and pipelines show how ingestion can be composed. An
 adapter translates an external source into a pipeline's expected shape; a
@@ -235,7 +235,7 @@ commit protocol. LakeCat provides catalog and data-platform boundaries. A
 Marciana adapter should be a thin translator into a formation profile, not a
 parallel Cognee compatibility layer.
 
-### 3.5 Letta and LangMem: learning with restraint
+### Letta and LangMem: learning with restraint
 
 Letta makes memory part of agent state; LangMem distinguishes background
 learning from hot-path adaptation. Marciana adopts both ideas as proposals:
@@ -243,7 +243,7 @@ working sets are bounded, procedures are versioned, evaluations unlock
 activation, and rollback remains possible. An agent can suggest a procedure;
 it cannot publish one by writing to its own prompt.
 
-### 3.6 The decision
+### The decision
 
 Marciana's differentiated product is not “all memory features.” It is a
 coherent trust kernel plus a small context-and-learning product:
@@ -272,7 +272,7 @@ proposal/commit split.
 
 # Part III — The QueryGraph stack
 
-## 4. Where Marciana lives
+## Where Marciana lives
 
 QueryGraph is a stack, not a single database. Each layer has a narrow contract:
 
@@ -309,7 +309,7 @@ flowchart TB
   L --> S
 ```
 
-### 4.1 The code-boundary rule
+### The code-boundary rule
 
 At every boundary, a caller should see a typed request and a typed receipt,
 not a borrowed store handle. The rule can be summarized as:
@@ -327,7 +327,7 @@ The trait is conceptual; the concrete implementation routes through TypeSec's
 capability-bound vault and the existing guarded cognition commit path. A client
 does not receive a Grust transaction or a Sail session as a substitute.
 
-## 5. TypeDID and TypeSec: identity before memory
+## TypeDID and TypeSec: identity before memory
 
 TypeDID supplies a durable identity for the agent or service making a request.
 The signed request carries the operation, target space, purpose, profile, and a
@@ -355,9 +355,9 @@ authorization, and storage to an injected transport. This keeps SDK code thin
 and makes it impossible for a convenience adapter to become a hidden policy
 engine.
 
-## 6. Grust, LakeCat, Sail, and Fluree
+## Grust, LakeCat, Sail, and Fluree
 
-### 6.1 Grust: the durable substrate
+### Grust: the durable substrate
 
 Grust supplies the durable scheduler/store semantics Marciana needs: leases,
 guarded idempotency, recovery, and ID-only outbox behavior. The ledger lowers a
@@ -377,7 +377,7 @@ Neither `plan` nor `receipt` carries arbitrary protected text into an audit
 stream. The durable identity and evidence digest are enough to reconcile a
 retry.
 
-### 6.2 LakeCat: catalog, not memory authority
+### LakeCat: catalog, not memory authority
 
 LakeCat names datasets, schemas, ownership, and governance metadata. In the
 coffee example, a Dataverse-shaped file is loaded into a table and associated
@@ -390,7 +390,7 @@ rows = dataset.scan(as_of=date(2026, 2, 10), columns=SAFE_COLUMNS)
 proposal = marciana.form(dataset.source_id, rows, profile="document-deduplication-v1")
 ```
 
-### 6.3 Sail: execution plane
+### Sail: execution plane
 
 Sail can run relational and semantic queries over distributed data. Marciana
 uses it as an execution endpoint and keeps Sail-specific behavior upstream.
@@ -410,7 +410,7 @@ The supported baseline records the merged upstream Sail PR #2374 revision in
 `compat/sail-revision.txt`. The explicit binary remains subject to the live
 gate; a random executable on `PATH` is not proof of compatibility.
 
-### 6.4 Fluree: semantic projection
+### Fluree: semantic projection
 
 Fluree can provide a semantic ledger and query surface for graph-shaped data.
 Marciana's rule is projection, not duplication: the memory ledger remains the
@@ -420,13 +420,13 @@ revision so it can be rebuilt and compared.
 
 # Part IV — The memory engine
 
-## 7. The assertion ledger
+## The assertion ledger
 
 The ledger is the first durable product. It solves the problem that a graph
 edge alone cannot solve: two claims can share a subject, predicate, and object
 shape yet differ in source episode, observation time, confidence, or lifecycle.
 
-### 7.1 Structural migration
+### Structural migration
 
 Legacy `RELATES` edges are migrated into explicit assertions through a
 retry-stable conversion. The migration runner applies only validated
@@ -442,7 +442,7 @@ projection is built.
 | Reopen | Durable IDs survive database close/reopen |
 | Read compatibility | Baseline neighborhood behavior remains available |
 
-### 7.2 Lifecycle states
+### Lifecycle states
 
 ```mermaid
 stateDiagram-v2
@@ -461,14 +461,14 @@ evidence digest. “Forget” does not mean pretending the event never existed;
 the system records a bounded lifecycle transition while preventing ordinary
 recall from returning the forgotten content.
 
-## 8. Formation and cognition
+## Formation and cognition
 
 Cognition is a proposal engine. It reads authorized source material, selects a
 closed profile, asks a trusted provider to produce bounded output, and emits
 an inert proposal. The application rechecks the profile, source/output ceilings,
 authority freshness, and labels before commit.
 
-### 8.1 Closed profiles
+### Closed profiles
 
 Profiles such as `background-deduplication-v1`,
 `conversation-deduplication-v1`, `document-deduplication-v1`,
@@ -484,7 +484,7 @@ native cognition operation. A payload cannot name a new executor or operation.
 | Output ceiling | Bounded proposal records |
 | Schema versions | Stable wire interpretation |
 
-### 8.2 Durable progress
+### Durable progress
 
 Job progress is lease-bound, monotonic, and bounded. It stores optional digest-
 only detail identities rather than worker text or model output. Restart and
@@ -503,7 +503,7 @@ pub struct FormationProgress {
 The distinction is crucial: inference may be repeated; the commit identity may
 not be duplicated.
 
-## 9. Governed context
+## Governed context
 
 Recall is a compiler pipeline:
 
@@ -528,7 +528,7 @@ The planner is pure and content-free. Equivalent recall paths pass the same
 visibility corpus; unauthorized candidates cannot leak through scores,
 summaries, or explanations.
 
-### 9.1 Typed bundles
+### Typed bundles
 
 A context bundle separates semantic sections while retaining one receipt:
 
@@ -552,7 +552,7 @@ capability merely by having a new name.
 
 # Part V — Enterprise semantics
 
-## 10. Marciana in the enterprise semantic layer
+## Marciana in the enterprise semantic layer
 
 Enterprise agents do not live in a single application database. They move
 between CRM records, lakehouse tables, catalog entries, policy systems,
@@ -560,7 +560,7 @@ documents, and operational APIs. A semantic layer makes those systems
 discoverable by concepts and relationships, but semantic discoverability is not
 permission to disclose or mutate.
 
-### 10.1 A reference workflow
+### A reference workflow
 
 ```mermaid
 sequenceDiagram
@@ -587,7 +587,7 @@ The semantic layer supplies names and relationships. Marciana supplies durable
 memory semantics. TypeSec supplies authority. This division lets an enterprise
 change its catalog or query engine without changing the memory trust contract.
 
-### 10.2 Agent roles
+### Agent roles
 
 The enterprise deployment should distinguish at least four roles:
 
@@ -601,7 +601,7 @@ The enterprise deployment should distinguish at least four roles:
 This is a better fit for regulated organizations than a single super-agent
 with an all-purpose database token.
 
-### 10.3 Cost and SLOs
+### Cost and SLOs
 
 The cognition layer exposes bounded metrics and integer microcredit estimates.
 Operation metrics carry verb counts, denials, and latency accounting. SLO
@@ -609,9 +609,9 @@ evaluation reports per-verb latency and denial-rate targets without exporting
 request or memory content. This supports a semantic layer that is accountable
 to procurement and operations rather than only to a demo notebook.
 
-## 11. Ontologies, semantic Croissant, and Apache Ossie
+## Ontologies, semantic Croissant, and Apache Ossie
 
-### 11.1 Why ontologies belong before extraction
+### Why ontologies belong before extraction
 
 An extractor that sees “price,” “value,” and “USD/kg” as unrelated strings will
 produce unstable memory. An ontology registry declares typed fields, edges,
@@ -629,7 +629,7 @@ CoffeeObservation
   └── source: prov:Entity
 ```
 
-### 11.2 Croissant alignment
+### Croissant alignment
 
 The semantic Croissant vocabulary is useful as an interchange description for
 datasets, fields, distributions, and their relationships. Marciana can map a
@@ -646,7 +646,7 @@ license/usage constraints, and the as-of boundary.
 | Distribution | Sail/warehouse adapter |
 | Provenance | Digest-only lineage graph |
 
-### 11.3 Apache Ossie as a future adapter target
+### Apache Ossie as a future adapter target
 
 If the new Apache Ossie project provides an ontology-aware semantic execution
 or cognition surface aligned with Croissant, it is a natural peer integration:
@@ -669,7 +669,7 @@ IDs, schema versions, source manifests, and bounded result sets. Until Ossie's
 released contracts are verified, this chapter is an integration design and a
 test plan—not a compatibility claim.
 
-### 11.4 Ontology-aware cognition
+### Ontology-aware cognition
 
 Ontology-aware formation can improve precision without making the ontology a
 permission system. A profile may require that `price` has a unit, `observedOn`
@@ -679,14 +679,14 @@ freshness, and guarded commit.
 
 # Part VI — Evidence and examples
 
-## 12. Benchmarking memory systems
+## Benchmarking memory systems
 
 Marciana benchmarks memory as a product and a safety boundary. The local smoke
 harness is dependency-free and intentionally small; external adapters are
 pinned but optional. It measures correctness, abstention, redaction, token
 utility, and latency rather than celebrating a single retrieval score.
 
-### 12.1 Current verified run
+### Current verified run
 
 | Measurement | Linear | Indexed |
 | --- | ---: | ---: |
@@ -702,7 +702,7 @@ The run used 504 records and 1,000 repeats. Indexed lookup was approximately
 81.44× faster at P50. The result is a regression signal, not a claim that a
 local in-memory index beats every hosted vendor under every workload.
 
-### 12.2 Vendor comparisons with discipline
+### Vendor comparisons with discipline
 
 Mem0 and Zep publish reference results for LoCoMo, LongMemEval, and BEAM.
 Those numbers are informative but not directly comparable without matching
@@ -721,7 +721,7 @@ policy. Marciana's report therefore requires provider-neutral metadata:
 }
 ```
 
-### 12.3 The real release corpus
+### The real release corpus
 
 The smoke test is not enough for release. The governed corpus should include
 temporal updates, contradictions, supersession, deletion closure, poisoned
@@ -730,7 +730,7 @@ procedure regression, crash recovery, index convergence, and stale proposal
 rejection. Every result must remain content-free outside its authorized
 environment.
 
-## 13. A coffee-market walk-through
+## A coffee-market walk-through
 
 The example follows an agricultural research agent studying Honduras coffee.
 The source is a Dataverse-shaped fixture based on the Palefire/AgStack style:
@@ -738,7 +738,7 @@ structured observations, provenance, a market entity, and a time-varying price.
 The example is deliberately small enough to run locally while showing the
 whole boundary chain.
 
-### 13.1 Typed rows
+### Typed rows
 
 ```python
 class CoffeeRow(BaseModel):
@@ -755,7 +755,7 @@ class CoffeeRow(BaseModel):
 The row is not yet a memory. It is source evidence. A formation profile or
 typed agent tool can propose a `MemoryFact` after validation.
 
-### 13.2 Dataverse to Sail
+### Dataverse to Sail
 
 ```python
 rows = DataverseClient(dataset_url, fixture_path).rows()
@@ -772,7 +772,7 @@ report = DataverseLoadReport(
 The report makes the data movement observable without embedding a secret or
 pretending that a local fixture is a production Dataverse connection.
 
-### 13.3 Pydantic AI v2 tools
+### Pydantic AI v2 tools
 
 ```python
 agent = Agent(
@@ -791,7 +791,7 @@ The tool definitions call `memory.remember`, `memory.recall`,
 so a test can verify what happened. The model does not receive a database
 credential.
 
-### 13.4 Remember, improve, forget
+### Remember, improve, forget
 
 ```python
 learned = await tool_turn(agent, deps, "remember", "Remember the agronomic facts.")
@@ -815,7 +815,7 @@ belief, but revision remains historical, scoped, and receipt-producing.
 
 # Part VII — Operating the system
 
-## 14. Failure, recovery, and deletion
+## Failure, recovery, and deletion
 
 The production test matrix is as important as the happy path. A memory system
 must answer what happens when a provider times out after proposing a draft,
@@ -837,7 +837,7 @@ Backups contain manifests and digests, not an accidental second memory
 authority. Encryption boundaries bind tenant identity, non-secret key identity,
 and monotonic key revision while key material stays deployment-owned.
 
-## 15. Building a disciplined adapter ecosystem
+## Building a disciplined adapter ecosystem
 
 An adapter is healthy when it is small. It should translate a foreign request
 into a Marciana intent, pass it to the native boundary, and translate the
@@ -864,7 +864,7 @@ The registry validates and dispatches. The injected transport owns the trust
 boundary. The same principle applies to the TypeScript client and MCP tool
 surface.
 
-## 16. A release checklist
+## A release checklist
 
 Before a release candidate:
 
