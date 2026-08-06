@@ -49,3 +49,12 @@ fn failed_repair_does_not_partially_change_manifest() {
     ));
     assert_eq!(manifest.digest(), before);
 }
+
+#[test]
+fn decoded_scope_identity_must_retain_constructor_invariants() {
+    let scope = VectorIndexScope::new("tenant-a", "embed-v1").unwrap();
+    let mut encoded = serde_json::to_value(&scope).unwrap();
+    encoded["tenant_id"] = serde_json::Value::String("not canonical space".into());
+    let decoded: VectorIndexScope = serde_json::from_value(encoded).unwrap();
+    assert!(decoded.validate().is_err());
+}

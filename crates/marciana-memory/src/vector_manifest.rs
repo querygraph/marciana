@@ -71,6 +71,9 @@ impl VectorIndexManifest {
 
     /// Verify the persisted membership and digest identity.
     pub fn validate(&self) -> Result<(), VectorManifestError> {
+        self.scope
+            .validate()
+            .map_err(|_| VectorManifestError::InvalidBatch)?;
         if self.indexed_ids.len() > MAX_MANIFEST_IDS
             || self.indexed_ids.iter().any(|id| {
                 id.is_empty()

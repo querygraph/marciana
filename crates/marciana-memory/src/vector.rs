@@ -107,6 +107,22 @@ impl VectorIndexScope {
     pub fn digest(&self) -> &str {
         &self.digest
     }
+
+    /// Verify a decoded scope was created from canonical components.
+    pub fn validate(&self) -> Result<(), TenantIndexError> {
+        if !valid_scope_component(&self.tenant_id) {
+            return Err(TenantIndexError::InvalidTenant);
+        }
+        if !valid_scope_component(&self.embedding_space) {
+            return Err(TenantIndexError::InvalidEmbeddingSpace);
+        }
+        let expected = Self::new(&self.tenant_id, &self.embedding_space)
+            .map_err(|_| TenantIndexError::InvalidEmbeddingSpace)?;
+        if expected.digest != self.digest {
+            return Err(TenantIndexError::TenantMismatch);
+        }
+        Ok(())
+    }
 }
 
 /// Explicitly tenant-checked vector-index seam. It intentionally does not
