@@ -6,6 +6,12 @@ All notable changes to Marciana are documented in this file.
 
 ### 2026-08-06
 
+- Restored the executable Sail baseline gate: CI now starts the exact pinned
+  upstream Sail binary (or uses an explicit `SAIL_ENDPOINT`) before running
+  Marciana's ignored live cognition tests.
+
+### 2026-08-06
+
 - Added lease-bound, digest-only cognition progress to the durable scheduler.
   Progress phases and counters are bounded, timestamp-monotonic, persisted
   under job schema v3, and never carry worker or model text.

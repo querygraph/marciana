@@ -271,7 +271,7 @@ async fn assert_live_operation_matches_reference(operation: CognitionOperation, 
 }
 
 #[tokio::test]
-#[ignore = "requires a live Sail Spark Connect endpoint (run scripts/integration-test.sh --backend sail)"]
+#[ignore = "requires a live Sail Spark Connect endpoint (run scripts/test-live-sail.sh)"]
 async fn live_sail_deduplication_matches_reference_and_keeps_evidence_secret() {
     assert_live_operation_matches_reference(
         CognitionOperation::Deduplicate,
@@ -281,7 +281,7 @@ async fn live_sail_deduplication_matches_reference_and_keeps_evidence_secret() {
 }
 
 #[tokio::test]
-#[ignore = "requires a live Sail Spark Connect endpoint (run scripts/integration-test.sh --backend sail)"]
+#[ignore = "requires a live Sail Spark Connect endpoint (run scripts/test-live-sail.sh)"]
 async fn live_sail_reconciliation_matches_reference_and_keeps_evidence_secret() {
     assert_live_operation_matches_reference(
         CognitionOperation::Reconcile,
