@@ -3,9 +3,9 @@
 use chrono::{DateTime, TimeDelta, Utc};
 
 use crate::OperationKind;
+use crate::tenant::is_valid_tenant_id;
 
 const OPERATION_COUNT: usize = 5;
-const MAX_TENANT_ID: usize = 256;
 
 /// Per-window limits in the same order as [`OperationKind`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -121,14 +121,9 @@ pub enum QuotaError {
 }
 
 fn validate_tenant(value: &str) -> Result<(), QuotaError> {
-    if value.is_empty()
-        || value.len() > MAX_TENANT_ID
-        || !value
-            .bytes()
-            .all(|byte| byte.is_ascii_alphanumeric() || b"_:/.-".contains(&byte))
-    {
-        Err(QuotaError::InvalidTenant)
-    } else {
+    if is_valid_tenant_id(value) {
         Ok(())
+    } else {
+        Err(QuotaError::InvalidTenant)
     }
 }

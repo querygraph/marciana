@@ -88,6 +88,8 @@ All notable changes to Marciana are documented in this file.
   accounting, exhaustion, clock, and window-reset checks.
 - Added a versioned redacted audit-export projection with hashed identities,
   lineage digests, deterministic affected-ID summaries, and schema bounds.
+- Added tenant-scoped, content-free resource accounting with deployment-owned
+  microcredit rates, operation separation, and saturating usage snapshots.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

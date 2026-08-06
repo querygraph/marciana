@@ -3,6 +3,7 @@
 mod audit_export;
 mod backup;
 mod binding_error;
+mod cost;
 mod engine_binding;
 mod formation_profile;
 mod governed;
@@ -12,11 +13,13 @@ mod memory_error;
 mod metrics;
 mod procedure_rollout;
 mod quota;
+mod tenant;
 mod working_set;
 
 pub use audit_export::{AuditExportError, AuditExportRecord};
 pub use backup::{BackupManifest, RestoreError};
 pub use binding_error::CognitionBindingError;
+pub use cost::{CostError, CostRates, CostSample, CostSnapshot, TenantCostAccounting};
 pub use engine_binding::CognitionEngineBinding;
 pub use formation_profile::{
     FormationBinding, FormationBudgetError, FormationCapability, FormationProfile,

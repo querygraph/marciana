@@ -91,6 +91,10 @@ quota state or exported snapshots.
 Phase 5 also exposes a versioned audit-export projection that hashes subject,
 purpose, and affected IDs while retaining content-free lineage digests and
 rejecting unsupported audit schemas.
+Cost-accounting groundwork now provides one bounded meter per tenant, records
+only operation/resource counters, and derives deterministic integer
+microcredit estimates from deployment-owned rates; arithmetic saturates rather
+than wrapping and snapshots contain no request or memory content.
 
 Phase 3 groundwork has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view
