@@ -70,7 +70,8 @@ pub trait LakeCatCognitionAuthority: Send + Sync {
     ) -> Result<FreshLakeCatAuthority, LakeCatAuthorityError>;
 }
 
-pub(crate) struct PrimedAuthorityVerifier {
+#[cfg_attr(feature = "test-support", doc(hidden))]
+pub struct PrimedAuthorityVerifier {
     primed: Mutex<Option<PrimedAuthority>>,
     clock: Arc<dyn CognitionClock>,
 }
@@ -81,14 +82,14 @@ struct PrimedAuthority {
 }
 
 impl PrimedAuthorityVerifier {
-    pub(crate) fn new(clock: Arc<dyn CognitionClock>) -> Self {
+    pub fn new(clock: Arc<dyn CognitionClock>) -> Self {
         Self {
             primed: Mutex::new(None),
             clock,
         }
     }
 
-    pub(crate) fn prime(
+    pub fn prime(
         &self,
         evidence: CognitionAuthorityEvidence,
         effective_expires_at: u64,
@@ -104,7 +105,7 @@ impl PrimedAuthorityVerifier {
         Ok(())
     }
 
-    pub(crate) fn clear(&self) -> Result<(), CognitionAuthorityError> {
+    pub fn clear(&self) -> Result<(), CognitionAuthorityError> {
         self.primed.lock().map_err(lock_error)?.take();
         Ok(())
     }
@@ -194,7 +195,7 @@ pub(crate) fn validate_fresh_authority(
     )
 }
 
-pub(crate) fn current_policy_decision_id(
+pub fn current_policy_decision_id(
     fresh_authorization_digest: &str,
     fresh_policy_decision_digest: &str,
     provider_revalidated_at: &DateTime<Utc>,

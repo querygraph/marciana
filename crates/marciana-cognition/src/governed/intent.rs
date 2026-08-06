@@ -41,7 +41,15 @@ pub const CLAIM_FIELD_MAPPING_DIGEST: &str = "marciana.field-mapping.digest";
 
 const SOURCE_SELECTION_DOMAIN: &str = "marciana.source-selection.digest.v1";
 const FIELD_MAPPING_DOMAIN: &str = "marciana.field-mapping.digest.v1";
+#[cfg(feature = "test-support")]
+#[doc(hidden)]
+pub const CONTEXT_SUBJECT: &str = "marciana.typedid.subject";
+#[cfg(not(feature = "test-support"))]
 pub(crate) const CONTEXT_SUBJECT: &str = "marciana.typedid.subject";
+#[cfg(feature = "test-support")]
+#[doc(hidden)]
+pub const CONTEXT_REQUEST_DIGEST: &str = "marciana.typedid.request-digest";
+#[cfg(not(feature = "test-support"))]
 pub(crate) const CONTEXT_REQUEST_DIGEST: &str = "marciana.typedid.request-digest";
 pub(crate) const CONTEXT_REQUESTED_PRIVACY: &str = "marciana.requested-privacy";
 

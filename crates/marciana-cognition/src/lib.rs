@@ -21,6 +21,11 @@ pub use governed::{
     GovernedCognitionConfig, GovernedCognitionResult, LakeCatAuthorityError,
     LakeCatCognitionAuthority, cognition_field_mapping_digest, cognition_source_selection_digest,
 };
+#[cfg(feature = "test-support")]
+#[doc(hidden)]
+pub use governed::{
+    CONTEXT_REQUEST_DIGEST, CONTEXT_SUBJECT, PrimedAuthorityVerifier, current_policy_decision_id,
+};
 pub use memory_error::CognitionMemoryError;
 
 #[cfg(test)]
