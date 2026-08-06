@@ -13,6 +13,9 @@ All notable changes to Marciana are documented in this file.
 - Added a closed formation provider binding contract with explicit input/output
   schema versions and fixed source/output record ceilings.
 
+- Added a pure content-free context planner that deterministically applies a
+  token budget to ranked IDs and emits a receipt-bound plan digest.
+
 - Added the closed MARCIANA2 formation-profile registry. Versioned background
   deduplication and reconciliation profiles select exactly one native
   cognition operation and reject unrecognized profile identities.

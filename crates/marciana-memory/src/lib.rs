@@ -506,6 +506,7 @@ pub mod analytics;
 pub mod assertion_projection;
 pub mod assertion_recall;
 pub mod cognition;
+pub mod context;
 #[cfg(feature = "turso")]
 pub mod turso;
 pub mod vector;
