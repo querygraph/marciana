@@ -2,7 +2,7 @@ use chrono::Utc;
 use grust_memory::MemoryGraphStore;
 use querygraph_memory::{
     FacadeError, ForgetRequest, GraphStoreMemoryStore, MemoryFacade, RecallRequest,
-    RememberRequest, SessionMetadata,
+    RememberRequest, SessionMetadata, ThreadMetadata,
     context::{ContextCandidate, ContextRecipe, ContextView, RecallIntent},
 };
 use sha2::Digest;
@@ -126,6 +126,35 @@ fn facade_executes_all_verbs_through_the_vault() {
         ),
         Err(FacadeError::SpaceMismatch)
     ));
+    let thread_bundle = facade
+        .materialize_context_for_thread(
+            &read,
+            &ThreadMetadata::new(
+                "coffee-thread".into(),
+                space.resource_id().into(),
+                digest("recall-policy"),
+            )
+            .unwrap(),
+            RecallIntent {
+                query_digest: digest("coffee-price"),
+                working_set_digest: None,
+                pinned_memory_ids: Vec::new(),
+                view: ContextView::Episodes,
+                recipe: ContextRecipe::Ranked,
+                as_of: Utc::now(),
+                token_budget: 32,
+            },
+            vec![ContextCandidate {
+                id: id.clone(),
+                score_basis_points: 100,
+                estimated_tokens: 8,
+                reason_digest: digest("query-match"),
+            }],
+            Label::Internal,
+            &typesec_core::policy::RequestContext::new().with_purpose("research"),
+        )
+        .unwrap();
+    assert_eq!(thread_bundle.memories.len(), 1);
     let replacement = facade
         .improve(
             &write,
