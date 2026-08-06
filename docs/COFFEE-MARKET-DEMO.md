@@ -1,6 +1,6 @@
 # Honduras coffee-market demo
 
-The demo in [`examples/coffee_market_demo`](examples/coffee_market_demo)
+The demo in [`examples/coffee_market_demo`](../examples/coffee_market_demo)
 exercises the QueryGraph memory stack as a small agricultural research
 workflow. It loads a Dataverse-shaped Honduras fixture, optionally writes and
 queries Sail over Spark Connect, and runs typed Pydantic AI v2 tools against
@@ -119,7 +119,6 @@ python3 -m examples.coffee_market_demo.demo
 ```
 
 Install the optional Python dependencies from
-`examples/coffee_market_demo/requirements.txt` for Pydantic AI v2. Use
+`../examples/coffee_market_demo/requirements.txt` for Pydantic AI v2. Use
 `--live --live-model <provider:model>` only when the external services and
 credentials are configured.
-

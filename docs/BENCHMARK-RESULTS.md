@@ -46,5 +46,4 @@ python3 benchmarks/run_memory_benchmark.py --json
 The CLI accepts `--model`, `--provider`, `--embedding`, `--prompt`,
 `--profile`, and `--revision`. Empty, overlong, or newline-containing values
 are rejected so results remain attributable. The full benchmark design and
-adapter policy are in [`benchmarks/README.md`](benchmarks/README.md).
-
+adapter policy are in [`benchmarks/README.md`](../benchmarks/README.md).
