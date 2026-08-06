@@ -18,6 +18,10 @@ The flow is:
 5. Every agent turn is a Pydantic AI v2 structured `AgentDecision`; tools are
    the only path to memory verbs.
 
+Reference designs: [AgStack](https://agstack.org/),
+[Pale Fire](https://github.com/agstack/palefire), and the
+[Pydantic AI structured-output docs](https://pydantic.dev/docs/ai/core-concepts/output/).
+
 ## Key-free run
 
 ```bash

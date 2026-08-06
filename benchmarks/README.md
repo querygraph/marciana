@@ -18,6 +18,15 @@ Their managed stacks, models, prompts, and judge choices differ. Reproduce
 their datasets with a pinned model/configuration and publish raw results before
 comparing.
 
+For orientation, Mem0’s published pages report roughly 92–94% on LoCoMo and
+LongMemEval, 64.1/48.6 on BEAM at 1M/10M, and about 6.8–7.0k retrieval tokens;
+Zep reports 94.7% LoCoMo and 90.2% LongMemEval with 155/162 ms retrieval
+latency and 5,760/4,408-token contexts. These are vendor-reported reference
+points, not targets to copy without matching their model and judge setup:
+[Mem0 evaluation](https://docs.mem0.ai/core-concepts/memory-evaluation),
+[Mem0 research](https://mem0.ai/research), and
+[Zep research](https://www.getzep.com/research/).
+
 Run the dependency-free harness with:
 
 ```text
