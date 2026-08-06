@@ -1,6 +1,6 @@
 use chrono::{TimeZone, Utc};
 use querygraph_memory::context::{ContextRecipe, ContextView, RecallIntent};
-use querygraph_memory::session::{SessionError, SessionMetadata};
+use querygraph_memory::session::{SessionError, SessionMetadata, ThreadMetadata};
 
 fn digest(label: &str) -> String {
     let marker = if label == "policy" { "b" } else { "a" };
@@ -45,5 +45,18 @@ fn binding_changes_plan_identity_without_granting_authority() {
     assert_ne!(
         bound.query_digest,
         other.bind_intent(intent()).unwrap().query_digest
+    );
+}
+
+#[test]
+fn thread_metadata_shares_bounds_but_has_a_distinct_identity_domain() {
+    let session = SessionMetadata::new("same-id".into(), "space".into(), digest("policy")).unwrap();
+    let thread = ThreadMetadata::new("same-id".into(), "space".into(), digest("policy")).unwrap();
+    assert_eq!(thread.thread_id(), "same-id");
+    assert_eq!(thread.space_id(), session.space_id());
+    assert_ne!(thread.digest(), session.digest());
+    assert_ne!(
+        thread.bind_intent(intent()).unwrap().query_digest,
+        session.bind_intent(intent()).unwrap().query_digest
     );
 }

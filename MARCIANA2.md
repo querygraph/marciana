@@ -130,6 +130,8 @@ session, space, and recall-policy digest. Binding it changes the deterministic
 recall intent identity only; it does not mint capabilities or create an
 authorization namespace. The facade now checks the session's selected space,
 binds the identity before planning, and materializes through the TypeSec vault.
+Thread metadata uses the same shared product contract and facade path, with a
+distinct digest domain and no authorization semantics of its own.
 
 Phase 3 implementation has also started with a pure context planner in
 `querygraph-memory`. It accepts only digest-safe ranked IDs, closed view

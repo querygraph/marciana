@@ -13,7 +13,7 @@ use crate::api::{ApiError, ForgetRequest, ImproveRequest, RecallRequest, Remembe
 use crate::context::{
     ContextBundle, ContextCandidate, ContextError, ContextPlan, RecallIntent, plan_context,
 };
-use crate::session::SessionMetadata;
+use crate::session::{RecallContextMetadata, SessionMetadata, ThreadMetadata};
 
 /// Public facade failures keep validation separate from vault failures.
 #[derive(Debug, thiserror::Error)]
@@ -62,10 +62,35 @@ where
         ceiling: Label,
         context: &RequestContext,
     ) -> Result<ContextBundle, FacadeError> {
-        if session.space_id() != self.space.resource_id() {
+        self.materialize_context_for_metadata(cap, session, intent, candidates, ceiling, context)
+    }
+
+    /// Bind thread metadata and materialize through the same capability gate.
+    pub fn materialize_context_for_thread(
+        &self,
+        cap: &Capability<CanRead, MemorySpace>,
+        thread: &ThreadMetadata,
+        intent: RecallIntent,
+        candidates: Vec<ContextCandidate>,
+        ceiling: Label,
+        context: &RequestContext,
+    ) -> Result<ContextBundle, FacadeError> {
+        self.materialize_context_for_metadata(cap, thread, intent, candidates, ceiling, context)
+    }
+
+    fn materialize_context_for_metadata<M: RecallContextMetadata>(
+        &self,
+        cap: &Capability<CanRead, MemorySpace>,
+        metadata: &M,
+        intent: RecallIntent,
+        candidates: Vec<ContextCandidate>,
+        ceiling: Label,
+        context: &RequestContext,
+    ) -> Result<ContextBundle, FacadeError> {
+        if metadata.space_id() != self.space.resource_id() {
             return Err(FacadeError::SpaceMismatch);
         }
-        let bound = session
+        let bound = metadata
             .bind_intent(intent)
             .map_err(|_| FacadeError::Context(ContextError::InvalidIntent))?;
         let plan = plan_context(bound, candidates).map_err(FacadeError::Context)?;

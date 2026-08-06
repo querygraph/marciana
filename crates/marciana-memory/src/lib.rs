@@ -521,13 +521,13 @@ mod vector_manifest_store;
 pub use api::{
     ApiError, ForgetRequest, ImproveRequest, MemoryVerb, RecallRequest, RememberRequest,
 };
-pub use facade::{FacadeError, MemoryFacade};
 pub use evaluation::{
     ContextEvaluationCase, ContextEvaluationCorpus, ContextEvaluationReport,
     ContextEvaluationSummary, EvaluationError,
 };
 pub use evaluation_receipt::{ContextEvaluationReceipt, EvaluationReceiptError};
-pub use session::{SessionError, SessionMetadata};
+pub use facade::{FacadeError, MemoryFacade};
+pub use session::{RecallContextMetadata, SessionError, SessionMetadata, ThreadMetadata};
 #[cfg(feature = "turso")]
 pub use turso::TursoMemoryStore;
 pub use vector::{Embedder, TenantIndexError, TenantVectorIndex, VectorIndex, VectorIndexScope};
