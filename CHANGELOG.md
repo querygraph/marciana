@@ -47,6 +47,8 @@ All notable changes to Marciana are documented in this file.
   selectors without acquiring capabilities or mutating storage.
 - Added `MemoryFacade`, which executes all four validated requests only through
   TypeSec capability-bound vault operations.
+- Added an integration test proving facade remember/recall/forget execution
+  against the Grust graph store and TypeSec RBAC capabilities.
 - Added a versioned content-free backup manifest and restore compatibility
   validator for deployment-owned backup/restore workflows.
 - Added an independently buildable TypeScript client with strict four-verb

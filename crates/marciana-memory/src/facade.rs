@@ -1,7 +1,7 @@
 //! Capability-bound execution of the validated four-verb API contracts.
 
 use typesec_core::policy::RequestContext;
-use typesec_core::{CanDelete, CanRead, CanWrite, Capability};
+use typesec_core::{CanDelete, CanRead, CanWrite, Capability, Resource};
 use typesec_memory::{Label, MemoryError, MemoryId, MemorySpace, MemoryStore, MemoryVault};
 
 use crate::api::{ApiError, ForgetRequest, ImproveRequest, RecallRequest, RememberRequest};
@@ -13,6 +13,8 @@ pub enum FacadeError {
     Validation(#[from] ApiError),
     #[error(transparent)]
     Vault(#[from] MemoryError),
+    #[error("memory request targets another space")]
+    SpaceMismatch,
 }
 
 /// Thin execution facade; all authority remains in [`MemoryVault`].
@@ -22,6 +24,14 @@ pub struct MemoryFacade<'a, S: MemoryStore> {
 }
 
 impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
+    fn check_space(&self, request_space: &str) -> Result<(), FacadeError> {
+        if request_space == self.space.resource_id() {
+            Ok(())
+        } else {
+            Err(FacadeError::SpaceMismatch)
+        }
+    }
+
     /// Bind one facade instance to one vault and one memory space.
     #[must_use]
     pub fn new(vault: &'a MemoryVault<S>, space: &'a MemorySpace) -> Self {
@@ -34,6 +44,7 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
         cap: &Capability<CanWrite, MemorySpace>,
         request: RememberRequest,
     ) -> Result<MemoryId, FacadeError> {
+        self.check_space(&request.space_id)?;
         let draft = request.to_draft()?;
         self.vault
             .remember(self.space, cap, draft)
@@ -52,6 +63,7 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
         ),
         FacadeError,
     > {
+        self.check_space(&request.space_id)?;
         let query = request.to_query()?;
         let context = RequestContext::default().with_purpose(request.purpose);
         self.vault
@@ -65,6 +77,7 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
         cap: &Capability<CanWrite, MemorySpace>,
         request: ImproveRequest,
     ) -> Result<MemoryId, FacadeError> {
+        self.check_space(&request.space_id)?;
         let draft = request.replacement_draft()?;
         self.vault
             .remember(self.space, cap, draft)
@@ -77,6 +90,7 @@ impl<'a, S: MemoryStore> MemoryFacade<'a, S> {
         cap: &Capability<CanDelete, MemorySpace>,
         request: ForgetRequest,
     ) -> Result<typesec_memory::Tombstone, FacadeError> {
+        self.check_space(&request.space_id)?;
         let selector = request.to_selector()?;
         self.vault
             .forget(self.space, cap, selector)
