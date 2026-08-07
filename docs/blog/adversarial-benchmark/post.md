@@ -205,7 +205,7 @@ gate at zero. All six systems, run 2026-08-06 on local hardware (Ollama
 |--------|:---------:|:-------:|---------|
 | Marciana (reference) | 18 | 18 | All nine hard gates zero |
 | Akka + Fluree | 16 | 16 | Every claimed capability holds |
-| Letta App Server | 6 | 0 | No bounded IDs; empty and oversized inputs accepted |
+| Letta App Server | 6 | 1 | Empty abstention passes; temporal output is out of contract |
 | Graphiti (Kuzu) | 8 | 6 | Retrieval not token-order stable; no input bound |
 | Mem0 | 9 | 6 | Private memory leaks across clearance within a tenant |
 | Cognee | 8 | 5 | Clearance holds, but errors on empty input; no input bound |
@@ -223,8 +223,9 @@ the adapter refuses to fake one.
 **Letta** is driven through the current self-hosted App Server and Agent SDK;
 every remember, recall, and forget operation is a real agent turn against
 persistent MemFS. On the retained local `llama3.1:latest` run, the loop returns
-no bounded IDs in four supported retrieval cases and accepts empty and 16 KB
-queries, scoring 0/6. Twelve cases are unsupported, including isolation:
+no bounded IDs in current retrieval, restart, order, and oversized-query cases;
+its temporal output is out of contract, while empty-query abstention passes,
+scoring 1/6. Twelve cases are unsupported, including isolation:
 selecting a principal's agent is adapter routing, not a Letta authorization
 permission. These are response and input-validation findings for this exact
 configuration, not a memory-leak or authorization claim.

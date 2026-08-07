@@ -65,9 +65,9 @@ repository,
 where executable OSS adapters run each system against the corpus. Recorded
 there (2026-08-06, local host): Akka + Fluree passes all sixteen
 capabilities it claims (clearance and purpose honestly unsupported). The
-current Letta App Server/Agent SDK path scores 0/6 with local
-`llama3.1:latest`: four retrieval cases return no bounded IDs, and empty and
-oversized queries are accepted. Its twelve unsupported cases include
+current Letta App Server/Agent SDK path scores 1/6 with local
+`llama3.1:latest`: empty-query abstention passes, while temporal output is out
+of contract and four other supported cases return no bounded IDs. Its twelve unsupported cases include
 isolation, which adapter routing cannot establish. These are diagnostics on
 the exact local configuration, not vendor or authorization claims.
 

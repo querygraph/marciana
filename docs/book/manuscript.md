@@ -785,8 +785,8 @@ releases on the same suite. The first comparative runs are instructive: an
 Akka-with-Fluree port, using Fluree as the semantic-ledger authority, passes
 every capability it claims through guarded SPARQL transactions and honestly
 declares clearance and purpose unsupported, while the current Letta App
-Server/Agent SDK path returns no bounded IDs in its four claimed retrieval
-cases and accepts empty and oversized queries. It does not claim isolation
+Server/Agent SDK path passes empty-query abstention, but its temporal output is
+out of contract and four other supported cases return no bounded IDs. It does not claim isolation
 because adapter routing is not authorization. The adapters make exactly which parts of the governed
 boundary each system enforces — and which it does not — legible instead of
 hidden.
