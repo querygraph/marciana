@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Replace stale Letta benchmark claims across results, blog, and book sources
+  with the retained current App Server/Agent SDK result, and explicitly leave
+  adapter-mediated isolation unsupported.
 - Update the adversarial-benchmark blog post with the completed six-system
   comparison, a dedicated section on why the boundary is unforgeable rather
   than merely careful, links to the new adversari.al site and the

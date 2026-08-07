@@ -205,7 +205,7 @@ gate at zero. All six systems, run 2026-08-06 on local hardware (Ollama
 |--------|:---------:|:-------:|---------|
 | Marciana (reference) | 18 | 18 | All nine hard gates zero |
 | Akka + Fluree | 16 | 16 | Every claimed capability holds |
-| Letta 0.16.8 | 9 | 7 | No input-robustness boundary |
+| Letta App Server | 6 | 0 | No bounded IDs; empty and oversized inputs accepted |
 | Graphiti (Kuzu) | 8 | 6 | Retrieval not token-order stable; no input bound |
 | Mem0 | 9 | 6 | Private memory leaks across clearance within a tenant |
 | Cognee | 8 | 5 | Clearance holds, but errors on empty input; no input bound |
@@ -220,17 +220,14 @@ every safety gate — and honestly declares the two it cannot enforce
 (clearance and purpose), because this Fluree build ships no policy engine and
 the adapter refuses to fake one.
 
-**Letta**, driven through its archival-memory path, passes retrieval,
-isolation, temporal, restart reproducibility, and injection containment. But
-the adversarial cases found something a retrieval score never would: Letta
-has **no input-robustness boundary at the memory layer**. An empty query
-returns every memory instead of abstaining, and a 16 KB query is accepted and
-answered rather than rejected. Both cases require only the retrieval
-capability Letta claims, so both are scored — and both fail. That is the
-benchmark doing its job: not "Letta is bad at recall" (it is fine at recall),
-but "Letta's memory API has no guard against malformed or oversized input" —
-exactly the kind of finding a governed deployment needs before it trusts a
-memory layer.
+**Letta** is driven through the current self-hosted App Server and Agent SDK;
+every remember, recall, and forget operation is a real agent turn against
+persistent MemFS. On the retained local `llama3.1:latest` run, the loop returns
+no bounded IDs in four supported retrieval cases and accepts empty and 16 KB
+queries, scoring 0/6. Twelve cases are unsupported, including isolation:
+selecting a principal's agent is adapter routing, not a Letta authorization
+permission. These are response and input-validation findings for this exact
+configuration, not a memory-leak or authorization claim.
 
 **Mem0, Graphiti, and Cognee** ship as adapters in the same repository and
 run against the same local stack. The adversarial cases surface exactly where
@@ -262,7 +259,7 @@ cooperating. Akka + Fluree holds because a real ledger enforces the
 properties directly. Marciana holds because the vault, not the model, is
 the authority. The other four are all fine memory libraries that were never
 built to survive an adversary: Mem0's only scoping axis is `user_id`, so it
-cannot express clearance within a tenant; Letta, Graphiti, and Cognee all
+cannot express clearance within a tenant; the tested Letta configuration, Graphiti, and Cognee all
 happily embed and answer a query with no upper bound on its size. None of
 this shows up on a recall benchmark. It only shows up when something is
 trying to break the boundary on purpose — which is the entire premise of

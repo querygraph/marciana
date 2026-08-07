@@ -64,10 +64,12 @@ repository,
 [querygraph/adversarial-cognition](https://github.com/querygraph/adversarial-cognition/blob/main/docs/RESULTS.md),
 where executable OSS adapters run each system against the corpus. Recorded
 there (2026-08-06, local host): Akka + Fluree passes all sixteen
-capabilities it claims (clearance and purpose honestly unsupported), and
-Letta 0.16.8 passes seven of nine supported cases — the two failures
-surfacing that its memory layer rejects neither empty nor oversized
-queries. Those runs are diagnostics on local hardware, not vendor claims.
+capabilities it claims (clearance and purpose honestly unsupported). The
+current Letta App Server/Agent SDK path scores 0/6 with local
+`llama3.1:latest`: four retrieval cases return no bounded IDs, and empty and
+oversized queries are accepted. Its twelve unsupported cases include
+isolation, which adapter routing cannot establish. These are diagnostics on
+the exact local configuration, not vendor or authorization claims.
 
 ## Reproduce
 

@@ -784,9 +784,10 @@ corpus on a local Ollama-and-Fluree stack; Marciana continues to gate its
 releases on the same suite. The first comparative runs are instructive: an
 Akka-with-Fluree port, using Fluree as the semantic-ledger authority, passes
 every capability it claims through guarded SPARQL transactions and honestly
-declares clearance and purpose unsupported, while Letta passes retrieval and
-isolation but is caught with no guard against empty or oversized queries at
-the memory layer. The adapters make exactly which parts of the governed
+declares clearance and purpose unsupported, while the current Letta App
+Server/Agent SDK path returns no bounded IDs in its four claimed retrieval
+cases and accepts empty and oversized queries. It does not claim isolation
+because adapter routing is not authorization. The adapters make exactly which parts of the governed
 boundary each system enforces — and which it does not — legible instead of
 hidden.
 Every result remains content-free outside its authorized environment: the
