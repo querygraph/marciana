@@ -102,7 +102,8 @@ impl SessionMetadata {
     /// Returns [`SessionError`] when the intent's space or policy disagrees
     /// with the session scope.
     pub fn bind_intent(&self, mut intent: RecallIntent) -> Result<RecallIntent, SessionError> {
-        self.core.bind_intent(&mut intent)
+        self.core.bind_intent(&mut intent)?;
+        Ok(intent)
     }
 }
 
@@ -153,7 +154,8 @@ impl ThreadMetadata {
     /// Returns [`SessionError`] when the intent's space or policy disagrees
     /// with the thread scope.
     pub fn bind_intent(&self, mut intent: RecallIntent) -> Result<RecallIntent, SessionError> {
-        self.core.bind_intent(&mut intent)
+        self.core.bind_intent(&mut intent)?;
+        Ok(intent)
     }
 }
 
@@ -201,7 +203,7 @@ impl ContextMetadataCore {
         })
     }
 
-    fn bind_intent(&self, intent: &mut RecallIntent) -> Result<RecallIntent, SessionError> {
+    fn bind_intent(&self, intent: &mut RecallIntent) -> Result<(), SessionError> {
         intent
             .validate()
             .map_err(|_: ContextError| SessionError::InvalidIntent)?;
@@ -211,7 +213,7 @@ impl ContextMetadataCore {
         hasher.update([0]);
         hasher.update(self.digest.as_bytes());
         intent.query_digest = format!("sha256:{:x}", hasher.finalize());
-        Ok(intent.clone())
+        Ok(())
     }
 }
 

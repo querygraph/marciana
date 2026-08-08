@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Return owned session- and thread-bound recall intents directly instead of
+  cloning their bounded working-set IDs after validation and digest binding.
 - Size governed snapshot JSON buffers from already-validated projection bytes
   before canonical serialization and digesting.
 - Pre-size observation and feedback canonical identity buffers to avoid
