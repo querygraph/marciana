@@ -94,6 +94,13 @@ fn rejects_unknown_semantics_and_duplicate_names() {
             .expect_err("unknown metric"),
         OssieError::UnknownMetric
     );
+    for dimension in ["aardvark", "lane", "zulu"] {
+        assert_eq!(
+            OssieAdapter::plan_query(&binding, "price_usd_per_kg", vec![dimension.to_owned()],)
+                .expect_err("unknown dimension"),
+            OssieError::UnknownDimension
+        );
+    }
     let duplicate = MODEL.replace(
         "{\"name\": \"market\", \"role\": \"identifier\"}",
         "{\"name\": \"country\", \"role\": \"identifier\"}",

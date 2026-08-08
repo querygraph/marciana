@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Validate Ossie selections through its canonical sorted indexes, using binary
+  search for metrics and a single merge-style pass for dimension subsets.
 - Resolve point-in-time assertion state by binary partitioning the validated
   monotonic transition log instead of scanning its full history.
 - Cache indexed-vector norms, compute each query norm once, avoid entity locks

@@ -175,11 +175,11 @@ impl OssieAdapter {
         dimensions: impl IntoIterator<Item = String>,
     ) -> Result<OssieQueryPlan, OssieError> {
         let metric = metric.into();
-        if !binding
+        if binding
             .document
             .metrics
-            .iter()
-            .any(|(name, _)| name == &metric)
+            .binary_search_by(|(name, _)| name.cmp(&metric))
+            .is_err()
         {
             return Err(OssieError::UnknownMetric);
         }
@@ -189,13 +189,7 @@ impl OssieAdapter {
         }
         dimensions.sort_unstable();
         dimensions.dedup();
-        if dimensions.iter().any(|dimension| {
-            !binding
-                .document
-                .dimensions
-                .iter()
-                .any(|name| name == dimension)
-        }) {
+        if !is_sorted_subset(&dimensions, &binding.document.dimensions) {
             return Err(OssieError::UnknownDimension);
         }
         let mut hasher = Sha256::new();
@@ -326,6 +320,19 @@ fn sorted_names<'a>(values: impl Iterator<Item = &'a str>) -> Vec<String> {
     let mut names = values.map(str::to_owned).collect::<Vec<_>>();
     names.sort_unstable();
     names
+}
+
+fn is_sorted_subset(required: &[String], available: &[String]) -> bool {
+    let mut available = available.iter();
+    required.iter().all(|required| {
+        loop {
+            match available.next() {
+                Some(candidate) if candidate < required => {}
+                Some(candidate) => break candidate == required,
+                None => break false,
+            }
+        }
+    })
 }
 
 fn binding_digest(source_manifest: &str, document: &OssieDocumentSummary, schema: &str) -> String {
