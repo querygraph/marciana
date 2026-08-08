@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Generate audit-export benchmark evidence with the canonical affected-ID
+  ordering required by validated TypeSec cognition outcomes.
 - Validate canonical schema-window versions directly as ASCII decimal text
   instead of allocating a formatted copy of every parsed version.
 - Detect duplicate cognition projection fields without tree-node allocation,

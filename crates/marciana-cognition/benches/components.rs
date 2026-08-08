@@ -249,7 +249,6 @@ fn audit(affected_id_count: usize) -> CognitionAuditEvidence {
         policy_decision_id: "policy:benchmark".to_owned(),
         evidence_digest: DIGEST.to_owned(),
         affected_ids: (0..affected_id_count)
-            .rev()
             .map(|item| MemoryId::from_string(format!("memory-{item:08}")))
             .collect(),
         authority_revalidated_at: at,
