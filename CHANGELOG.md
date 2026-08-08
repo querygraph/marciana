@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Size governed snapshot JSON buffers from already-validated projection bytes
+  before canonical serialization and digesting.
 - Pre-size observation and feedback canonical identity buffers to avoid
   geometric growth copies while preserving their exact durable digests.
 - Digest canonically ordered cognition audit IDs in place while retaining an

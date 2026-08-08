@@ -24,6 +24,14 @@ fn digest(value: &str) -> String {
 }
 
 #[test]
+fn snapshot_digest_is_stable() {
+    assert_eq!(
+        snapshot().digest().expect("valid snapshot"),
+        "sha256:81a3ef288bfb5ec04e27a7d147d54ccbef8d419d26b446343143fac30629b9d9"
+    );
+}
+
+#[test]
 fn snapshot_identity_byte_limit_is_inclusive_and_canonical() {
     let mut source = snapshot();
     source.catalog = "x".repeat(MAX_COGNITION_IDENTITY_BYTES);

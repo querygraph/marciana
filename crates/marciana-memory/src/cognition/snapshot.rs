@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use super::CognitionError;
-use super::bounds::{is_canonical_projection, is_canonical_text};
+use super::bounds::{canonical_projection_bytes, is_canonical_projection, is_canonical_text};
+
+const SNAPSHOT_JSON_BASE_BYTES: usize = 512;
 
 /// Hash-bound proof of the `LakeCat` snapshot and governed Sail scan used by a job.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -56,9 +58,8 @@ impl GovernedLakeCatSnapshot {
                 return Err(CognitionError::InvalidSnapshot(name));
             }
         }
-        if !is_canonical_projection(&self.effective_projection) {
-            return Err(CognitionError::InvalidSnapshot("effective projection"));
-        }
+        let projection_bytes = canonical_projection_bytes(&self.effective_projection)
+            .ok_or(CognitionError::InvalidSnapshot("effective projection"))?;
         for (name, digest) in [
             ("governed scan digest", self.governed_scan_digest.as_str()),
             ("snapshot digest", self.snapshot_digest.as_str()),
@@ -72,7 +73,16 @@ impl GovernedLakeCatSnapshot {
                 return Err(CognitionError::InvalidSnapshot(name));
             }
         }
-        let bytes = serde_json::to_vec(self)
+        let capacity = SNAPSHOT_JSON_BASE_BYTES
+            + self.catalog.len()
+            + self.namespace.len()
+            + self.table.len()
+            + self.subject.len()
+            + self.purpose.len()
+            + projection_bytes
+            + self.effective_projection.len() * 3;
+        let mut bytes = Vec::with_capacity(capacity);
+        serde_json::to_writer(&mut bytes, self)
             .map_err(|_| CognitionError::Serialization("snapshot encoding failed"))?;
         Ok(format!("sha256:{:x}", Sha256::digest(bytes)))
     }

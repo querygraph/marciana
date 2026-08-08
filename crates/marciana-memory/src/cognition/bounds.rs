@@ -25,8 +25,12 @@ pub(super) fn is_bounded_failure(value: &str) -> bool {
 }
 
 pub(super) fn is_canonical_projection(projection: &[String]) -> bool {
+    canonical_projection_bytes(projection).is_some()
+}
+
+pub(super) fn canonical_projection_bytes(projection: &[String]) -> Option<usize> {
     if projection.is_empty() || projection.len() > MAX_COGNITION_PROJECTION_FIELDS {
-        return false;
+        return None;
     }
     let total_bytes = projection.iter().try_fold(0usize, |total, field| {
         if is_canonical_text(field) {
@@ -34,12 +38,11 @@ pub(super) fn is_canonical_projection(projection: &[String]) -> bool {
         } else {
             None
         }
-    });
-    if total_bytes.is_none_or(|total| total > MAX_COGNITION_PROJECTION_BYTES) {
-        return false;
+    })?;
+    if total_bytes > MAX_COGNITION_PROJECTION_BYTES || !unique_projection_fields(projection) {
+        return None;
     }
-
-    unique_projection_fields(projection)
+    Some(total_bytes)
 }
 
 fn unique_projection_fields(projection: &[String]) -> bool {
