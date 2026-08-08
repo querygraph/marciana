@@ -86,3 +86,25 @@ fn feedback_dataset_is_order_stable_and_digest_only() {
     .unwrap();
     assert_eq!(left.dataset_digest, right.dataset_digest);
 }
+
+#[test]
+fn feedback_dataset_canonicalizes_conflicting_outcomes_for_the_same_trajectory_time() {
+    let at = Utc.with_ymd_and_hms(2026, 8, 6, 12, 0, 0).unwrap();
+    let low = FeedbackRecord {
+        trajectory_digest: digest("trajectory"),
+        outcome_basis_points: 2_000,
+        recorded_at: at,
+    };
+    let high = FeedbackRecord {
+        trajectory_digest: digest("trajectory"),
+        outcome_basis_points: 8_000,
+        recorded_at: at,
+    };
+
+    let ascending = FeedbackDataset::new(vec![low.clone(), high.clone()]).unwrap();
+    let descending = FeedbackDataset::new(vec![high, low]).unwrap();
+
+    assert_eq!(ascending.dataset_digest, descending.dataset_digest);
+    assert_eq!(ascending.records, descending.records);
+    assert_eq!(ascending.records[0].outcome_basis_points, 2_000);
+}

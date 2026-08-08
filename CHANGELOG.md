@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Totally order feedback records by trajectory, time, and outcome so dataset
+  identity is input-order independent, using in-place unstable canonical sort.
 - Recompute vector-manifest digests without cloning membership and apply
   repair batches through a prevalidated per-ID delta instead of a full set copy.
 - Partition contradiction candidates by normalized assertion prefix before

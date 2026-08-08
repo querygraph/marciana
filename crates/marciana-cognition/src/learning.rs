@@ -176,10 +176,11 @@ impl FeedbackDataset {
         }) {
             return Err(LearningError::InvalidFeedback);
         }
-        records.sort_by(|left, right| {
+        records.sort_unstable_by(|left, right| {
             left.trajectory_digest
                 .cmp(&right.trajectory_digest)
                 .then_with(|| left.recorded_at.cmp(&right.recorded_at))
+                .then_with(|| left.outcome_basis_points.cmp(&right.outcome_basis_points))
         });
         let dataset_digest = formatted_digest(
             "feedback-v1|[]".len() + records.len() * FEEDBACK_RECORD_IDENTITY_BYTES,
