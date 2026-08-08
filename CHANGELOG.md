@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Recompute vector-manifest digests without cloning membership and apply
+  repair batches through a prevalidated per-ID delta instead of a full set copy.
 - Partition contradiction candidates by normalized assertion prefix before
   pair generation, and normalize text in one allocation without a word vector.
 - Evaluate validated context-plan candidates through borrowed case membership

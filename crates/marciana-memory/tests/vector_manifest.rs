@@ -26,6 +26,10 @@ fn manifest_and_repair_are_scope_bound_and_deterministic() {
         ["mem-a", "mem-b"]
     );
     let first_digest = manifest.digest().to_owned();
+    assert_eq!(
+        first_digest,
+        "sha256:2bfaed6638c828cfc93648e6bb7d54128891b5ab62db32e9ba7bf1e3143c7cbb"
+    );
     manifest
         .apply(
             &VectorRepairBatch::new(&scope, vec![VectorRepairOperation::Remove(id("mem-b"))])

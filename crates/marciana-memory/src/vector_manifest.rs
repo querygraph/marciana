@@ -1,6 +1,6 @@
 //! Content-free durable vector-index manifests and atomic ID-only repairs.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -96,9 +96,7 @@ impl VectorIndexManifest {
         {
             return Err(VectorManifestError::InvalidBatch);
         }
-        let mut copy = self.clone();
-        copy.refresh_digest();
-        if copy.digest != self.digest {
+        if manifest_digest(&self.scope, &self.indexed_ids) != self.digest {
             return Err(VectorManifestError::InvalidBatch);
         }
         Ok(())
@@ -115,40 +113,54 @@ impl VectorIndexManifest {
         if batch.scope_digest != self.scope.digest() {
             return Err(VectorManifestError::ScopeMismatch);
         }
-        let mut next = self.indexed_ids.clone();
+        let mut changes = BTreeMap::new();
         for operation in &batch.operations {
-            let id = match operation {
-                VectorRepairOperation::Index(id) | VectorRepairOperation::Remove(id) => id,
-            };
+            let id = operation.id();
             if id.as_str().is_empty() || id.as_str().len() > 256 {
                 return Err(VectorManifestError::InvalidBatch);
             }
-            match operation {
-                VectorRepairOperation::Index(id) => {
-                    next.insert(id.as_str().to_owned());
+            changes.insert(id.as_str(), operation.indexes());
+        }
+        let mut next_len = self.indexed_ids.len();
+        for (id, indexes) in &changes {
+            match (*indexes, self.indexed_ids.contains(*id)) {
+                (true, false) => {
+                    next_len = next_len
+                        .checked_add(1)
+                        .ok_or(VectorManifestError::Capacity)?;
                 }
-                VectorRepairOperation::Remove(id) => {
-                    next.remove(id.as_str());
-                }
+                (false, true) => next_len -= 1,
+                _ => {}
             }
         }
-        if next.len() > MAX_MANIFEST_IDS {
+        if next_len > MAX_MANIFEST_IDS {
             return Err(VectorManifestError::Capacity);
         }
-        self.indexed_ids = next;
+        for (id, indexes) in changes {
+            if indexes {
+                self.indexed_ids.insert(id.to_owned());
+            } else {
+                self.indexed_ids.remove(id);
+            }
+        }
         self.refresh_digest();
         Ok(())
     }
 
     fn refresh_digest(&mut self) {
-        let mut hasher = Sha256::new();
-        hasher.update(b"querygraph.marciana.vector-manifest.v1\0");
-        hasher.update(self.scope.digest().as_bytes());
-        for id in &self.indexed_ids {
-            hasher.update(id.as_bytes());
-            hasher.update([0]);
+        self.digest = manifest_digest(&self.scope, &self.indexed_ids);
+    }
+}
+
+impl VectorRepairOperation {
+    fn id(&self) -> &MemoryId {
+        match self {
+            Self::Index(id) | Self::Remove(id) => id,
         }
-        self.digest = format!("sha256:{:x}", hasher.finalize());
+    }
+
+    fn indexes(&self) -> bool {
+        matches!(self, Self::Index(_))
     }
 }
 
@@ -166,9 +178,7 @@ impl VectorRepairBatch {
             return Err(VectorManifestError::Capacity);
         }
         if operations.iter().any(|operation| {
-            let id = match operation {
-                VectorRepairOperation::Index(id) | VectorRepairOperation::Remove(id) => id,
-            };
+            let id = operation.id();
             id.as_str().is_empty()
                 || id.as_str().len() > 256
                 || !id
@@ -192,5 +202,76 @@ impl VectorRepairBatch {
     #[must_use]
     pub fn operations(&self) -> &[VectorRepairOperation] {
         &self.operations
+    }
+}
+
+fn manifest_digest(scope: &VectorIndexScope, indexed_ids: &BTreeSet<String>) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(b"querygraph.marciana.vector-manifest.v1\0");
+    hasher.update(scope.digest().as_bytes());
+    for id in indexed_ids {
+        hasher.update(id.as_bytes());
+        hasher.update([0]);
+    }
+    format!("sha256:{:x}", hasher.finalize())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn id(value: impl Into<String>) -> MemoryId {
+        MemoryId::from_string(value.into())
+    }
+
+    #[test]
+    fn repair_delta_preserves_sequential_last_operation_semantics() {
+        let scope = VectorIndexScope::new("tenant-a", "embed-v1").expect("valid scope");
+        let mut manifest = VectorIndexManifest::new(scope.clone());
+        manifest
+            .apply(
+                &VectorRepairBatch::new(
+                    &scope,
+                    vec![
+                        VectorRepairOperation::Index(id("memory-a")),
+                        VectorRepairOperation::Remove(id("memory-a")),
+                        VectorRepairOperation::Index(id("memory-a")),
+                        VectorRepairOperation::Index(id("memory-b")),
+                        VectorRepairOperation::Remove(id("memory-b")),
+                    ],
+                )
+                .expect("valid repair"),
+            )
+            .expect("apply repair");
+
+        assert!(manifest.contains(&id("memory-a")));
+        assert!(!manifest.contains(&id("memory-b")));
+    }
+
+    #[test]
+    fn capacity_rejection_leaves_a_full_manifest_unchanged() {
+        let scope = VectorIndexScope::new("tenant-a", "embed-v1").expect("valid scope");
+        let mut manifest = VectorIndexManifest::new(scope.clone());
+        let seed = VectorRepairBatch::new(
+            &scope,
+            (0..MAX_MANIFEST_IDS)
+                .map(|index| VectorRepairOperation::Index(id(format!("memory-{index:08}"))))
+                .collect(),
+        )
+        .expect("capacity-sized repair");
+        manifest.apply(&seed).expect("fill manifest");
+        let before = manifest.digest().to_owned();
+        let overflow = VectorRepairBatch::new(
+            &scope,
+            vec![VectorRepairOperation::Index(id("memory-overflow"))],
+        )
+        .expect("bounded overflow repair");
+
+        assert_eq!(
+            manifest.apply(&overflow),
+            Err(VectorManifestError::Capacity)
+        );
+        assert_eq!(manifest.digest(), before);
+        assert!(!manifest.contains(&id("memory-overflow")));
     }
 }
