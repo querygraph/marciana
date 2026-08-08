@@ -60,14 +60,14 @@ impl WorkingSet {
         slots: Vec<WorkingSetSlot>,
         source: WorkingSetSource,
     ) -> Result<Self, WorkingSetError> {
-        validate_policy(&space_id, &policy_digest, token_budget, &slots)?;
+        let slot_ids = validate_policy(&space_id, &policy_digest, token_budget, &slots)?;
         let working_set_digest = working_set_digest(
             &space_id,
             &policy_digest,
             view,
             recipe,
             token_budget,
-            &slots,
+            &slot_ids,
             source,
         );
         Ok(Self {
@@ -88,7 +88,7 @@ impl WorkingSet {
     /// # Errors
     /// Returns a fixed error when a field or slot was modified after proposal.
     pub fn validate(&self) -> Result<(), WorkingSetError> {
-        validate_policy(
+        let slot_ids = validate_policy(
             &self.space_id,
             &self.policy_digest,
             self.token_budget,
@@ -100,7 +100,7 @@ impl WorkingSet {
             self.view,
             self.recipe,
             self.token_budget,
-            &self.slots,
+            &slot_ids,
             self.source,
         ) != self.working_set_digest
         {
@@ -197,12 +197,12 @@ pub enum WorkingSetError {
     Transition,
 }
 
-fn validate_policy(
+fn validate_policy<'a>(
     space_id: &str,
     policy_digest: &str,
     token_budget: u32,
-    slots: &[WorkingSetSlot],
-) -> Result<(), WorkingSetError> {
+    slots: &'a [WorkingSetSlot],
+) -> Result<Vec<&'a str>, WorkingSetError> {
     if space_id.is_empty()
         || space_id.len() > MAX_POLICY_ID
         || policy_digest.len() > MAX_POLICY_ID
@@ -230,7 +230,7 @@ fn validate_policy(
     if ids.windows(2).any(|pair| pair[0] == pair[1]) {
         return Err(WorkingSetError::Slot);
     }
-    Ok(())
+    Ok(ids)
 }
 
 fn working_set_digest(
@@ -239,14 +239,9 @@ fn working_set_digest(
     view: ContextView,
     recipe: ContextRecipe,
     token_budget: u32,
-    slots: &[WorkingSetSlot],
+    ids: &[&str],
     source: WorkingSetSource,
 ) -> String {
-    let mut ids = slots
-        .iter()
-        .map(|slot| slot.memory_id.as_str())
-        .collect::<Vec<_>>();
-    ids.sort_unstable();
     let canonical = format!(
         "working-set-v1|{space_id}|{policy_digest}|{view:?}|{recipe:?}|{token_budget}|{ids:?}|{source:?}"
     );

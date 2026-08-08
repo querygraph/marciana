@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Reuse validated working-set slot ordering during canonical digesting instead
+  of allocating and sorting the same identities twice.
 - Validate Ossie selections through its canonical sorted indexes, using binary
   search for metrics and a single merge-style pass for dimension subsets.
 - Resolve point-in-time assertion state by binary partitioning the validated
