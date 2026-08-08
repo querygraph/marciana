@@ -277,6 +277,18 @@ fn benchmark_audit_and_lineage(criterion: &mut Criterion) {
             },
         );
     }
+
+    let mut unordered_audit = audit(4_096);
+    unordered_audit.affected_ids.reverse();
+    group.throughput(Throughput::Elements(4_096));
+    group.bench_function("4096_unordered_fallback", |bencher| {
+        bencher.iter(|| {
+            black_box(
+                AuditExportRecord::from_audit(black_box(&unordered_audit))
+                    .expect("bounded defensive audit export"),
+            )
+        });
+    });
     group.finish();
 
     let export = AuditExportRecord::from_audit(&audit(64)).expect("valid audit export");

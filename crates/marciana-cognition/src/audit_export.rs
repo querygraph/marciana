@@ -94,6 +94,22 @@ fn digest(domain: &str, value: &str) -> String {
 }
 
 fn affected_ids_digest(audit: &CognitionAuditEvidence) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(b"querygraph.marciana.audit-export.affected.v1\0");
+    let mut previous_id = None;
+    for id in &audit.affected_ids {
+        let id = id.as_str();
+        if previous_id.is_some_and(|previous| previous >= id) {
+            return sorted_affected_ids_digest(audit);
+        }
+        hasher.update(id.as_bytes());
+        hasher.update([0]);
+        previous_id = Some(id);
+    }
+    format!("sha256:{:x}", hasher.finalize())
+}
+
+fn sorted_affected_ids_digest(audit: &CognitionAuditEvidence) -> String {
     let mut ids = audit
         .affected_ids
         .iter()

@@ -26,7 +26,10 @@ fn audit() -> CognitionAuditEvidence {
         authorization_receipt_digest: digest("receipt"),
         policy_decision_id: "policy:coffee".into(),
         evidence_digest: digest("evidence"),
-        affected_ids: vec![MemoryId::from_string("memory-1")],
+        affected_ids: vec![
+            MemoryId::from_string("memory-1"),
+            MemoryId::from_string("memory-2"),
+        ],
         authority_revalidated_at: at,
         prepared_at: at,
     }
@@ -39,7 +42,7 @@ fn audit_export_is_redacted_and_order_stable() {
     assert_eq!(export.schema_version, 1);
     assert_ne!(export.subject_digest, audit.subject);
     assert_ne!(export.purpose_digest, audit.purpose);
-    assert_eq!(export.affected_id_count, 1);
+    assert_eq!(export.affected_id_count, 2);
     audit.affected_ids.reverse();
     let reversed = AuditExportRecord::from_audit(&audit).expect("reversed export");
     assert_eq!(export.affected_ids_digest, reversed.affected_ids_digest);

@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Digest canonically ordered cognition audit IDs in place while retaining an
+  order-independent fallback for defensive export of manually built records.
 - Generate audit-export benchmark evidence with the canonical affected-ID
   ordering required by validated TypeSec cognition outcomes.
 - Validate canonical schema-window versions directly as ASCII decimal text
