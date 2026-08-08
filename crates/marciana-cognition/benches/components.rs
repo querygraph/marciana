@@ -8,8 +8,10 @@ use marciana_cognition::{
     FormationRunMode, HealthSnapshot, LineageInspection, MetricsSnapshot, OperationKind,
     OperationMetrics, OperationSample, Procedure, ProcedureRollout, QuotaLimits, SchemaDefinition,
     SchemaEdge, SchemaField, SchemaFieldKind, SchemaIdentity, SchemaRegistry, SchemaWindow,
-    SloPolicy, TenantCostAccounting, TenantQuota,
+    SloPolicy, TenantCostAccounting, TenantQuota, cognition_field_mapping_digest,
+    cognition_source_selection_digest,
 };
+use querygraph_memory::cognition::CognitionFieldMapping;
 use typesec_memory::{CognitionAuditEvidence, CognitionEffect, MemoryId};
 
 const DIGEST: &str = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -373,6 +375,44 @@ fn benchmark_rollout(criterion: &mut Criterion) {
     group.finish();
 }
 
+fn benchmark_governed_identity(criterion: &mut Criterion) {
+    let mut group = criterion.benchmark_group("cognition/governed_identity");
+    group.sample_size(20);
+    for source_count in [1, 1_024, 4_096] {
+        let source_ids = (0..source_count)
+            .rev()
+            .map(|item| MemoryId::from_string(format!("memory-{item:08}")))
+            .collect::<Vec<_>>();
+        group.throughput(Throughput::Elements(
+            u64::try_from(source_count).expect("benchmark size fits u64"),
+        ));
+        group.bench_with_input(
+            BenchmarkId::new("source_selection", source_count),
+            &source_count,
+            |bencher, _| {
+                bencher.iter(|| {
+                    black_box(cognition_source_selection_digest(black_box(&source_ids)))
+                        .expect("valid source selection")
+                });
+            },
+        );
+    }
+
+    let field_mapping = CognitionFieldMapping {
+        id: "memory_id".to_owned(),
+        text: "memory_text".to_owned(),
+        valid_from: "valid_from".to_owned(),
+    };
+    group.throughput(Throughput::Elements(3));
+    group.bench_function("field_mapping", |bencher| {
+        bencher.iter(|| {
+            black_box(cognition_field_mapping_digest(black_box(&field_mapping)))
+                .expect("valid field mapping")
+        });
+    });
+    group.finish();
+}
+
 criterion_group!(
     benches,
     benchmark_accounting,
@@ -380,6 +420,7 @@ criterion_group!(
     benchmark_ontology,
     benchmark_formation,
     benchmark_audit_and_lineage,
-    benchmark_rollout
+    benchmark_rollout,
+    benchmark_governed_identity
 );
 criterion_main!(benches);
