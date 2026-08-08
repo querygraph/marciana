@@ -11,6 +11,10 @@ fn latency_percentiles_are_nearest_rank_and_order_stable() {
     assert_eq!(first.p50_micros, 30);
     assert_eq!(first.p95_micros, 90);
     assert_eq!(first.p99_micros, 90);
+    assert_eq!(
+        first.digest,
+        "sha256:0771e488d0d20ec7a6dbb3a8115e7fcb9813c9bf36bbb51303a7f635e8621169"
+    );
     samples.record(1).unwrap();
     assert_ne!(first.digest, samples.snapshot().digest);
 }
