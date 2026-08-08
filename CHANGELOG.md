@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Resolve point-in-time assertion state by binary partitioning the validated
+  monotonic transition log instead of scanning its full history.
 - Cache indexed-vector norms, compute each query norm once, avoid entity locks
   for plain retrieval, and partially select bounded vector results before
   cloning and deterministically sorting the winners.

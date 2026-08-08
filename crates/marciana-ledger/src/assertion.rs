@@ -346,10 +346,12 @@ impl Assertion {
     /// Belief state at an instant, derived from the immutable transition log.
     #[must_use]
     pub fn state_at(&self, at: DateTime<Utc>) -> AssertionState {
-        self.transitions
-            .iter()
-            .take_while(|transition| transition.at() <= at)
-            .last()
+        let transition_count = self
+            .transitions
+            .partition_point(|transition| transition.at() <= at);
+        transition_count
+            .checked_sub(1)
+            .and_then(|index| self.transitions.get(index))
             .map_or(AssertionState::Proposed, AssertionTransition::to)
     }
 
