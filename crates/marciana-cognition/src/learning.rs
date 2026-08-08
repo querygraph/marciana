@@ -1,10 +1,15 @@
 //! Governed learning artifacts. These are proposal metadata, never direct memory writes.
 
+use std::fmt;
+
 use chrono::{DateTime, Utc};
 use sha2::{Digest, Sha256};
 
 const MAX_EVIDENCE: usize = 256;
 const MAX_FEEDBACK: usize = 10_000;
+// Conservative capacity hints; formatting remains correct if a value grows.
+const OBSERVATION_IDENTITY_BASE_BYTES: usize = 128;
+const FEEDBACK_RECORD_IDENTITY_BYTES: usize = 192;
 
 /// Lifecycle for an evidence-backed derived observation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -51,9 +56,16 @@ impl Observation {
         }
         let mut canonical = evidence_digests.to_owned();
         canonical.sort();
-        let observation_digest = digest(&format!(
-            "observation-v1|{canonical:?}|{support_count}|{confidence_basis_points}|{valid_from}"
-        ));
+        let identity_capacity = canonical.iter().fold(
+            OBSERVATION_IDENTITY_BASE_BYTES,
+            |capacity, evidence_digest| capacity + evidence_digest.len() + 4,
+        );
+        let observation_digest = formatted_digest(
+            identity_capacity,
+            format_args!(
+                "observation-v1|{canonical:?}|{support_count}|{confidence_basis_points}|{valid_from}"
+            ),
+        );
         Ok(Self {
             observation_digest,
             evidence_digests: canonical,
@@ -169,7 +181,10 @@ impl FeedbackDataset {
                 .cmp(&right.trajectory_digest)
                 .then_with(|| left.recorded_at.cmp(&right.recorded_at))
         });
-        let dataset_digest = digest(&format!("feedback-v1|{records:?}"));
+        let dataset_digest = formatted_digest(
+            "feedback-v1|[]".len() + records.len() * FEEDBACK_RECORD_IDENTITY_BYTES,
+            format_args!("feedback-v1|{records:?}"),
+        );
         Ok(Self {
             dataset_digest,
             records,
@@ -289,4 +304,12 @@ fn is_digest(value: &str) -> bool {
 
 fn digest(value: &str) -> String {
     format!("sha256:{:x}", Sha256::digest(value.as_bytes()))
+}
+
+fn formatted_digest(capacity: usize, arguments: fmt::Arguments<'_>) -> String {
+    let mut identity = String::with_capacity(capacity);
+    let Ok(()) = fmt::write(&mut identity, arguments) else {
+        unreachable!("formatting into a string is infallible");
+    };
+    digest(&identity)
 }

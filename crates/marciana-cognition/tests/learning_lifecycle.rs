@@ -14,6 +14,10 @@ fn observations_require_evidence_and_follow_a_closed_lifecycle() {
     let at = Utc.with_ymd_and_hms(2026, 8, 6, 12, 0, 0).unwrap();
     let evidence = vec![digest("a"), digest("b")];
     let mut observation = Observation::propose(&evidence, 2, 8_500, at).expect("proposal");
+    assert_eq!(
+        observation.observation_digest,
+        "sha256:65a0c45d4c7d0560df4f793f90d0bd935e817582c799fd003d1d13fcf7eee3d5"
+    );
     observation
         .transition(ObservationStatus::Accepted, at)
         .expect("accept");
@@ -36,6 +40,10 @@ fn procedures_cannot_activate_without_evaluation_and_approval() {
     let report =
         EvaluationReport::new(procedure.procedure_digest.clone(), digest("dataset"), 8_000)
             .expect("evaluation report");
+    assert_eq!(
+        report.report_digest,
+        "sha256:221bdcbd2a29569fe229b92616ff2649c4d4641322eac6b75ab03759bbc817d8"
+    );
     procedure.record_evaluation(&report).expect("evaluate");
     procedure.approve().expect("approve");
     procedure.activate().expect("activate");
@@ -59,6 +67,10 @@ fn feedback_dataset_is_order_stable_and_digest_only() {
         },
     ])
     .unwrap();
+    assert_eq!(
+        left.dataset_digest,
+        "sha256:18cefce4472a44d0cfc1957bbf6f3b4ebcbaf024601bd736b7975d8d978602e8"
+    );
     let right = FeedbackDataset::new(vec![
         FeedbackRecord {
             trajectory_digest: digest("a"),

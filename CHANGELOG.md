@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Pre-size observation and feedback canonical identity buffers to avoid
+  geometric growth copies while preserving their exact durable digests.
 - Digest canonically ordered cognition audit IDs in place while retaining an
   order-independent fallback for defensive export of manually built records.
 - Generate audit-export benchmark evidence with the canonical affected-ID

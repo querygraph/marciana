@@ -20,6 +20,10 @@ fn rollout_requires_active_evaluated_procedure_and_supports_rollback() {
     let mut procedure = approved_procedure();
     let mut rollout = ProcedureRollout::propose(&procedure, digest("cohort"), 2_500, 90)
         .expect("rollout proposal");
+    assert_eq!(
+        rollout.rollout_digest,
+        "sha256:ff4c8c1663c4c62d5465d4c467587f01fddf1044bf06abf0ad43f01e0ddcd89a"
+    );
     assert_eq!(rollout.status, ProcedureRolloutStatus::Proposed);
     rollout.approve().expect("rollout approval");
     assert!(rollout.activate(&procedure).is_err());

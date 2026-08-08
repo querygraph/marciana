@@ -22,6 +22,10 @@ fn working_set_requires_approval_before_activation_and_only_compiles_intent() {
         WorkingSetSource::AgentProposal,
     )
     .expect("proposal");
+    assert_eq!(
+        set.working_set_digest,
+        "sha256:bb264e511b1a5eddd98236676ae1990f99ee32acf20d60b0fe873221d4a11ef0"
+    );
     assert_eq!(set.status, WorkingSetStatus::Proposed);
     assert!(set.activate().is_err());
     set.approve().expect("approval");
