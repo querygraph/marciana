@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Cache indexed-vector norms, compute each query norm once, avoid entity locks
+  for plain retrieval, and partially select bounded vector results before
+  cloning and deterministically sorting the winners.
 - Make large context plans use one validated candidate and pinned-ID
   membership index instead of repeated linear scans during ordering.
 - Add production-profile Criterion coverage for ledger history queries,

@@ -138,6 +138,44 @@ fn remove_prunes_vectors_and_entities() {
 }
 
 #[test]
+fn bounded_search_matches_the_complete_deterministic_ranking() {
+    let index = VectorIndex::new(BagEmbedder::new(true));
+    for item in 0..100 {
+        let text = match item % 4 {
+            0 => "alice venice coffee",
+            1 => "alice venice",
+            2 => "alice coffee",
+            _ => "venice tea",
+        };
+        index
+            .index(&id(&format!("memory-{item:03}")), Label::Public, text)
+            .unwrap();
+    }
+
+    let complete = index.search("alice venice coffee", 100).unwrap();
+    assert_eq!(
+        index.search("alice venice coffee", 10).unwrap(),
+        complete[..10],
+        "partial selection must preserve score and identity ordering"
+    );
+}
+
+#[test]
+fn hybrid_boost_preserves_zero_vector_reranking() {
+    let index = VectorIndex::new(BagEmbedder::new(true));
+    index.index(&id("zero"), Label::Public, "unknown").unwrap();
+    index.note_entities(&id("zero"), ["Venice".to_owned()]);
+
+    assert!(index.search("unknown", 10).unwrap().is_empty());
+    assert_eq!(
+        index
+            .search_hybrid("unknown", 10, &["Venice".to_owned()])
+            .unwrap(),
+        vec![id("zero")]
+    );
+}
+
+#[test]
 fn embedding_space_identity_is_explicit_and_bounded() {
     let index = VectorIndex::with_embedding_space(BagEmbedder::new(true), "model-v2:384")
         .expect("canonical embedding space");

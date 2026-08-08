@@ -20,7 +20,8 @@
 //! entity, Zep-style — but that is a *reordering* of already-authorized
 //! candidates, never a widening.
 
-use std::collections::HashMap;
+use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet};
 use std::sync::RwLock;
 
 use serde::{Deserialize, Serialize};
@@ -55,9 +56,40 @@ pub trait Embedder: Send + Sync {
 pub struct VectorIndex<E: Embedder> {
     embedder: E,
     embedding_space: String,
-    vectors: RwLock<HashMap<MemoryId, Vec<f32>>>,
+    vectors: RwLock<HashMap<MemoryId, IndexedVector>>,
     // id -> entity names it mentions, for the optional hybrid graph re-rank.
     entities: RwLock<HashMap<MemoryId, Vec<String>>>,
+}
+
+struct IndexedVector {
+    components: Vec<f32>,
+    norm: f32,
+}
+
+enum EntityBoost<'a> {
+    Linear(&'a [String]),
+    Indexed(HashSet<&'a str>),
+}
+
+impl<'a> EntityBoost<'a> {
+    const INDEX_THRESHOLD: usize = 8;
+
+    fn new(entities: &'a [String]) -> Self {
+        if entities.len() <= Self::INDEX_THRESHOLD {
+            Self::Linear(entities)
+        } else {
+            Self::Indexed(entities.iter().map(String::as_str).collect())
+        }
+    }
+
+    fn matches(&self, mentions: &[String]) -> bool {
+        match self {
+            Self::Linear(entities) => mentions.iter().any(|mention| entities.contains(mention)),
+            Self::Indexed(entities) => mentions
+                .iter()
+                .any(|mention| entities.contains(mention.as_str())),
+        }
+    }
 }
 
 /// Tenant and embedding-space identity that must accompany a vector index.
@@ -398,36 +430,42 @@ impl<E: Embedder> VectorIndex<E> {
     }
 
     fn ranked(&self, query_vec: &[f32], limit: usize, boost: Option<&[String]>) -> Vec<MemoryId> {
+        if limit == 0 {
+            return Vec::new();
+        }
+        let query_norm = vector_norm(query_vec);
         let vectors = self
             .vectors
             .read()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
-        let entities = self
-            .entities
-            .read()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        let mut scored: Vec<(f32, MemoryId)> = vectors
+        let boost = boost.map(EntityBoost::new);
+        let entities = boost.as_ref().map(|_| {
+            self.entities
+                .read()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+        });
+        let mut scored = vectors
             .iter()
             .map(|(id, vec)| {
-                let mut score = cosine(query_vec, vec);
-                if let Some(boost) = boost
-                    && let Some(mentions) = entities.get(id)
-                    && mentions.iter().any(|e| boost.contains(e))
+                let mut score = cosine(query_vec, query_norm, vec);
+                if let Some(boost) = &boost
+                    && let Some(mentions) = entities.as_ref().and_then(|entities| entities.get(id))
+                    && boost.matches(mentions)
                 {
                     // A small, bounded re-rank nudge — reordering, not gating.
                     score += 0.1;
                 }
-                (score, id.clone())
+                (score, id)
             })
             // Drop orthogonal (no-signal) records: a zero cosine is not a hit.
             .filter(|(score, _)| *score > 0.0)
-            .collect();
-        scored.sort_by(|a, b| {
-            b.0.partial_cmp(&a.0)
-                .unwrap_or(std::cmp::Ordering::Equal)
-                .then(a.1.cmp(&b.1))
-        });
-        scored.into_iter().take(limit).map(|(_, id)| id).collect()
+            .collect::<Vec<_>>();
+        if scored.len() > limit {
+            let _ = scored.select_nth_unstable_by(limit, compare_scored);
+            scored.truncate(limit);
+        }
+        scored.sort_by(compare_scored);
+        scored.into_iter().map(|(_, id)| id.clone()).collect()
     }
 
     /// Hybrid search: cosine ranking with a bounded boost for records that
@@ -460,10 +498,17 @@ impl<E: Embedder> SemanticIndex for VectorIndex<E> {
             return Ok(());
         }
         let vector = self.embedder.embed(text)?;
+        let norm = vector_norm(&vector);
         self.vectors
             .write()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .insert(id.clone(), vector);
+            .insert(
+                id.clone(),
+                IndexedVector {
+                    components: vector,
+                    norm,
+                },
+            );
         Ok(())
     }
 
@@ -485,15 +530,29 @@ impl<E: Embedder> SemanticIndex for VectorIndex<E> {
     }
 }
 
-fn cosine(a: &[f32], b: &[f32]) -> f32 {
-    let dot: f32 = a.iter().zip(b).map(|(x, y)| x * y).sum();
-    let na: f32 = a.iter().map(|x| x * x).sum::<f32>().sqrt();
-    let nb: f32 = b.iter().map(|x| x * x).sum::<f32>().sqrt();
-    if na == 0.0 || nb == 0.0 {
+fn vector_norm(vector: &[f32]) -> f32 {
+    vector.iter().map(|value| value * value).sum::<f32>().sqrt()
+}
+
+fn cosine(query: &[f32], query_norm: f32, indexed: &IndexedVector) -> f32 {
+    let dot: f32 = query
+        .iter()
+        .zip(&indexed.components)
+        .map(|(left, right)| left * right)
+        .sum();
+    if query_norm == 0.0 || indexed.norm == 0.0 {
         0.0
     } else {
-        dot / (na * nb)
+        dot / (query_norm * indexed.norm)
     }
+}
+
+fn compare_scored(left: &(f32, &MemoryId), right: &(f32, &MemoryId)) -> Ordering {
+    right
+        .0
+        .partial_cmp(&left.0)
+        .unwrap_or(Ordering::Equal)
+        .then_with(|| left.1.cmp(right.1))
 }
 
 #[cfg(test)]
