@@ -74,27 +74,38 @@ pub(crate) fn deduplicate(memories: &[RecalledMemory]) -> DedupPlanning {
 }
 
 pub(crate) fn reconcile(memories: &[RecalledMemory]) -> ReconcilePlanning {
-    let sources: Vec<_> = memories.iter().map(ReconcileSource::new).collect();
+    let mut groups: BTreeMap<String, Vec<ReconcileSource<'_>>> = BTreeMap::new();
+    for memory in memories {
+        let (prefix, tail) = assertion_parts(&memory.content.text);
+        if !prefix.is_empty() {
+            groups
+                .entry(prefix)
+                .or_default()
+                .push(ReconcileSource { memory, tail });
+        }
+    }
     let mut pairs = BTreeSet::new();
     let mut older_ids = BTreeSet::new();
-    for (index, left) in sources.iter().enumerate() {
-        for right in &sources[index + 1..] {
-            if !left.conflicts_with(right) {
-                continue;
+    for sources in groups.values() {
+        for (index, left) in sources.iter().enumerate() {
+            for right in &sources[index + 1..] {
+                if !left.conflicts_with(right) {
+                    continue;
+                }
+                let (newer, older) = if validity_order(left.memory) > validity_order(right.memory) {
+                    (left, right)
+                } else {
+                    (right, left)
+                };
+                if newer.memory.id == older.memory.id {
+                    continue;
+                }
+                pairs.insert((
+                    newer.memory.id.as_str().to_owned(),
+                    older.memory.id.as_str().to_owned(),
+                ));
+                older_ids.insert(older.memory.id.clone());
             }
-            let (newer, older) = if validity_order(left.memory) > validity_order(right.memory) {
-                (left, right)
-            } else {
-                (right, left)
-            };
-            if newer.memory.id == older.memory.id {
-                continue;
-            }
-            pairs.insert((
-                newer.memory.id.as_str().to_owned(),
-                older.memory.id.as_str().to_owned(),
-            ));
-            older_ids.insert(older.memory.id.clone());
         }
     }
 
@@ -114,10 +125,14 @@ pub(crate) fn reconcile(memories: &[RecalledMemory]) -> ReconcilePlanning {
 }
 
 pub(crate) fn normalize_text(text: &str) -> String {
-    text.split_whitespace()
-        .collect::<Vec<_>>()
-        .join(" ")
-        .to_lowercase()
+    let mut normalized = String::with_capacity(text.len());
+    for word in text.split_whitespace() {
+        if !normalized.is_empty() {
+            normalized.push(' ');
+        }
+        normalized.extend(word.chars().flat_map(char::to_lowercase));
+    }
+    normalized
 }
 
 pub(crate) fn assertion_parts(text: &str) -> (String, String) {
@@ -134,22 +149,12 @@ pub(crate) fn normalized_assertion_parts(normalized: &str) -> (String, String) {
 
 struct ReconcileSource<'a> {
     memory: &'a RecalledMemory,
-    prefix: String,
     tail: String,
 }
 
-impl<'a> ReconcileSource<'a> {
-    fn new(memory: &'a RecalledMemory) -> Self {
-        let (prefix, tail) = assertion_parts(&memory.content.text);
-        Self {
-            memory,
-            prefix,
-            tail,
-        }
-    }
-
+impl ReconcileSource<'_> {
     fn conflicts_with(&self, other: &Self) -> bool {
-        !self.prefix.is_empty() && self.prefix == other.prefix && self.tail != other.tail
+        self.tail != other.tail
     }
 }
 
