@@ -4,10 +4,11 @@ use chrono::{TimeDelta, TimeZone, Utc};
 use criterion::{BatchSize, BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use marciana_cognition::{
     AuditExportRecord, BackupManifest, ComponentHealth, ComponentState, CostRates, CostSample,
-    EncryptionBoundary, EvaluationReport, HealthSnapshot, LineageInspection, MetricsSnapshot,
-    OperationKind, OperationMetrics, OperationSample, Procedure, ProcedureRollout, QuotaLimits,
-    SchemaDefinition, SchemaEdge, SchemaField, SchemaFieldKind, SchemaIdentity, SchemaRegistry,
-    SchemaWindow, SloPolicy, TenantCostAccounting, TenantQuota,
+    EncryptionBoundary, EvaluationReport, FormationProfile, FormationProvider, FormationRegistry,
+    FormationRunMode, HealthSnapshot, LineageInspection, MetricsSnapshot, OperationKind,
+    OperationMetrics, OperationSample, Procedure, ProcedureRollout, QuotaLimits, SchemaDefinition,
+    SchemaEdge, SchemaField, SchemaFieldKind, SchemaIdentity, SchemaRegistry, SchemaWindow,
+    SloPolicy, TenantCostAccounting, TenantQuota,
 };
 use typesec_memory::{CognitionAuditEvidence, CognitionEffect, MemoryId};
 
@@ -226,6 +227,42 @@ fn benchmark_ontology(criterion: &mut Criterion) {
     group.finish();
 }
 
+fn benchmark_formation(criterion: &mut Criterion) {
+    let registry = FormationRegistry;
+    let binding = registry
+        .resolve_for_mode(
+            FormationProfile::ConversationDeduplicationV1,
+            FormationProvider::ReferenceV1,
+            FormationRunMode::HotPathProposal,
+        )
+        .expect("valid formation binding");
+    let mut group = criterion.benchmark_group("cognition/formation");
+    group.bench_function("resolve", |bencher| {
+        bencher.iter(|| {
+            black_box(black_box(registry).resolve_for_mode(
+                black_box(FormationProfile::ConversationDeduplicationV1),
+                black_box(FormationProvider::ReferenceV1),
+                black_box(FormationRunMode::HotPathProposal),
+            ))
+            .expect("valid formation binding");
+        });
+    });
+    group.bench_function("explain", |bencher| {
+        bencher.iter_batched(
+            || (DIGEST.to_owned(), DIGEST.to_owned()),
+            |(source_manifest_digest, proposal_digest)| {
+                black_box(
+                    binding
+                        .explain(source_manifest_digest, proposal_digest, 10_000, 10_000)
+                        .expect("valid formation explanation"),
+                )
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    group.finish();
+}
+
 fn audit(affected_id_count: usize) -> CognitionAuditEvidence {
     let at = Utc
         .timestamp_opt(1_786_032_000, 0)
@@ -315,11 +352,25 @@ fn benchmark_rollout(criterion: &mut Criterion) {
     let procedure = approved_procedure();
     let rollout =
         ProcedureRollout::propose(&procedure, DIGEST.to_owned(), 2_500, 90).expect("valid rollout");
-    criterion.bench_function("cognition/procedure_rollout/validate", |bencher| {
+    let mut group = criterion.benchmark_group("cognition/procedure_rollout");
+    group.bench_function("propose", |bencher| {
+        bencher.iter_batched(
+            || DIGEST.to_owned(),
+            |cohort_digest| {
+                black_box(
+                    ProcedureRollout::propose(&procedure, cohort_digest, 2_500, 90)
+                        .expect("valid rollout"),
+                )
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    group.bench_function("validate", |bencher| {
         bencher.iter(|| {
             black_box(black_box(&rollout).validate()).expect("valid rollout identity");
         });
     });
+    group.finish();
 }
 
 criterion_group!(
@@ -327,6 +378,7 @@ criterion_group!(
     benchmark_accounting,
     benchmark_operational_metadata,
     benchmark_ontology,
+    benchmark_formation,
     benchmark_audit_and_lineage,
     benchmark_rollout
 );

@@ -30,7 +30,8 @@ All notable changes to Marciana are documented in this file.
 - Add production-profile Criterion coverage for ledger history queries,
   vector and hybrid retrieval, context planning, Grust-backed memory-store
   operations, cognition canonicalization, accounting, operational metadata,
-  ontology, audit export, lineage, rollout, and the LakeCat proof adapter.
+  ontology, formation, learning artifacts, working-set recall, audit export,
+  lineage, rollout, and the LakeCat proof adapter.
 - Replace stale Letta benchmark claims across results, blog, and book sources
   with the retained current App Server/Agent SDK result, and explicitly leave
   adapter-mediated isolation unsupported.

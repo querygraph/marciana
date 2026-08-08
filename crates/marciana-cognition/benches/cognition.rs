@@ -4,8 +4,8 @@ use std::time::Duration;
 use chrono::{TimeZone, Utc};
 use criterion::{BatchSize, BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use marciana_cognition::{
-    FeedbackDataset, FeedbackRecord, LatencySamples, OssieAdapter, WorkingSet, WorkingSetSlot,
-    WorkingSetSource,
+    EvaluationReport, FeedbackDataset, FeedbackRecord, LatencySamples, Observation, OssieAdapter,
+    WorkingSet, WorkingSetSlot, WorkingSetSource,
 };
 use querygraph_memory::context::{ContextRecipe, ContextView};
 use serde_json::json;
@@ -77,6 +77,58 @@ fn benchmark_feedback_dataset(criterion: &mut Criterion) {
     group.finish();
 }
 
+fn observation_evidence(count: usize) -> Vec<String> {
+    (0..count)
+        .rev()
+        .map(|item| format!("sha256:{item:064x}"))
+        .collect()
+}
+
+fn benchmark_learning_artifacts(criterion: &mut Criterion) {
+    let at = Utc
+        .timestamp_opt(1_786_032_000, 0)
+        .single()
+        .expect("benchmark timestamp");
+    let mut group = criterion.benchmark_group("cognition/learning");
+    for evidence_count in [1, 256] {
+        let evidence = observation_evidence(evidence_count);
+        group.throughput(Throughput::Elements(
+            u64::try_from(evidence_count).expect("benchmark size fits u64"),
+        ));
+        group.bench_with_input(
+            BenchmarkId::new("observation_propose", evidence_count),
+            &evidence_count,
+            |bencher, _| {
+                bencher.iter(|| {
+                    black_box(
+                        Observation::propose(
+                            black_box(&evidence),
+                            u32::try_from(evidence_count).expect("evidence count fits u32"),
+                            8_500,
+                            at,
+                        )
+                        .expect("valid observation"),
+                    )
+                });
+            },
+        );
+    }
+    group.throughput(Throughput::Elements(1));
+    group.bench_function("evaluation_report", |bencher| {
+        bencher.iter_batched(
+            || (DIGEST.to_owned(), DIGEST.to_owned()),
+            |(procedure_digest, dataset_digest)| {
+                black_box(
+                    EvaluationReport::new(procedure_digest, dataset_digest, 8_000)
+                        .expect("valid evaluation report"),
+                )
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    group.finish();
+}
+
 fn working_set_slots(count: usize) -> Vec<WorkingSetSlot> {
     (0..count)
         .rev()
@@ -132,6 +184,33 @@ fn benchmark_working_set(criterion: &mut Criterion) {
                     working_set.validate().expect("working set remains valid");
                     black_box(&working_set);
                 });
+            },
+        );
+
+        let mut active_working_set = working_set.clone();
+        active_working_set.approve().expect("working set approval");
+        active_working_set
+            .activate()
+            .expect("working set activation");
+        let as_of = Utc
+            .timestamp_opt(1_786_032_000, 0)
+            .single()
+            .expect("benchmark timestamp");
+        group.bench_with_input(
+            BenchmarkId::new("recall_intent", slot_count),
+            &slot_count,
+            |bencher, _| {
+                bencher.iter_batched(
+                    || DIGEST.to_owned(),
+                    |query_digest| {
+                        black_box(
+                            active_working_set
+                                .recall_intent(query_digest, as_of)
+                                .expect("valid recall intent"),
+                        )
+                    },
+                    BatchSize::SmallInput,
+                );
             },
         );
     }
@@ -214,6 +293,7 @@ criterion_group!(
     benches,
     benchmark_latency_snapshot,
     benchmark_feedback_dataset,
+    benchmark_learning_artifacts,
     benchmark_working_set,
     benchmark_ossie
 );
