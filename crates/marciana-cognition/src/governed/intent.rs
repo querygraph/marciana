@@ -295,6 +295,10 @@ pub(crate) fn validate_claims(
 #[cfg(any(test, feature = "test-support"))]
 #[doc(hidden)]
 #[must_use]
+#[allow(
+    dead_code,
+    reason = "the library test target cannot observe integration-test consumers"
+)]
 pub const fn intent_claim_limits_for_test() -> (usize, usize) {
     (
         MAX_COGNITION_INTENT_CLAIMS,

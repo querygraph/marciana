@@ -27,7 +27,12 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 async-trait = { workspace = true }
+criterion = { workspace = true }
 typesec-core = "0.13.1"
+
+[[bench]]
+name = "cognition"
+harness = false
 
 [lints]
 workspace = true

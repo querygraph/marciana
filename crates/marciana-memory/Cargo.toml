@@ -30,6 +30,7 @@ async-trait = { workspace = true }
 arrow = { version = "58.1.0", features = ["ipc_compression"], optional = true }
 
 [dev-dependencies]
+criterion = { workspace = true }
 grust-memory = "0.12.1"
 tempfile = { workspace = true }
 typesec-memory = { version = "0.13.1", features = ["conformance"] }
@@ -37,6 +38,10 @@ typesec-core = "0.13.1"
 typesec-rbac = { version = "0.13.1", default-features = false }
 static_assertions = "1"
 tokio = { workspace = true, features = ["test-util"] }
+
+[[bench]]
+name = "memory"
+harness = false
 
 [lints]
 workspace = true
