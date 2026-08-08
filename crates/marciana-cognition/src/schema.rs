@@ -57,10 +57,16 @@ impl SchemaWindow {
         else {
             return false;
         };
+        if version_text.is_empty()
+            || version_text.starts_with('0')
+            || !version_text.bytes().all(|byte| byte.is_ascii_digit())
+        {
+            return false;
+        }
         let Ok(version) = version_text.parse::<u32>() else {
             return false;
         };
-        version_text == version.to_string() && version >= self.minimum && version <= self.maximum
+        version >= self.minimum && version <= self.maximum
     }
 }
 

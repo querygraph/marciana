@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Validate canonical schema-window versions directly as ASCII decimal text
+  instead of allocating a formatted copy of every parsed version.
 - Detect duplicate cognition projection fields without tree-node allocation,
   using an allocation-free small-input path and a compact sorted borrowed index
   for larger governed projections.
