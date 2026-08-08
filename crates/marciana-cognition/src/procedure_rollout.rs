@@ -1,7 +1,8 @@
 //! Proposal-only cohort rollout and trajectory-retention policy.
 
-use crate::learning::{Procedure, ProcedureStatus};
 use sha2::{Digest, Sha256};
+
+use crate::learning::{Procedure, ProcedureStatus};
 
 const MAX_COHORT_ID: usize = 256;
 const MAX_RETENTION_DAYS: u16 = 3_650;
