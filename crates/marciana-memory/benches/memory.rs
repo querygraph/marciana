@@ -4,6 +4,7 @@ use std::time::Duration;
 use chrono::{TimeZone, Utc};
 use criterion::{BatchSize, BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use grust_memory::MemoryGraphStore;
+use querygraph_memory::cognition::GovernedLakeCatSnapshot;
 use querygraph_memory::context::{
     ContextCandidate, ContextRecipe, ContextView, RecallIntent, plan_context,
 };
@@ -157,6 +158,45 @@ fn benchmark_context_planning(criterion: &mut Criterion) {
     group.finish();
 }
 
+fn governed_snapshot(projection_count: usize) -> GovernedLakeCatSnapshot {
+    GovernedLakeCatSnapshot {
+        catalog: "lakecat://benchmark".to_owned(),
+        namespace: "benchmark".to_owned(),
+        table: "memories".to_owned(),
+        snapshot_id: 42,
+        governed_scan_digest: DIGEST.to_owned(),
+        snapshot_digest: DIGEST.to_owned(),
+        plan_task_digest: DIGEST.to_owned(),
+        subject: "did:key:benchmark".to_owned(),
+        purpose: "benchmark".to_owned(),
+        effective_projection: (0..projection_count)
+            .map(|item| format!("column_{item:03}"))
+            .collect(),
+        authorization_receipt_digest: DIGEST.to_owned(),
+    }
+}
+
+fn benchmark_governed_snapshot_digest(criterion: &mut Criterion) {
+    let mut group = criterion.benchmark_group("memory/governed_snapshot_digest");
+    for projection_count in [3, 128] {
+        let snapshot = governed_snapshot(projection_count);
+        group.bench_with_input(
+            BenchmarkId::from_parameter(projection_count),
+            &projection_count,
+            |bencher, _| {
+                bencher.iter(|| {
+                    black_box(
+                        black_box(&snapshot)
+                            .digest()
+                            .expect("valid governed snapshot fixture"),
+                    )
+                });
+            },
+        );
+    }
+    group.finish();
+}
+
 fn record(item: usize) -> StoredRecord {
     serde_json::from_value(json!({
         "id": format!("memory-{item:08}"),
@@ -267,6 +307,7 @@ criterion_group!(
     benches,
     benchmark_vector_search,
     benchmark_context_planning,
+    benchmark_governed_snapshot_digest,
     benchmark_store_query,
     benchmark_store_mutations
 );

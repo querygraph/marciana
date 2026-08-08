@@ -1,7 +1,5 @@
 //! Shared canonical bounds for untrusted cognition identities and projections.
 
-use std::collections::BTreeSet;
-
 pub use typesec_memory::{MAX_COGNITION_IDENTITY_BYTES, MAX_COGNITION_PROJECTION_FIELDS};
 
 /// Maximum UTF-8 bytes accepted for one caller-presented bearer token.
@@ -41,6 +39,18 @@ pub(super) fn is_canonical_projection(projection: &[String]) -> bool {
         return false;
     }
 
-    let unique: BTreeSet<_> = projection.iter().map(String::as_str).collect();
-    unique.len() == projection.len()
+    unique_projection_fields(projection)
+}
+
+fn unique_projection_fields(projection: &[String]) -> bool {
+    if projection.len() <= 8 {
+        return projection
+            .iter()
+            .enumerate()
+            .all(|(index, field)| !projection[..index].contains(field));
+    }
+
+    let mut fields = projection.iter().map(String::as_str).collect::<Vec<_>>();
+    fields.sort_unstable();
+    !fields.windows(2).any(|pair| pair[0] == pair[1])
 }

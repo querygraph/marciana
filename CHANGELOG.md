@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Detect duplicate cognition projection fields without tree-node allocation,
+  using an allocation-free small-input path and a compact sorted borrowed index
+  for larger governed projections.
 - Lower validated Ossie documents by consuming their owned strings, reserving
   exact output capacities, and delegating duplicate detection to ontology
   canonicalization instead of building a redundant tree index.
