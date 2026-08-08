@@ -1,5 +1,8 @@
 //! Pure, content-free context planning over authorized candidate identities.
 
+use std::cmp::Ordering;
+use std::collections::HashSet;
+
 use chrono::{DateTime, Utc};
 use grust_core::prelude::GraphMutationStore;
 use sha2::{Digest, Sha256};
@@ -215,23 +218,31 @@ impl RecallIntent {
     /// Returns [`ContextError`] when an identity, digest, or bound in the
     /// intent is invalid.
     pub fn validate(&self) -> Result<(), ContextError> {
+        self.validated_pinned_ids().map(drop)
+    }
+
+    fn validated_pinned_ids(&self) -> Result<HashSet<&str>, ContextError> {
         if !is_digest(&self.query_digest) {
             return Err(ContextError::InvalidIntent);
         }
         if self.token_budget == 0 || self.token_budget > 64_000 {
             return Err(ContextError::InvalidIntent);
         }
-        if self.pinned_memory_ids.len() > 64
-            || self.pinned_memory_ids.iter().any(|id| {
-                id.as_str().is_empty()
-                    || id.as_str().len() > 256
-                    || !id
-                        .as_str()
-                        .bytes()
-                        .all(|byte| byte.is_ascii_alphanumeric() || b"_:/.-".contains(&byte))
-            })
-        {
+        if self.pinned_memory_ids.len() > 64 {
             return Err(ContextError::InvalidIntent);
+        }
+        let mut pinned_ids = HashSet::with_capacity(self.pinned_memory_ids.len());
+        for id in &self.pinned_memory_ids {
+            let id = id.as_str();
+            if id.is_empty()
+                || id.len() > 256
+                || !id
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || b"_:/.-".contains(&byte))
+                || !pinned_ids.insert(id)
+            {
+                return Err(ContextError::InvalidIntent);
+            }
         }
         if self
             .working_set_digest
@@ -240,16 +251,7 @@ impl RecallIntent {
         {
             return Err(ContextError::InvalidIntent);
         }
-        let mut ids = self
-            .pinned_memory_ids
-            .iter()
-            .map(MemoryId::as_str)
-            .collect::<Vec<_>>();
-        ids.sort_unstable();
-        if ids.windows(2).any(|pair| pair[0] == pair[1]) {
-            return Err(ContextError::InvalidIntent);
-        }
-        Ok(())
+        Ok(pinned_ids)
     }
 }
 
@@ -261,18 +263,14 @@ impl ContextPlan {
     /// Returns a fixed [`ContextError`] when a caller modifies candidate
     /// metadata, ordering, accounting, or the plan digest.
     pub fn validate(&self) -> Result<(), ContextError> {
-        self.intent.validate()?;
+        let pinned_ids = self.intent.validated_pinned_ids()?;
         validate_candidates(&self.candidates)?;
-        validate_pinned_candidates(&self.intent, &self.candidates)?;
-        if self.candidates.windows(2).any(|pair| {
-            let left_pinned = is_pinned(&self.intent, &pair[0]);
-            let right_pinned = is_pinned(&self.intent, &pair[1]);
-            (!left_pinned && right_pinned)
-                || (left_pinned == right_pinned
-                    && (pair[0].score_basis_points < pair[1].score_basis_points
-                        || (pair[0].score_basis_points == pair[1].score_basis_points
-                            && pair[0].id > pair[1].id)))
-        }) {
+        validate_pinned_candidates(&pinned_ids, &self.candidates)?;
+        if self
+            .candidates
+            .windows(2)
+            .any(|pair| compare_candidates(&pinned_ids, &pair[0], &pair[1]).is_gt())
+        {
             return Err(ContextError::InvalidCandidate);
         }
         if self.considered_candidates < self.candidates.len() {
@@ -306,19 +304,13 @@ pub fn plan_context(
     intent: RecallIntent,
     mut candidates: Vec<ContextCandidate>,
 ) -> Result<ContextPlan, ContextError> {
-    intent.validate()?;
+    let pinned_ids = intent.validated_pinned_ids()?;
     if candidates.len() > 100_000 {
         return Err(ContextError::CandidateLimit);
     }
     validate_candidates(&candidates)?;
-    validate_pinned_candidates(&intent, &candidates)?;
-    candidates.sort_by(|left, right| {
-        is_pinned(&intent, left)
-            .cmp(&is_pinned(&intent, right))
-            .reverse()
-            .then_with(|| right.score_basis_points.cmp(&left.score_basis_points))
-            .then_with(|| left.id.cmp(&right.id))
-    });
+    validate_pinned_candidates(&pinned_ids, &candidates)?;
+    candidates.sort_by(|left, right| compare_candidates(&pinned_ids, left, right));
     let considered_candidates = candidates.len();
     let mut used = 0_u32;
     candidates.retain(|candidate| {
@@ -328,7 +320,8 @@ pub fn plan_context(
         }
         fits
     });
-    validate_pinned_candidates(&intent, &candidates).map_err(|_| ContextError::TokenAccounting)?;
+    validate_pinned_candidates(&pinned_ids, &candidates)
+        .map_err(|_| ContextError::TokenAccounting)?;
     let digest = context_plan_digest(&intent, &candidates, used);
     Ok(ContextPlan {
         intent,
@@ -476,22 +469,42 @@ fn context_plan_digest(
 }
 
 fn validate_pinned_candidates(
-    intent: &RecallIntent,
+    pinned_ids: &HashSet<&str>,
     candidates: &[ContextCandidate],
 ) -> Result<(), ContextError> {
-    for pinned in &intent.pinned_memory_ids {
-        if !candidates.iter().any(|candidate| candidate.id == *pinned) {
-            return Err(ContextError::PinnedCandidateMissing);
-        }
+    let matched = candidates
+        .iter()
+        .filter(|candidate| pinned_ids.contains(candidate.id.as_str()))
+        .count();
+    if matched != pinned_ids.len() {
+        return Err(ContextError::PinnedCandidateMissing);
     }
     Ok(())
 }
 
-fn is_pinned(intent: &RecallIntent, candidate: &ContextCandidate) -> bool {
-    intent
-        .pinned_memory_ids
-        .iter()
-        .any(|id| id == &candidate.id)
+fn is_pinned(pinned_ids: &HashSet<&str>, candidate: &ContextCandidate) -> bool {
+    pinned_ids.contains(candidate.id.as_str())
+}
+
+fn compare_candidates(
+    pinned_ids: &HashSet<&str>,
+    left: &ContextCandidate,
+    right: &ContextCandidate,
+) -> Ordering {
+    let ranked = || {
+        right
+            .score_basis_points
+            .cmp(&left.score_basis_points)
+            .then_with(|| left.id.cmp(&right.id))
+    };
+    if pinned_ids.is_empty() {
+        ranked()
+    } else {
+        is_pinned(pinned_ids, left)
+            .cmp(&is_pinned(pinned_ids, right))
+            .reverse()
+            .then_with(ranked)
+    }
 }
 
 fn is_digest(value: &str) -> bool {

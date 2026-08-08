@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Make large context plans use one validated candidate and pinned-ID
+  membership index instead of repeated linear scans during ordering.
 - Add production-profile Criterion coverage for ledger history queries,
   vector and hybrid retrieval, context planning, Grust-backed memory-store
   operations, cognition canonicalization, and the LakeCat proof adapter.

@@ -218,3 +218,22 @@ fn pinned_working_set_candidates_are_selected_first_and_required() {
         Err(ContextError::TokenAccounting)
     ));
 }
+
+#[test]
+fn duplicate_pinned_candidates_fail_before_planning() {
+    let pinned = MemoryId::from_string("mem-pinned");
+    let intent = RecallIntent {
+        query_digest: digest("duplicate-pinned-query"),
+        working_set_digest: None,
+        pinned_memory_ids: vec![pinned.clone(), pinned],
+        view: ContextView::Episodes,
+        recipe: ContextRecipe::Ranked,
+        as_of: Utc.timestamp_opt(10, 0).unwrap(),
+        token_budget: 4,
+    };
+
+    assert!(matches!(
+        plan_context(intent, Vec::new()),
+        Err(ContextError::InvalidIntent)
+    ));
+}
