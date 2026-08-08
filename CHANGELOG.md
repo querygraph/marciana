@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Evaluate validated context-plan candidates through borrowed case membership
+  checks and average corpus metrics in one pass without temporary collections.
 - Return owned session- and thread-bound recall intents directly instead of
   cloning their bounded working-set IDs after validation and digest binding.
 - Size governed snapshot JSON buffers from already-validated projection bytes

@@ -46,6 +46,10 @@ fn evaluation_reports_quality_and_token_utility_without_content() {
     )
     .unwrap();
     let report = ContextEvaluationReport::evaluate(&case, &plan(&["mem-a", "mem-c"])).unwrap();
+    assert_eq!(
+        report.report_digest,
+        "sha256:e813ddd0b87c82827f854d31fe4c9f1b6fd80c48f8e08bf833331c706489c064"
+    );
     assert_eq!(report.relevant_count, 1);
     assert_eq!(report.precision_basis_points, 5_000);
     assert_eq!(report.recall_basis_points, 5_000);
@@ -88,6 +92,10 @@ fn corpus_summary_is_ordered_and_digest_stable() {
     let summary = corpus
         .evaluate(&[plan(&["mem-a"]), plan(&["mem-b"])])
         .unwrap();
+    assert_eq!(
+        summary.summary_digest,
+        "sha256:d830ee12e84cc46eea0b9b9609310e4baae042b2de815c31ddc5b0c74c644ae1"
+    );
     assert_eq!(summary.case_count, 2);
     assert_eq!(summary.passed_count, 2);
     assert!(summary.passed);

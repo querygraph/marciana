@@ -1,5 +1,6 @@
 //! Deterministic, content-free evaluation for governed context plans.
 
+use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
@@ -10,6 +11,7 @@ use crate::context::ContextPlan;
 
 const MAX_EVALUATION_IDS: usize = 1_000;
 const MAX_EVALUATION_CASES: usize = 1_000;
+const DIRECT_MEMBERSHIP_CANDIDATES: usize = 128;
 
 #[derive(Debug, Clone, Copy)]
 struct EvaluationMetrics {
@@ -160,14 +162,25 @@ impl ContextEvaluationReport {
         if plan.estimated_tokens > case.token_budget {
             return Err(EvaluationError::BudgetExceeded);
         }
-        let selected = plan
-            .candidates
-            .iter()
-            .map(|candidate| candidate.id.as_str().to_owned())
-            .collect::<BTreeSet<_>>();
-        let relevant_count = selected.intersection(&case.expected_ids).count();
-        let forbidden_count = selected.intersection(&case.forbidden_ids).count();
-        let precision = ratio_basis_points(relevant_count, selected.len());
+        let selected_count = plan.candidates.len();
+        let (relevant_count, forbidden_count) = if selected_count <= DIRECT_MEMBERSHIP_CANDIDATES {
+            (
+                candidate_memberships(&plan.candidates, &case.expected_ids),
+                candidate_memberships(&plan.candidates, &case.forbidden_ids),
+            )
+        } else {
+            let mut selected_ids = plan
+                .candidates
+                .iter()
+                .map(|candidate| candidate.id.as_str())
+                .collect::<Vec<_>>();
+            selected_ids.sort_unstable();
+            (
+                sorted_memberships(&selected_ids, &case.expected_ids),
+                sorted_memberships(&selected_ids, &case.forbidden_ids),
+            )
+        };
+        let precision = ratio_basis_points(relevant_count, selected_count);
         let recall = ratio_basis_points(relevant_count, case.expected_ids.len());
         let token_utility = ratio_basis_points(
             relevant_count,
@@ -187,7 +200,7 @@ impl ContextEvaluationReport {
             case_digest: case.case_digest.clone(),
             plan_digest: plan.plan_digest.clone(),
             expected_count: case.expected_ids.len(),
-            selected_count: selected.len(),
+            selected_count,
             relevant_count,
             forbidden_count,
             precision_basis_points: precision,
@@ -197,6 +210,41 @@ impl ContextEvaluationReport {
             report_digest,
         })
     }
+}
+
+fn candidate_memberships(
+    candidates: &[crate::context::ContextCandidate],
+    expected: &BTreeSet<String>,
+) -> usize {
+    if expected.is_empty() {
+        return 0;
+    }
+    candidates
+        .iter()
+        .filter(|candidate| expected.contains(candidate.id.as_str()))
+        .count()
+}
+
+fn sorted_memberships(selected: &[&str], expected: &BTreeSet<String>) -> usize {
+    let mut selected = selected.iter().copied().peekable();
+    let mut expected = expected.iter().map(String::as_str).peekable();
+    let mut matches = 0;
+    while let (Some(selected_id), Some(expected_id)) = (selected.peek(), expected.peek()) {
+        match selected_id.cmp(expected_id) {
+            Ordering::Less => {
+                selected.next();
+            }
+            Ordering::Equal => {
+                matches += 1;
+                selected.next();
+                expected.next();
+            }
+            Ordering::Greater => {
+                expected.next();
+            }
+        }
+    }
+    matches
 }
 
 impl ContextEvaluationCorpus {
@@ -322,12 +370,13 @@ fn ratio_basis_points(numerator: usize, denominator: usize) -> u16 {
 }
 
 fn average_metric(values: impl Iterator<Item = u16>) -> u16 {
-    let values = values.collect::<Vec<_>>();
-    if values.is_empty() {
+    let (total, count) = values.fold((0_u64, 0_u64), |(total, count), value| {
+        (total + u64::from(value), count + 1)
+    });
+    if count == 0 {
         return 0;
     }
-    let total = values.iter().map(|value| u64::from(*value)).sum::<u64>();
-    u16::try_from(total / u64::try_from(values.len()).unwrap_or(1)).unwrap_or(u16::MAX)
+    u16::try_from(total / count).unwrap_or(u16::MAX)
 }
 
 fn summary_digest(
