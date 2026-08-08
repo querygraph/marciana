@@ -4,8 +4,6 @@
 //! those definitions into its operator-owned ontology registry; it never lets
 //! an Ossie document mint a capability or write memory directly.
 
-use std::collections::BTreeSet;
-
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
@@ -105,52 +103,61 @@ impl OssieAdapter {
             serde_json::from_str(json).map_err(|_| OssieError::InvalidJson)?;
         validate_document(&document)?;
 
-        let identity = SchemaIdentity::new(
-            document.namespace.clone(),
-            document.name.clone(),
-            document.version,
-        )?;
-        let mut fields = document
-            .metrics
-            .iter()
-            .map(|metric| SchemaField {
+        let OssieDocument {
+            namespace,
+            name,
+            version,
+            metrics,
+            dimensions,
+            relationships,
+        } = document;
+        let identity = SchemaIdentity::new(namespace.clone(), name.clone(), version)?;
+        let mut fields = Vec::with_capacity(metrics.len() + dimensions.len());
+        let mut canonical_metrics = Vec::with_capacity(metrics.len());
+        for metric in metrics {
+            fields.push(SchemaField {
                 name: metric.name.clone(),
                 kind: SchemaFieldKind::Decimal,
-            })
-            .collect::<Vec<_>>();
-        fields.extend(document.dimensions.iter().map(|dimension| SchemaField {
-            name: dimension.name.clone(),
-            kind: if dimension.role == "identifier" {
-                SchemaFieldKind::Identifier
-            } else {
-                SchemaFieldKind::Text
-            },
-        }));
-        let edges = document
-            .relationships
-            .iter()
-            .map(|relationship| SchemaEdge {
+            });
+            canonical_metrics.push((metric.name, metric.expression));
+        }
+        let mut canonical_dimensions = Vec::with_capacity(dimensions.len());
+        for dimension in dimensions {
+            fields.push(SchemaField {
+                name: dimension.name.clone(),
+                kind: if dimension.role == "identifier" {
+                    SchemaFieldKind::Identifier
+                } else {
+                    SchemaFieldKind::Text
+                },
+            });
+            canonical_dimensions.push(dimension.name);
+        }
+        let mut edges = Vec::with_capacity(relationships.len());
+        let mut canonical_relationships = Vec::with_capacity(relationships.len());
+        for relationship in relationships {
+            edges.push(SchemaEdge {
                 name: relationship.name.clone(),
-                from_kind: relationship.from.clone(),
-                to_kind: relationship.to.clone(),
-            })
-            .collect();
-        let schema = SchemaDefinition::new(identity, fields, edges)?;
-        let mut metrics = document
-            .metrics
-            .iter()
-            .map(|metric| (metric.name.clone(), metric.expression.clone()))
-            .collect::<Vec<_>>();
-        metrics.sort_unstable();
+                from_kind: relationship.from,
+                to_kind: relationship.to,
+            });
+            canonical_relationships.push(relationship.name);
+        }
+        let schema =
+            SchemaDefinition::new(identity, fields, edges).map_err(|error| match error {
+                OntologyError::DuplicateField => OssieError::InvalidDocument,
+                error => OssieError::Ontology(error),
+            })?;
+        canonical_metrics.sort_unstable();
+        canonical_dimensions.sort_unstable();
+        canonical_relationships.sort_unstable();
         let summary = OssieDocumentSummary {
-            namespace: document.namespace,
-            name: document.name,
-            version: document.version,
-            metrics,
-            dimensions: sorted_names(document.dimensions.iter().map(|item| item.name.as_str())),
-            relationships: sorted_names(
-                document.relationships.iter().map(|item| item.name.as_str()),
-            ),
+            namespace,
+            name,
+            version,
+            metrics: canonical_metrics,
+            dimensions: canonical_dimensions,
+            relationships: canonical_relationships,
         };
         let digest = binding_digest(&source_manifest, &summary, schema.digest());
         Ok(OssieBinding {
@@ -283,17 +290,6 @@ fn validate_document(document: &OssieDocument) -> Result<(), OssieError> {
     }) {
         return Err(OssieError::InvalidRelationship);
     }
-    let mut names = BTreeSet::new();
-    for name in document
-        .metrics
-        .iter()
-        .map(|item| item.name.as_str())
-        .chain(document.dimensions.iter().map(|item| item.name.as_str()))
-    {
-        if !names.insert(name) {
-            return Err(OssieError::InvalidDocument);
-        }
-    }
     Ok(())
 }
 
@@ -314,12 +310,6 @@ fn validate_text(value: &str) -> Result<(), ()> {
     } else {
         Ok(())
     }
-}
-
-fn sorted_names<'a>(values: impl Iterator<Item = &'a str>) -> Vec<String> {
-    let mut names = values.map(str::to_owned).collect::<Vec<_>>();
-    names.sort_unstable();
-    names
 }
 
 fn is_sorted_subset(required: &[String], available: &[String]) -> bool {

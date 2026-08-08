@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Lower validated Ossie documents by consuming their owned strings, reserving
+  exact output capacities, and delegating duplicate detection to ontology
+  canonicalization instead of building a redundant tree index.
 - Reuse validated working-set slot ordering during canonical digesting instead
   of allocating and sorting the same identities twice.
 - Validate Ossie selections through its canonical sorted indexes, using binary
