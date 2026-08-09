@@ -176,10 +176,20 @@ fn benchmark_evidence_canonicalization(criterion: &mut Criterion) {
     group.finish();
 }
 
+fn benchmark_identity_parsing(criterion: &mut Criterion) {
+    let assertion_id = "12345678-1234-4123-8123-123456789abc";
+    criterion.bench_function("ledger/identity/assertion_id_parse", |bencher| {
+        bencher.iter(|| {
+            black_box(AssertionId::parse(black_box(assertion_id))).expect("canonical assertion ID")
+        });
+    });
+}
+
 criterion_group!(
     benches,
     benchmark_state_at,
     benchmark_query_selection,
-    benchmark_evidence_canonicalization
+    benchmark_evidence_canonicalization,
+    benchmark_identity_parsing
 );
 criterion_main!(benches);

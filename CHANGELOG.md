@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Format parsed assertion UUIDs once for both canonicality checking and owned
+  identity construction.
 - Validate native cognition snapshots without hashing and discarding their
   JSON, reuse the validated label join during proposal construction, compare
   canonical TypeSec manifest IDs directly, and sort only borrowed metadata.
@@ -57,8 +59,8 @@ All notable changes to Marciana are documented in this file.
   operations, analytics planning, evaluation, sessions, vector manifests,
   assertion projection, cognition canonicalization, accounting, operational
   metadata, ontology, formation, learning artifacts, working-set recall,
-  audit export, lineage, rollout, governed identity, the full native cognition
-  engine boundary, and the LakeCat proof adapter.
+  audit export, lineage, rollout, governed identity, assertion identity parsing,
+  the full native cognition engine boundary, and the LakeCat proof adapter.
 - Replace stale Letta benchmark claims across results, blog, and book sources
   with the retained current App Server/Agent SDK result, and explicitly leave
   adapter-mediated isolation unsupported.

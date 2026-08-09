@@ -30,12 +30,13 @@ impl AssertionId {
     /// Returns [`LedgerError::InvalidAssertionId`] when `value` is not a
     /// canonical lowercase UUID.
     pub fn parse(value: impl AsRef<str>) -> Result<Self, LedgerError> {
-        let parsed =
-            Uuid::parse_str(value.as_ref()).map_err(|_| LedgerError::InvalidAssertionId)?;
-        if parsed.to_string() != value.as_ref() {
+        let value = value.as_ref();
+        let parsed = Uuid::parse_str(value).map_err(|_| LedgerError::InvalidAssertionId)?;
+        let canonical = parsed.to_string();
+        if canonical != value {
             return Err(LedgerError::InvalidAssertionId);
         }
-        Ok(Self(parsed.to_string()))
+        Ok(Self(canonical))
     }
 
     pub(crate) fn from_legacy_key(key: &str) -> Self {
