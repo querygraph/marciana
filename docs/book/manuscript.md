@@ -409,9 +409,12 @@ rows = warehouse.query(
 )
 ```
 
-The supported baseline records the merged upstream Sail PR #2374 revision in
-`compat/sail-revision.txt`. The explicit binary remains subject to the live
-gate; a random executable on `PATH` is not proof of compatibility.
+The refreshed candidate records exact reachable QueryGraph Sail graph revision
+`c5309365` in `compat/sail-revision.txt`. That revision integrates the head
+`ce5dada0` of open draft upstream performance PR #2400 with QueryGraph's native
+Cypher extension; it does not imply that the upstream PR is merged. The
+explicit production binary remains subject to the live gate; a random
+executable on `PATH` is not proof of compatibility.
 
 ### The Akka/Fluree role and Marciana's replacement boundary
 
@@ -988,7 +991,7 @@ unrelated utilities in one large module.
 | `clients/typescript` | Independently buildable wire client | Fixture conformance tests |
 | `benchmarks` | Content-free corpus, adapters, latency and safety metrics | Dependency-free smoke and adversarial test suites |
 | `examples/coffee_market_demo` | Dataverse/Sail/Pydantic AI v2 example | Lifecycle regression tests |
-| `compat` | Sail revision and compatibility fixtures | Pinned merged upstream hash |
+| `compat` | Sail revision and compatibility fixtures | Pinned reachable QueryGraph graph hash |
 | `docs/book` | This source-owned manuscript and FirstPair assets | Build and rendered checks |
 
 The small-file rule is a design constraint, not an aesthetic preference. A

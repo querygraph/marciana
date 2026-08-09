@@ -4,6 +4,10 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Pin the refreshed Sail candidate to the exact reachable QueryGraph graph
+  revision carrying upstream performance PR #2400's head, while preserving the
+  explicit production-binary live gate and distinguishing an open PR from a
+  merged upstream release.
 - Reuse an outbox claim's already-loaded durable outcome during full commit
   recovery instead of loading and decoding the same graph node twice.
 - Add end-to-end production benchmarks for authoritative cognition mutation,
