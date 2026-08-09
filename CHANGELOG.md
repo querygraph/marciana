@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Canonicalize cognition source selections through sorted borrowed IDs before
+  cloning only binding-owned output, share projection validation across the
+  composition boundary, and validate three-field mapping uniqueness in place.
 - Totally order feedback records by trajectory, time, and outcome so dataset
   identity is input-order independent, using in-place unstable canonical sort.
 - Recompute vector-manifest digests without cloning membership and apply

@@ -24,7 +24,9 @@ pub(super) fn is_bounded_failure(value: &str) -> bool {
     !value.trim().is_empty() && value.len() <= MAX_COGNITION_FAILURE_BYTES
 }
 
-pub(super) fn is_canonical_projection(projection: &[String]) -> bool {
+/// Reports whether a cognition projection is bounded, canonical, and unique.
+#[must_use]
+pub fn is_canonical_projection(projection: &[String]) -> bool {
     canonical_projection_bytes(projection).is_some()
 }
 

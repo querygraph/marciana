@@ -6,7 +6,9 @@ use lakecat_core::governed_scan::{
     GovernedScanCatalogIdentity, GovernedScanProof, validate_governed_sha256_digest,
 };
 use marciana_catalog::governed_cognition_source;
-use querygraph_memory::cognition::{CognitionFieldMapping, GovernedLakeCatSnapshot};
+use querygraph_memory::cognition::{
+    CognitionFieldMapping, GovernedLakeCatSnapshot, is_canonical_projection,
+};
 use typesec_integrations::VerifiedTypeDidContext;
 use typesec_memory::{
     CognitionAuthorityEvidence, CognitionBinding, CognitionSourceManifest, GovernedSourceScope,
@@ -15,7 +17,7 @@ use typesec_memory::{
 
 use super::governed_proof::validate_governed_proof;
 use super::intent::{CognitionIntent, IntentInputs, canonical_source_ids};
-use super::projection::{RequiredProjection, is_canonical_projection};
+use super::projection::RequiredProjection;
 use crate::FormationProfile;
 
 #[derive(Debug, Clone)]

@@ -379,10 +379,11 @@ fn benchmark_governed_identity(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("cognition/governed_identity");
     group.sample_size(20);
     for source_count in [1, 1_024, 4_096] {
-        let source_ids = (0..source_count)
-            .rev()
+        let canonical_source_ids = (0..source_count)
             .map(|item| MemoryId::from_string(format!("memory-{item:08}")))
             .collect::<Vec<_>>();
+        let mut unordered_source_ids = canonical_source_ids.clone();
+        unordered_source_ids.reverse();
         group.throughput(Throughput::Elements(
             u64::try_from(source_count).expect("benchmark size fits u64"),
         ));
@@ -391,8 +392,22 @@ fn benchmark_governed_identity(criterion: &mut Criterion) {
             &source_count,
             |bencher, _| {
                 bencher.iter(|| {
-                    black_box(cognition_source_selection_digest(black_box(&source_ids)))
-                        .expect("valid source selection")
+                    black_box(cognition_source_selection_digest(black_box(
+                        &unordered_source_ids,
+                    )))
+                    .expect("valid source selection")
+                });
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("source_selection_canonical", source_count),
+            &source_count,
+            |bencher, _| {
+                bencher.iter(|| {
+                    black_box(cognition_source_selection_digest(black_box(
+                        &canonical_source_ids,
+                    )))
+                    .expect("valid source selection")
                 });
             },
         );

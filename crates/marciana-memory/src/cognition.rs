@@ -30,7 +30,7 @@ mod store;
 
 pub use bounds::{
     MAX_COGNITION_BEARER_TOKEN_BYTES, MAX_COGNITION_FAILURE_BYTES, MAX_COGNITION_IDENTITY_BYTES,
-    MAX_COGNITION_PROJECTION_BYTES, MAX_COGNITION_PROJECTION_FIELDS,
+    MAX_COGNITION_PROJECTION_BYTES, MAX_COGNITION_PROJECTION_FIELDS, is_canonical_projection,
 };
 pub use engine::{
     CognitionEngine, CognitionRequest, ReferenceCognitionEngine, SailCognitionEngine,

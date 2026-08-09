@@ -194,6 +194,15 @@ impl CognitionIntent {
 pub(crate) fn canonical_source_ids(
     source_ids: &[MemoryId],
 ) -> Result<Vec<MemoryId>, CognitionBindingError> {
+    Ok(canonical_source_id_refs(source_ids)?
+        .into_iter()
+        .cloned()
+        .collect())
+}
+
+fn canonical_source_id_refs(
+    source_ids: &[MemoryId],
+) -> Result<Vec<&MemoryId>, CognitionBindingError> {
     if source_ids.is_empty() || source_ids.len() > MAX_COGNITION_SOURCE_COUNT {
         return Err(CognitionBindingError::InvalidSourceSelection);
     }
@@ -204,11 +213,9 @@ pub(crate) fn canonical_source_ids(
     {
         return Err(CognitionBindingError::InvalidSourceSelection);
     }
-    let mut canonical = source_ids.to_vec();
-    canonical.sort();
-    let original_len = canonical.len();
-    canonical.dedup();
-    if canonical.len() != original_len {
+    let mut canonical = source_ids.iter().collect::<Vec<_>>();
+    canonical.sort_unstable();
+    if canonical.windows(2).any(|pair| pair[0] == pair[1]) {
         return Err(CognitionBindingError::InvalidSourceSelection);
     }
     Ok(canonical)
@@ -218,11 +225,10 @@ pub(crate) fn canonical_source_ids(
 pub fn cognition_source_selection_digest(
     source_ids: &[MemoryId],
 ) -> Result<String, CognitionBindingError> {
-    let canonical = canonical_source_ids(source_ids)?;
-    let values: Vec<_> = canonical.iter().map(MemoryId::as_str).collect();
+    let canonical = canonical_source_id_refs(source_ids)?;
     governed_evidence_digest(
         SOURCE_SELECTION_DOMAIN,
-        &json!({ "version": SOURCE_SELECTION_DOMAIN, "sourceIds": values }),
+        &json!({ "version": SOURCE_SELECTION_DOMAIN, "sourceIds": canonical }),
     )
     .map_err(|_| CognitionBindingError::Digest)
 }
@@ -233,11 +239,9 @@ pub fn cognition_field_mapping_digest(
 ) -> Result<String, CognitionBindingError> {
     let fields = [&mapping.id, &mapping.text, &mapping.valid_from];
     if fields.iter().any(|field| !is_canonical_identity(field))
-        || fields
-            .into_iter()
-            .collect::<std::collections::BTreeSet<_>>()
-            .len()
-            != 3
+        || fields[0] == fields[1]
+        || fields[0] == fields[2]
+        || fields[1] == fields[2]
     {
         return Err(CognitionBindingError::InvalidProjection);
     }

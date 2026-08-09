@@ -3,10 +3,7 @@
 use crate::CognitionBindingError;
 use lakecat_core::governed_scan::GovernedScanProof;
 
-use super::intent::is_canonical_identity;
-use querygraph_memory::cognition::{
-    MAX_COGNITION_PROJECTION_BYTES, MAX_COGNITION_PROJECTION_FIELDS,
-};
+use querygraph_memory::cognition::is_canonical_projection;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct RequiredProjection(Vec<String>);
@@ -37,20 +34,4 @@ impl RequiredProjection {
     pub(crate) fn fields(&self) -> &[String] {
         &self.0
     }
-}
-
-pub(crate) fn is_canonical_projection(fields: &[String]) -> bool {
-    if fields.is_empty() || fields.len() > MAX_COGNITION_PROJECTION_FIELDS {
-        return false;
-    }
-    let total = fields.iter().try_fold(0usize, |total, field| {
-        is_canonical_identity(field).then_some(())?;
-        total.checked_add(field.len())
-    });
-    total.is_some_and(|bytes| bytes <= MAX_COGNITION_PROJECTION_BYTES)
-        && fields
-            .iter()
-            .collect::<std::collections::BTreeSet<_>>()
-            .len()
-            == fields.len()
 }
