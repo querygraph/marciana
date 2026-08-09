@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Add end-to-end production benchmarks for authoritative cognition mutation,
+  no-change, recovery, and outbox claim paths.
 - Reuse the exact validated scheduler job state when a high-level claim
   acquires its lease, while retaining fresh-load recovery for CAS races.
 - Add production benchmarks for durable cognition submission, loading, lease

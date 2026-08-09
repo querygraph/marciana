@@ -55,5 +55,9 @@ harness = false
 name = "persistence"
 harness = false
 
+[[bench]]
+name = "commit"
+harness = false
+
 [lints]
 workspace = true
