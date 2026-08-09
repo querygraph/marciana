@@ -54,8 +54,8 @@ All notable changes to Marciana are documented in this file.
   operations, analytics planning, evaluation, sessions, vector manifests,
   assertion projection, cognition canonicalization, accounting, operational
   metadata, ontology, formation, learning artifacts, working-set recall,
-  audit export, lineage, rollout, governed identity, and the LakeCat proof
-  adapter.
+  audit export, lineage, rollout, governed identity, the full native cognition
+  engine boundary, and the LakeCat proof adapter.
 - Replace stale Letta benchmark claims across results, blog, and book sources
   with the retained current App Server/Agent SDK result, and explicitly leave
   adapter-mediated isolation unsupported.
