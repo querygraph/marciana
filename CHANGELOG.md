@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Represent closed assertion-query state membership as a compact mask instead
+  of a heap-allocated tree, preserving duplicate-insensitive query semantics.
 - Canonicalize cognition source selections through sorted borrowed IDs before
   cloning only binding-owned output, share projection validation across the
   composition boundary, and validate three-field mapping uniqueness in place.

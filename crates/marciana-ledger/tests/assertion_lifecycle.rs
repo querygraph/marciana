@@ -272,6 +272,20 @@ fn candidate_queries_are_deterministic_and_keep_history_distinct_from_current_va
             .select(&assertions),
         vec![&ended]
     );
+    assert_eq!(
+        AssertionQuery::states_at(
+            at(4),
+            [
+                AssertionState::Proposed,
+                AssertionState::Current,
+                AssertionState::Current,
+            ],
+        )
+        .unwrap()
+        .select(&assertions)
+        .len(),
+        2
+    );
     assert!(matches!(
         AssertionQuery::states_at(at(4), []),
         Err(LedgerError::InvalidQuery)
