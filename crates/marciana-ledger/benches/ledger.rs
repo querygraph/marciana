@@ -117,7 +117,8 @@ fn benchmark_query_selection(criterion: &mut Criterion) {
 
 fn benchmark_evidence_canonicalization(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("ledger/evidence_canonicalization");
-    for evidence_count in [16, 256, 4_096] {
+    group.sample_size(50);
+    for evidence_count in [16_usize, 256, 4_096] {
         let mut assertions = (0..evidence_count)
             .map(|index| {
                 AssertionId::parse(format!("{index:08x}-0000-4000-8000-{index:012x}"))
@@ -129,12 +130,38 @@ fn benchmark_evidence_canonicalization(criterion: &mut Criterion) {
             .collect::<Vec<_>>();
         assertions.reverse();
         digests.reverse();
+        let (scrambled_assertions, scrambled_digests) = (0..evidence_count)
+            .map(|position| {
+                let index = position.wrapping_mul(2_654_435_769) % evidence_count;
+                (
+                    AssertionId::parse(format!("{index:08x}-0000-4000-8000-{index:012x}"))
+                        .expect("canonical benchmark UUID"),
+                    format!("sha256:{index:064x}"),
+                )
+            })
+            .unzip::<_, _, Vec<_>, Vec<_>>();
         group.bench_with_input(
             BenchmarkId::from_parameter(evidence_count),
             &evidence_count,
             |bencher, _| {
                 bencher.iter_batched(
                     || (assertions.clone(), digests.clone()),
+                    |(assertions, digests)| {
+                        black_box(
+                            TransitionEvidence::new(assertions, digests)
+                                .expect("valid evidence corpus"),
+                        )
+                    },
+                    BatchSize::SmallInput,
+                );
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("scrambled", evidence_count),
+            &evidence_count,
+            |bencher, _| {
+                bencher.iter_batched(
+                    || (scrambled_assertions.clone(), scrambled_digests.clone()),
                     |(assertions, digests)| {
                         black_box(
                             TransitionEvidence::new(assertions, digests)

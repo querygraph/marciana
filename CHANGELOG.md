@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Canonicalize total-ordered assertion transition evidence with in-place
+  unstable sorting, avoiding stable-sort scratch allocation, and cover both
+  descending and deterministically scrambled evidence in benchmarks.
 - Represent closed assertion-query state membership as a compact mask instead
   of a heap-allocated tree, preserving duplicate-insensitive query semantics.
 - Canonicalize cognition source selections through sorted borrowed IDs before

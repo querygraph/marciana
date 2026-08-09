@@ -86,8 +86,8 @@ impl TransitionEvidence {
         mut causing_assertions: Vec<AssertionId>,
         mut evidence_digests: Vec<String>,
     ) -> Result<Self, LedgerError> {
-        causing_assertions.sort();
-        evidence_digests.sort();
+        causing_assertions.sort_unstable();
+        evidence_digests.sort_unstable();
         if causing_assertions.is_empty()
             || evidence_digests.is_empty()
             || causing_assertions.windows(2).any(|pair| pair[0] == pair[1])
@@ -110,7 +110,7 @@ impl TransitionEvidence {
     /// Returns [`LedgerError::InvalidTransitionEvidence`] without at least one
     /// lowercase SHA-256 digest or when a digest is duplicated.
     pub fn import(mut evidence_digests: Vec<String>) -> Result<Self, LedgerError> {
-        evidence_digests.sort();
+        evidence_digests.sort_unstable();
         if evidence_digests.is_empty()
             || evidence_digests.windows(2).any(|pair| pair[0] == pair[1])
             || evidence_digests.iter().any(|digest| !is_digest(digest))
