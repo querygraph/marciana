@@ -4,6 +4,9 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Validate native cognition snapshots without hashing and discarding their
+  JSON, reuse the validated label join during proposal construction, compare
+  canonical TypeSec manifest IDs directly, and sort only borrowed metadata.
 - Canonicalize total-ordered assertion transition evidence with in-place
   unstable sorting, avoiding stable-sort scratch allocation, and cover both
   descending and deterministically scrambled evidence in benchmarks.

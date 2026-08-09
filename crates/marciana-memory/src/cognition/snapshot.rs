@@ -44,6 +44,22 @@ impl GovernedLakeCatSnapshot {
     /// Returns [`CognitionError`] when the snapshot cannot be canonically
     /// serialized for digesting.
     pub fn digest(&self) -> Result<String, CognitionError> {
+        let projection_bytes = self.validate()?;
+        let capacity = SNAPSHOT_JSON_BASE_BYTES
+            + self.catalog.len()
+            + self.namespace.len()
+            + self.table.len()
+            + self.subject.len()
+            + self.purpose.len()
+            + projection_bytes
+            + self.effective_projection.len() * 3;
+        let mut bytes = Vec::with_capacity(capacity);
+        serde_json::to_writer(&mut bytes, self)
+            .map_err(|_| CognitionError::Serialization("snapshot encoding failed"))?;
+        Ok(format!("sha256:{:x}", Sha256::digest(bytes)))
+    }
+
+    pub(super) fn validate(&self) -> Result<usize, CognitionError> {
         if self.snapshot_id < 0 {
             return Err(CognitionError::InvalidSnapshot("snapshot id"));
         }
@@ -73,18 +89,7 @@ impl GovernedLakeCatSnapshot {
                 return Err(CognitionError::InvalidSnapshot(name));
             }
         }
-        let capacity = SNAPSHOT_JSON_BASE_BYTES
-            + self.catalog.len()
-            + self.namespace.len()
-            + self.table.len()
-            + self.subject.len()
-            + self.purpose.len()
-            + projection_bytes
-            + self.effective_projection.len() * 3;
-        let mut bytes = Vec::with_capacity(capacity);
-        serde_json::to_writer(&mut bytes, self)
-            .map_err(|_| CognitionError::Serialization("snapshot encoding failed"))?;
-        Ok(format!("sha256:{:x}", Sha256::digest(bytes)))
+        Ok(projection_bytes)
     }
 }
 
@@ -105,15 +110,24 @@ pub struct CognitionFieldMapping {
 }
 
 impl CognitionFieldMapping {
+    #[cfg(test)]
     pub(super) fn validate(&self, projection: &[String]) -> Result<(), CognitionError> {
+        if !is_canonical_projection(projection) {
+            return Err(CognitionError::InvalidSnapshot("effective projection"));
+        }
+        self.validate_against_canonical_projection(projection)
+    }
+
+    pub(super) fn validate_against_canonical_projection(
+        &self,
+        projection: &[String],
+    ) -> Result<(), CognitionError> {
+        debug_assert!(is_canonical_projection(projection));
         let fields = [
             self.id.as_str(),
             self.text.as_str(),
             self.valid_from.as_str(),
         ];
-        if !is_canonical_projection(projection) {
-            return Err(CognitionError::InvalidSnapshot("effective projection"));
-        }
         if fields.iter().any(|field| !is_canonical_text(field)) {
             return Err(CognitionError::InvalidSnapshot("cognition field mapping"));
         }

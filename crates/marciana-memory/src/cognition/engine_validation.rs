@@ -6,7 +6,7 @@ use super::engine::CognitionRequest;
 use super::error::CognitionError;
 use super::operation::CognitionOperation;
 
-pub(super) fn validate_request(request: &CognitionRequest<'_>) -> Result<(), CognitionError> {
+pub(super) fn validate_request(request: &CognitionRequest<'_>) -> Result<Label, CognitionError> {
     if !super::bounds::is_canonical_text(request.job_id) {
         return Err(CognitionError::InvalidJobId);
     }
@@ -14,14 +14,14 @@ pub(super) fn validate_request(request: &CognitionRequest<'_>) -> Result<(), Cog
     if request.operation == CognitionOperation::Reconcile {
         super::budget::check_reconcile_work(request.input.memories().len())?;
     }
-    request.source.digest()?;
+    request.source.validate()?;
     validate_request_binding(request)
 }
 
-fn validate_request_binding(request: &CognitionRequest<'_>) -> Result<(), CognitionError> {
+fn validate_request_binding(request: &CognitionRequest<'_>) -> Result<Label, CognitionError> {
     request
         .field_mapping
-        .validate(&request.source.effective_projection)?;
+        .validate_against_canonical_projection(&request.source.effective_projection)?;
     request
         .binding
         .canonical_digest()
@@ -60,31 +60,30 @@ fn validate_request_binding(request: &CognitionRequest<'_>) -> Result<(), Cognit
         }
     }
 
-    let mut bound_projection = request.binding.effective_projection.clone();
-    let mut source_projection = request.source.effective_projection.clone();
-    bound_projection.sort();
-    source_projection.sort();
-    if bound_projection != source_projection {
+    if !projections_match(
+        &request.binding.effective_projection,
+        &request.source.effective_projection,
+    ) {
         return Err(CognitionError::BindingMismatch("effective projection"));
     }
 
-    let mut recalled: Vec<_> = request
-        .input
-        .memories()
+    // `AuthorizedCognitionInput` is opaque outside TypeSec, whose manifest
+    // constructor already stores source preconditions in canonical ID order.
+    let memories = request.input.memories();
+    let sources = &request.input.manifest().sources;
+    if !memories
         .iter()
         .map(|memory| &memory.id)
-        .collect();
-    recalled.sort();
-    let mut manifest: Vec<_> = request
-        .input
-        .manifest()
-        .sources
-        .iter()
-        .map(|source| &source.id)
-        .collect();
-    manifest.sort();
-    if recalled != manifest {
-        return Err(CognitionError::BindingMismatch("source manifest ids"));
+        .eq(sources.iter().map(|source| &source.id))
+    {
+        let mut recalled = memories.iter().map(|memory| &memory.id).collect::<Vec<_>>();
+        recalled.sort_unstable();
+        if !recalled
+            .into_iter()
+            .eq(sources.iter().map(|source| &source.id))
+        {
+            return Err(CognitionError::BindingMismatch("source manifest ids"));
+        }
     }
     let joined = request
         .input
@@ -94,5 +93,19 @@ fn validate_request_binding(request: &CognitionRequest<'_>) -> Result<(), Cognit
     if joined != request.input.manifest().joined_label {
         return Err(CognitionError::BindingMismatch("source label join"));
     }
-    Ok(())
+    Ok(joined)
+}
+
+fn projections_match(left: &[String], right: &[String]) -> bool {
+    if left == right {
+        return true;
+    }
+    if left.len() != right.len() {
+        return false;
+    }
+    let mut left = left.iter().map(String::as_str).collect::<Vec<_>>();
+    let mut right = right.iter().map(String::as_str).collect::<Vec<_>>();
+    left.sort_unstable();
+    right.sort_unstable();
+    left == right
 }

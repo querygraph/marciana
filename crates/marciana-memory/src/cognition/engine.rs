@@ -53,7 +53,7 @@ impl CognitionEngine for ReferenceCognitionEngine {
         &self,
         request: CognitionRequest<'_>,
     ) -> Result<CognitionProposal, CognitionError> {
-        validate_request(&request)?;
+        let joined_label = validate_request(&request)?;
         let profile = CognitionEngineProfile::reference(request.operation);
         validate_profile(request.operation, profile)?;
         let (plan, evidence) = match request.operation {
@@ -72,7 +72,7 @@ impl CognitionEngine for ReferenceCognitionEngine {
                 )
             }
         };
-        build_proposal(request, plan, evidence, profile)
+        build_proposal(request, plan, evidence, profile, joined_label)
     }
 }
 
@@ -113,7 +113,7 @@ impl<E: SailCognitionExecutor> CognitionEngine for SailCognitionEngine<E> {
         &self,
         request: CognitionRequest<'_>,
     ) -> Result<CognitionProposal, CognitionError> {
-        validate_request(&request)?;
+        let joined_label = validate_request(&request)?;
         let profile = CognitionEngineProfile::sail(request.operation);
         validate_profile(request.operation, profile)?;
         let output = self
@@ -121,7 +121,7 @@ impl<E: SailCognitionExecutor> CognitionEngine for SailCognitionEngine<E> {
             .execute(&request)
             .await
             .map_err(cognition_executor_error)?;
-        build_proposal(request, output.plan, output.evidence, profile)
+        build_proposal(request, output.plan, output.evidence, profile, joined_label)
     }
 }
 
@@ -130,6 +130,7 @@ fn build_proposal(
     plan: ConsolidationPlan,
     evidence: Vec<String>,
     profile: CognitionEngineProfile,
+    joined_label: Label,
 ) -> Result<CognitionProposal, CognitionError> {
     let source_ids: Vec<MemoryId> = request
         .input
@@ -138,11 +139,6 @@ fn build_proposal(
         .iter()
         .map(|source| source.id.clone())
         .collect();
-    let joined = request
-        .input
-        .memories()
-        .iter()
-        .fold(Label::Public, |label, memory| label.join(memory.label));
     let effect = effect_for_plan(&plan);
     let mut proposal = CognitionProposal::new(
         request.job_id,
@@ -151,7 +147,7 @@ fn build_proposal(
         profile.algorithm(),
         profile.algorithm_version(),
         source_ids,
-        joined,
+        joined_label,
     )
     .with_plan(plan)
     .with_effect(effect)

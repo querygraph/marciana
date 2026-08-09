@@ -64,15 +64,17 @@ fn record(item: usize) -> StoredRecord {
     .expect("valid cognition record")
 }
 
-fn authorized_input(source_count: usize) -> AuthorizedCognitionInput {
+fn authorized_input(source_count: usize, reverse_source_ids: bool) -> AuthorizedCognitionInput {
     let store = InMemoryStore::new();
     for item in 0..source_count {
         store.put(record(item)).expect("seed cognition source");
     }
-    let source_ids = (0..source_count)
-        .rev()
+    let mut source_ids = (0..source_count)
         .map(|item| MemoryId::from_string(format!("memory-{item:08}")))
         .collect::<Vec<_>>();
+    if reverse_source_ids {
+        source_ids.reverse();
+    }
     let vault = MemoryVault::new(store);
     let space = MemorySpace::new("user:benchmark", "semantic");
     let policy = typesec_rbac::RbacEngine::from_yaml(POLICY).expect("valid benchmark policy");
@@ -115,8 +117,6 @@ fn governed_source() -> GovernedLakeCatSnapshot {
 }
 
 fn binding(source: &GovernedLakeCatSnapshot, input: &AuthorizedCognitionInput) -> CognitionBinding {
-    let mut effective_projection = source.effective_projection.clone();
-    effective_projection.reverse();
     CognitionBinding {
         space_id: "memory/user:benchmark/semantic".to_owned(),
         subject: source.subject.clone(),
@@ -126,7 +126,7 @@ fn binding(source: &GovernedLakeCatSnapshot, input: &AuthorizedCognitionInput) -
         snapshot_digest: source.snapshot_digest.clone(),
         plan_task_digest: source.plan_task_digest.clone(),
         authorization_receipt_digest: source.authorization_receipt_digest.clone(),
-        effective_projection,
+        effective_projection: source.effective_projection.clone(),
         source_manifest_digest: input.manifest().digest.clone(),
         typedid_request_digest: DIGEST.to_owned(),
     }
@@ -147,15 +147,21 @@ fn benchmark_cognition_engine(criterion: &mut Criterion) {
     group.sample_size(20);
     group.measurement_time(Duration::from_secs(5));
     for source_count in [64, 1_024, 4_096] {
-        let input = authorized_input(source_count);
-        let binding = binding(&source, &input);
-        let request = CognitionRequest {
+        let input = authorized_input(source_count, true);
+        let canonical_binding = binding(&source, &input);
+        let mut reordered_binding = canonical_binding.clone();
+        reordered_binding.effective_projection.reverse();
+        let reordered_request = CognitionRequest {
             job_id: "job-benchmark",
             source: &source,
-            binding: &binding,
+            binding: &reordered_binding,
             input: &input,
             field_mapping: &mapping,
             operation: CognitionOperation::Deduplicate,
+        };
+        let canonical_request = CognitionRequest {
+            binding: &canonical_binding,
+            ..reordered_request
         };
         group.throughput(Throughput::Elements(
             u64::try_from(source_count).expect("benchmark size fits u64"),
@@ -165,7 +171,35 @@ fn benchmark_cognition_engine(criterion: &mut Criterion) {
             &source_count,
             |bencher, _| {
                 bencher.iter(|| {
-                    black_box(runtime.block_on(engine.propose(black_box(request))))
+                    black_box(runtime.block_on(engine.propose(black_box(reordered_request))))
+                        .expect("valid cognition proposal")
+                });
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("canonical_projection", source_count),
+            &source_count,
+            |bencher, _| {
+                bencher.iter(|| {
+                    black_box(runtime.block_on(engine.propose(black_box(canonical_request))))
+                        .expect("valid cognition proposal")
+                });
+            },
+        );
+
+        let canonical_input = authorized_input(source_count, false);
+        let canonical_source_binding = binding(&source, &canonical_input);
+        let canonical_source_request = CognitionRequest {
+            binding: &canonical_source_binding,
+            input: &canonical_input,
+            ..canonical_request
+        };
+        group.bench_with_input(
+            BenchmarkId::new("canonical_sources", source_count),
+            &source_count,
+            |bencher, _| {
+                bencher.iter(|| {
+                    black_box(runtime.block_on(engine.propose(black_box(canonical_source_request))))
                         .expect("valid cognition proposal")
                 });
             },
