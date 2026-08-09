@@ -9,7 +9,7 @@
 //! methods and must never treat knowledge of a job key as authorization.
 
 use chrono::{DateTime, Duration, Utc};
-use grust_core::prelude::GraphCommitStore;
+use grust_core::prelude::{GraphCommitStore, Node};
 use typesec_memory::{CognitionIdempotencyKey, CognitionProposal};
 
 use super::bounds::{is_bounded_failure, is_canonical_text};
@@ -46,15 +46,27 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         max_attempts: u32,
         now: DateTime<Utc>,
     ) -> Result<CognitionJob, CognitionStateError> {
+        self.submit_cognition_job_state(key, owner, typedid_request_digest, max_attempts, now)
+            .map(|(_, job)| job)
+    }
+
+    fn submit_cognition_job_state(
+        &self,
+        key: &CognitionIdempotencyKey,
+        owner: &str,
+        typedid_request_digest: &str,
+        max_attempts: u32,
+        now: DateTime<Utc>,
+    ) -> Result<(Node, CognitionJob), CognitionStateError> {
         validate_submission(key, owner, typedid_request_digest, max_attempts)?;
-        if let Some((_, existing)) = self.load_job_node(key)? {
+        if let Some((node, existing)) = self.load_job_node(key)? {
             if existing.typedid_request_digest != typedid_request_digest
                 || existing.owner_digest != owner_digest(owner)
                 || existing.max_attempts != max_attempts
             {
                 return Err(CognitionStateError::DigestCollision);
             }
-            return Ok(existing);
+            return Ok((node, existing));
         }
 
         let job = CognitionJob {
@@ -75,7 +87,7 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
             progress: super::CognitionProgress::queued(now),
         };
         match self.create_job(key, &job) {
-            Ok(()) => Ok(job),
+            Ok(node) => Ok((node, job)),
             Err(CognitionStateError::ConcurrentModification) => {
                 self.recover_submission(key, owner, typedid_request_digest, max_attempts)
             }
@@ -116,35 +128,47 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         &self,
         request: CognitionJobClaimRequest<'_>,
     ) -> Result<CognitionJobClaim, CognitionStateError> {
-        let job = self.submit_cognition_job(
+        let state = self.submit_cognition_job_state(
             request.key,
             request.submitter,
             request.typedid_request_digest,
             request.max_attempts,
             request.now,
         )?;
+        let job = &state.1;
         match job.status {
             CognitionJobStatus::ProposalReady => Ok(CognitionJobClaim::ProposalReady {
-                proposal_digest: job.proposal_digest.ok_or_else(|| {
+                proposal_digest: job.proposal_digest.clone().ok_or_else(|| {
                     CognitionStateError::Backend("staged job has no proposal digest".into())
                 })?,
             }),
             CognitionJobStatus::Completed => Ok(CognitionJobClaim::Completed {
-                completion_digest: job.completion_digest.ok_or_else(|| {
+                completion_digest: job.completion_digest.clone().ok_or_else(|| {
                     CognitionStateError::Backend("completed job has no commit digest".into())
                 })?,
             }),
             CognitionJobStatus::Cancelled => Err(CognitionStateError::Terminal),
             CognitionJobStatus::Pending
             | CognitionJobStatus::Leased
-            | CognitionJobStatus::Failed => self
-                .acquire_cognition_lease(
+            | CognitionJobStatus::Failed => {
+                let lease_request = ValidatedLeaseRequest::new(
                     request.key,
                     request.worker,
                     request.now,
                     request.lease_ttl,
-                )
-                .map(CognitionJobClaim::Lease),
+                )?;
+                match self.acquire_cognition_lease_from_state(&lease_request, state) {
+                    Err(CognitionStateError::ConcurrentModification) => self
+                        .acquire_cognition_lease(
+                            request.key,
+                            request.worker,
+                            request.now,
+                            request.lease_ttl,
+                        )
+                        .map(CognitionJobClaim::Lease),
+                    result => result.map(CognitionJobClaim::Lease),
+                }
+            }
         }
     }
 
@@ -154,15 +178,15 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         owner: &str,
         typedid_request_digest: &str,
         max_attempts: u32,
-    ) -> Result<CognitionJob, CognitionStateError> {
-        let (_, existing) = self.load_job_node(key)?.ok_or_else(|| {
+    ) -> Result<(Node, CognitionJob), CognitionStateError> {
+        let (node, existing) = self.load_job_node(key)?.ok_or_else(|| {
             CognitionStateError::Backend("job CAS conflicted without a job".into())
         })?;
         if existing.typedid_request_digest == typedid_request_digest
             && existing.owner_digest == owner_digest(owner)
             && existing.max_attempts == max_attempts
         {
-            Ok(existing)
+            Ok((node, existing))
         } else {
             Err(CognitionStateError::DigestCollision)
         }
@@ -188,12 +212,19 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         now: DateTime<Utc>,
         ttl: Duration,
     ) -> Result<CognitionLease, CognitionStateError> {
-        validate_identity(key, owner)?;
-        let expires_at = lease_expiry(now, ttl)?;
-        let (node, mut job) = self
+        let request = ValidatedLeaseRequest::new(key, owner, now, ttl)?;
+        let state = self
             .load_job_node(key)?
             .ok_or(CognitionStateError::NotFound)?;
-        validate_transition_time(&job, now)?;
+        self.acquire_cognition_lease_from_state(&request, state)
+    }
+
+    fn acquire_cognition_lease_from_state(
+        &self,
+        request: &ValidatedLeaseRequest<'_>,
+        (node, mut job): (Node, CognitionJob),
+    ) -> Result<CognitionLease, CognitionStateError> {
+        validate_transition_time(&job, request.now)?;
         if job.status.is_terminal() {
             return Err(CognitionStateError::Terminal);
         }
@@ -205,32 +236,32 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         if job
             .lease
             .as_ref()
-            .is_some_and(|lease| lease.expires_at > now)
+            .is_some_and(|lease| lease.expires_at > request.now)
         {
             return Err(CognitionStateError::LeaseHeld);
         }
         if job.attempts >= job.max_attempts {
-            cancel_exhausted(&mut job, now)?;
-            self.transition_job(key, node, &job)?;
+            cancel_exhausted(&mut job, request.now)?;
+            self.transition_job(request.key, node, &job)?;
             return Err(CognitionStateError::AttemptsExhausted);
         }
 
         advance_attempt(&mut job)?;
-        advance_job(&mut job, now)?;
+        advance_job(&mut job, request.now)?;
         job.status = CognitionJobStatus::Leased;
         let token = new_lease_token();
         job.lease = Some(CognitionLeaseState {
-            owner_digest: owner_digest(owner),
+            owner_digest: owner_digest(request.owner),
             token_digest: token_digest(&token),
-            acquired_at: now,
-            expires_at,
+            acquired_at: request.now,
+            expires_at: request.expires_at,
         });
-        self.transition_job(key, node, &job)?;
+        self.transition_job(request.key, node, &job)?;
         Ok(CognitionLease::new(
             job.job_digest.clone(),
             token,
             job.attempts,
-            expires_at,
+            request.expires_at,
         ))
     }
 
@@ -452,6 +483,30 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         advance_job(&mut job, now)?;
         self.transition_job(key, node, &job)?;
         Ok(job)
+    }
+}
+
+struct ValidatedLeaseRequest<'a> {
+    key: &'a CognitionIdempotencyKey,
+    owner: &'a str,
+    now: DateTime<Utc>,
+    expires_at: DateTime<Utc>,
+}
+
+impl<'a> ValidatedLeaseRequest<'a> {
+    fn new(
+        key: &'a CognitionIdempotencyKey,
+        owner: &'a str,
+        now: DateTime<Utc>,
+        ttl: Duration,
+    ) -> Result<Self, CognitionStateError> {
+        validate_identity(key, owner)?;
+        Ok(Self {
+            key,
+            owner,
+            now,
+            expires_at: lease_expiry(now, ttl)?,
+        })
     }
 }
 

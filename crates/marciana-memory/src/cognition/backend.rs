@@ -43,7 +43,7 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         &self,
         key: &CognitionIdempotencyKey,
         job: &CognitionJob,
-    ) -> Result<(), CognitionStateError> {
+    ) -> Result<Node, CognitionStateError> {
         self.persist_job(key, job, vec![GraphExpectation::Absent(job_node_id(key))])
     }
 
@@ -54,6 +54,7 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         job: &CognitionJob,
     ) -> Result<(), CognitionStateError> {
         self.persist_job(key, job, vec![GraphExpectation::Exact(expected)])
+            .map(drop)
     }
 
     fn persist_job(
@@ -61,7 +62,7 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         key: &CognitionIdempotencyKey,
         job: &CognitionJob,
         expectations: Vec<GraphExpectation>,
-    ) -> Result<(), CognitionStateError> {
+    ) -> Result<Node, CognitionStateError> {
         let desired = encode_job(key, job)?;
         let request = json_digest(TRANSITION_DOMAIN, job)?;
         let guarded = GuardedGraphCommit::new(
@@ -80,7 +81,7 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
         if receipt.replayed {
             self.verify_replayed_node(&desired)?;
         }
-        Ok(())
+        Ok(desired)
     }
 
     pub(crate) fn verify_replayed_node(&self, desired: &Node) -> Result<(), CognitionStateError> {

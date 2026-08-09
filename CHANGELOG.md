@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Reuse the exact validated scheduler job state when a high-level claim
+  acquires its lease, while retaining fresh-load recovery for CAS races.
 - Add production benchmarks for durable cognition submission, loading, lease
   claims, and progress transitions.
 - Canonicalize total-ordered observation evidence in place without stable-sort
