@@ -7,7 +7,7 @@ use grust_core::prelude::{
 use serde::{Deserialize, Serialize};
 /// Maximum ID-only repair entries one cognition transaction may create.
 pub use typesec_memory::MAX_COGNITION_MUTATIONS as MAX_COGNITION_OUTBOX_ENTRIES;
-use typesec_memory::{CognitionCommitStore, CognitionIdempotencyKey, IndexMutation};
+use typesec_memory::{CognitionIdempotencyKey, IndexMutation};
 
 use super::backend::state_backend_error;
 use super::bounds::is_canonical_text;
@@ -151,11 +151,8 @@ impl<G: GraphCommitStore> GraphStoreMemoryStore<G> {
             OUTCOME_SCHEMA_VERSION,
             "unsupported persisted cognition outcome schema version",
         )?;
-        super::commit_outcome::validate_durable_outcome(key, &outcome)
-            .map_err(|_| corrupt_outbox("durable outcome manifest is invalid"))?;
-        self.recover_cognition(key, &outcome.proposal_digest)
-            .map_err(|_| corrupt_outbox("durable outcome manifest is not committed"))?
-            .ok_or_else(|| corrupt_outbox("durable outcome manifest is missing"))?;
+        super::commit_outcome::recover_loaded(self, key, &outcome.proposal_digest, &outcome)
+            .map_err(|_| corrupt_outbox("durable outcome manifest is not committed"))?;
 
         let mut claims = Vec::new();
         let commit_digest = commit_key_digest(key);

@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Reuse an outbox claim's already-loaded durable outcome during full commit
+  recovery instead of loading and decoding the same graph node twice.
 - Add end-to-end production benchmarks for authoritative cognition mutation,
   no-change, recovery, and outbox claim paths.
 - Reuse the exact validated scheduler job state when a high-level claim

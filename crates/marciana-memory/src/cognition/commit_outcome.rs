@@ -40,7 +40,19 @@ pub(super) fn recover<G: GraphCommitStore>(
     let Some(outcome) = outcome else {
         return Ok(None);
     };
-    validate_durable_outcome(key, &outcome)?;
+    recover_loaded(store, key, proposal_digest, &outcome).map(Some)
+}
+
+/// Recover from an outcome the caller already loaded after validating the
+/// request identity. The full durable outcome, audit, job, and commit receipt
+/// are still cross-checked here.
+pub(super) fn recover_loaded<G: GraphCommitStore>(
+    store: &GraphStoreMemoryStore<G>,
+    key: &CognitionIdempotencyKey,
+    proposal_digest: &str,
+    outcome: &DurableOutcome,
+) -> Result<CognitionCommitOutcome, CognitionCommitError> {
+    validate_durable_outcome(key, outcome)?;
     if outcome.proposal_digest != proposal_digest {
         return Err(CognitionCommitError::IdempotencyConflict);
     }
@@ -57,15 +69,15 @@ pub(super) fn recover<G: GraphCommitStore>(
     if json_commit_digest(AUDIT_DOMAIN, &audit)? != outcome.audit_digest {
         return Err(store_error("committed cognition audit evidence changed"));
     }
-    validate_recovered_audit(key, &outcome, &audit)?;
+    validate_recovered_audit(key, outcome, &audit)?;
 
     let (_, job) = store
         .load_job_node(key)
         .map_err(state_store_error)?
         .ok_or_else(|| store_error("committed cognition outcome has no durable job"))?;
-    validate_recovered_job(&job, &outcome, &audit)?;
+    validate_recovered_job(&job, outcome, &audit)?;
     if completed_job_digest(&job)? != outcome.completed_job_digest
-        || envelope_digest(&outcome)? != outcome.envelope_digest
+        || envelope_digest(outcome)? != outcome.envelope_digest
     {
         return Err(store_error(
             "committed cognition envelope does not match durable evidence",
@@ -92,12 +104,12 @@ pub(super) fn recover<G: GraphCommitStore>(
     // claim would make draining a bounded manifest quadratic. Claim and ack are
     // the current-state integrity checkpoints; they direct-load and validate a
     // manifest entry before any delivery transition is accepted.
-    Ok(Some(map_outcome(
+    map_outcome(
         &receipt,
-        &outcome,
+        outcome,
         audit,
         CognitionCommitStatus::AlreadyApplied,
-    )?))
+    )
 }
 
 fn validate_recovered_job(
