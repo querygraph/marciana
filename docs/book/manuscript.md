@@ -412,9 +412,11 @@ rows = warehouse.query(
 The refreshed candidate records exact reachable QueryGraph Sail graph revision
 `c5309365` in `compat/sail-revision.txt`. That revision integrates the head
 `ce5dada0` of open draft upstream performance PR #2400 with QueryGraph's native
-Cypher extension; it does not imply that the upstream PR is merged. The
-explicit production binary remains subject to the live gate; a random
-executable on `PATH` is not proof of compatibility.
+Cypher extension; it does not imply that the upstream PR is merged. Its exact
+native-CPU, `-O3`, thin-LTO, one-codegen-unit, stripped production executable
+passed the bounded Grust adapter checks and both Marciana cognition
+parity/secrecy tests. The release record binds that source and binary digest; a
+random executable on `PATH` is not proof of compatibility.
 
 ### The Akka/Fluree role and Marciana's replacement boundary
 

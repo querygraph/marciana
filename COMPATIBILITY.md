@@ -18,7 +18,7 @@ required.
 | TypeSec | Contract version, conformance fixture version, exact release or revision | Released 0.13.1, including vault-authorized ranked candidate materialization |
 | Grust | Core/backend version and guarded-commit capability | Released 0.12.1 graph, Sail, Turso, Cypher, SQL-core, and memory crates |
 | LakeCat | Governed-proof schema and exact release or revision | Released 0.3.0 core crate and qglake bundle |
-| Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail graph revision recorded below; source gates pass and the refreshed live gate is pending |
+| Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail graph revision recorded below; source and refreshed production live gates pass |
 | QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `efd6245` consumes standalone Marciana; a fresh clone passes its active 71-test suite, doctests, and strict Clippy |
 | Clients | Rust/Python/JavaScript fixture versions | Shared `compat/fixtures/api_remember_v1.json`, Python client `0.1.0` (Pydantic `>=2.7,<3`), and TypeScript client `0.1.0` (Node ESM, TypeScript `^5.7`) are independently buildable; coordinated release publication remains pending |
 
@@ -26,8 +26,12 @@ The linked Sail pin records reachable QueryGraph graph revision `c5309365`.
 That revision merges the head `ce5dada0` of the open draft performance PR
 [lakehq/sail#2400](https://github.com/lakehq/sail/pull/2400) with QueryGraph's
 native Cypher graph extension. It does not represent the upstream PR as merged.
-The exact production binary remains subject to the same `grust-sail` and live
-cognition gate, which must be rerun for this refreshed baseline.
+The exact production binary passed the same `grust-sail` and live cognition
+gate for this refreshed baseline. It was built from `c5309365` with Rust 1.96.0,
+native CPU instructions, `-O3`, thin LTO, one codegen unit, aborting panics,
+no incremental state, `clang`/`lld`, and stripped symbols. The
+115,921,992-byte AArch64 executable has SHA-256
+`937eb113b5a03384a400cb659d12157a9fdc42fbfc19f660325708983e989199`.
 
 ## Baseline procedure
 
@@ -51,10 +55,11 @@ active 71-test suite plus doctests and strict Clippy were built from fresh
 clones using only the exact Git revisions named above. The recorded Sail live
 gate was run from its selected QueryGraph Sail source. The refreshed graph
 revision is recorded above; its parser/analyzer, planner, Spark Connect, and
-strict Clippy source gates pass, and its live gate is pending rerun.
-Marciana's Sail-feature integration target compiles successfully against the
-recorded Grust/Sail bindings; the two ignored cognition tests still require a
-running Spark Connect endpoint and are not represented as live verification.
+strict Clippy source gates pass. On 2026-08-09, its exact optimized production
+binary also passed 26 `grust-sail` live tests, the dedicated non-null and temp
+view checks, and both governed cognition reference-parity/evidence-secrecy
+tests. Marciana's two Sail cognition tests therefore represent executed live
+verification against the recorded artifact, not compile-only coverage.
 
 Generic Sail changes are contributed upstream. Marciana consumes exact
 remotely reachable QueryGraph Sail revisions and never establishes a private
