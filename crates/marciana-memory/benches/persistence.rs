@@ -19,14 +19,18 @@ fn at(second: i64) -> chrono::DateTime<Utc> {
         .expect("benchmark timestamp")
 }
 
-fn job_key() -> CognitionIdempotencyKey {
+fn job_key_for(job_id: &str) -> CognitionIdempotencyKey {
     CognitionIdempotencyKey::for_authority(
         "memory/user:benchmark/semantic",
         "agent:benchmark",
         "benchmark",
-        "job-benchmark",
+        job_id,
     )
     .expect("canonical cognition job key")
+}
+
+fn job_key() -> CognitionIdempotencyKey {
+    job_key_for("job-benchmark")
 }
 
 fn store() -> TursoMemoryStore {
@@ -48,6 +52,20 @@ fn pending_store() -> (TursoMemoryStore, CognitionIdempotencyKey) {
     (store, key)
 }
 
+fn warm_store() -> (TursoMemoryStore, CognitionIdempotencyKey) {
+    let store = store();
+    store
+        .submit_cognition_job(
+            &job_key_for("seed-job"),
+            "scheduler",
+            REQUEST_DIGEST,
+            3,
+            at(0),
+        )
+        .expect("seed benchmark store");
+    (store, job_key())
+}
+
 fn leased_store() -> (TursoMemoryStore, CognitionIdempotencyKey, String) {
     let (store, key) = pending_store();
     let lease = store
@@ -57,8 +75,8 @@ fn leased_store() -> (TursoMemoryStore, CognitionIdempotencyKey, String) {
     (store, key, token)
 }
 
-fn benchmark_cognition_scheduler(criterion: &mut Criterion) {
-    let mut group = criterion.benchmark_group("memory/cognition_scheduler");
+fn benchmark_cognition_submission(criterion: &mut Criterion) {
+    let mut group = criterion.benchmark_group("memory/cognition_submission");
     group.sample_size(30);
     group.measurement_time(StdDuration::from_secs(5));
 
@@ -81,6 +99,33 @@ fn benchmark_cognition_scheduler(criterion: &mut Criterion) {
             BatchSize::SmallInput,
         );
     });
+
+    group.bench_function("submit_warm", |bencher| {
+        bencher.iter_batched(
+            warm_store,
+            |(store, key)| {
+                black_box(
+                    store
+                        .submit_cognition_job(
+                            black_box(&key),
+                            black_box("scheduler"),
+                            black_box(REQUEST_DIGEST),
+                            black_box(3),
+                            black_box(at(1)),
+                        )
+                        .expect("submit benchmark job to warm store"),
+                )
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    group.finish();
+}
+
+fn benchmark_cognition_scheduler(criterion: &mut Criterion) {
+    let mut group = criterion.benchmark_group("memory/cognition_scheduler");
+    group.sample_size(30);
+    group.measurement_time(StdDuration::from_secs(5));
 
     let (store, key) = pending_store();
     group.bench_function("load_pending", |bencher| {
@@ -115,6 +160,25 @@ fn benchmark_cognition_scheduler(criterion: &mut Criterion) {
         );
     });
 
+    group.bench_function("acquire_pending", |bencher| {
+        bencher.iter_batched(
+            pending_store,
+            |(store, key)| {
+                black_box(
+                    store
+                        .acquire_cognition_lease(
+                            black_box(&key),
+                            black_box("worker"),
+                            black_box(at(1)),
+                            black_box(Duration::minutes(5)),
+                        )
+                        .expect("lease benchmark job"),
+                )
+            },
+            BatchSize::SmallInput,
+        );
+    });
+
     group.bench_function("update_progress", |bencher| {
         bencher.iter_batched(
             leased_store,
@@ -142,5 +206,9 @@ fn benchmark_cognition_scheduler(criterion: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, benchmark_cognition_scheduler);
+criterion_group!(
+    benches,
+    benchmark_cognition_submission,
+    benchmark_cognition_scheduler
+);
 criterion_main!(benches);
