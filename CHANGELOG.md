@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Add production benchmarks for durable cognition submission, loading, lease
+  claims, and progress transitions.
 - Canonicalize total-ordered observation evidence in place without stable-sort
   scratch allocation, with a deterministically scrambled benchmark corpus.
 - Format parsed assertion UUIDs once for both canonicality checking and owned
