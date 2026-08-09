@@ -84,6 +84,15 @@ fn observation_evidence(count: usize) -> Vec<String> {
         .collect()
 }
 
+fn scrambled_observation_evidence(count: usize) -> Vec<String> {
+    (0..count)
+        .map(|position| {
+            let item = position.wrapping_mul(2_654_435_769) % count;
+            format!("sha256:{item:064x}")
+        })
+        .collect()
+}
+
 fn benchmark_learning_artifacts(criterion: &mut Criterion) {
     let at = Utc
         .timestamp_opt(1_786_032_000, 0)
@@ -92,6 +101,7 @@ fn benchmark_learning_artifacts(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("cognition/learning");
     for evidence_count in [1, 256] {
         let evidence = observation_evidence(evidence_count);
+        let scrambled_evidence = scrambled_observation_evidence(evidence_count);
         group.throughput(Throughput::Elements(
             u64::try_from(evidence_count).expect("benchmark size fits u64"),
         ));
@@ -103,6 +113,23 @@ fn benchmark_learning_artifacts(criterion: &mut Criterion) {
                     black_box(
                         Observation::propose(
                             black_box(&evidence),
+                            u32::try_from(evidence_count).expect("evidence count fits u32"),
+                            8_500,
+                            at,
+                        )
+                        .expect("valid observation"),
+                    )
+                });
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("observation_propose_scrambled", evidence_count),
+            &evidence_count,
+            |bencher, _| {
+                bencher.iter(|| {
+                    black_box(
+                        Observation::propose(
+                            black_box(&scrambled_evidence),
                             u32::try_from(evidence_count).expect("evidence count fits u32"),
                             8_500,
                             at,

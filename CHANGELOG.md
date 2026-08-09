@@ -4,6 +4,8 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+- Canonicalize total-ordered observation evidence in place without stable-sort
+  scratch allocation, with a deterministically scrambled benchmark corpus.
 - Format parsed assertion UUIDs once for both canonicality checking and owned
   identity construction.
 - Validate native cognition snapshots without hashing and discarding their

@@ -55,7 +55,7 @@ impl Observation {
             return Err(LearningError::InvalidEvidence);
         }
         let mut canonical = evidence_digests.to_owned();
-        canonical.sort();
+        canonical.sort_unstable();
         let identity_capacity = canonical.iter().fold(
             OBSERVATION_IDENTITY_BASE_BYTES,
             |capacity, evidence_digest| capacity + evidence_digest.len() + 4,
