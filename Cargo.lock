@@ -1336,9 +1336,9 @@ dependencies = [
 
 [[package]]
 name = "grust-graph"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61062ad3b3e9b83fe234bc446a0d0c960004e5ec5a16ee6e0337e1ed9a6a4e04"
+checksum = "4c7d2998254e43b77d9e2a961374034e571f15c564a343a9f8c09692db347348"
 dependencies = [
  "grust-core",
  "grust-cypher",
@@ -1358,9 +1358,9 @@ dependencies = [
 
 [[package]]
 name = "grust-sail"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26e7d01c83a1b81107084c5de37d4b963c3cc6caabbf591dedb1d5dff9abb533"
+checksum = "ab6fdfce00ed3b0fa49de2ecf7d5e160e6a9a2db8ac372032318aa85859f0bd4"
 dependencies = [
  "arrow",
  "async-trait",
@@ -1912,9 +1912,9 @@ dependencies = [
 
 [[package]]
 name = "lakecat-core"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c61a778a20ef4d6899ad8f5d13c69499d715e3ef3ee34fc70dcd71733bc087cd"
+checksum = "4ac799e08705878c72b4de60e13ce07ae7d15827ffb5db28fd5b5373e03cdb0f"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2100,7 +2100,7 @@ dependencies = [
 
 [[package]]
 name = "marciana-catalog"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "criterion",
  "lakecat-core",
@@ -2111,7 +2111,7 @@ dependencies = [
 
 [[package]]
 name = "marciana-cognition"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2132,7 +2132,7 @@ dependencies = [
 
 [[package]]
 name = "marciana-ledger"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "chrono",
  "criterion",
@@ -2544,7 +2544,7 @@ dependencies = [
 
 [[package]]
 name = "querygraph-memory"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "arrow",
  "async-trait",
