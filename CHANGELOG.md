@@ -4,6 +4,12 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+## 0.13.1 — 2026-09-04
+
+- Track LakeCat `0.4.0` (`lakecat-core`) so the governed-scan authority types
+  Marciana re-exports are the same types QueryGraph consumes from LakeCat;
+  intra-workspace requirements move to 0.13.1.
+
 ## 0.13.0 — 2026-09-04
 
 - Align the workspace with Grust 0.13.0 (Prawn) and TypeSec 0.14.0

@@ -17,7 +17,7 @@ grust-turso = { version = "0.13.0", optional = true }
 grust-sail = { version = "0.13.0", optional = true }
 typesec-memory = "0.14.0"
 typesec-core = "0.14.0"
-marciana-ledger = { path = "../marciana-ledger", version = "0.13.0" }
+marciana-ledger = { path = "../marciana-ledger", version = "0.13.1" }
 chrono = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

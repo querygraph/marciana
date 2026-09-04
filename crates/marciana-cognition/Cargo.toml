@@ -13,9 +13,9 @@ test-support = []
 async-trait = { workspace = true }
 chrono = { version = "0.4", features = ["serde"] }
 grust = { package = "grust-graph", version = "0.13.0", features = ["sail"] }
-lakecat-core = "0.3.0"
-marciana-catalog = { path = "../marciana-catalog", version = "0.13.0" }
-querygraph-memory = { path = "../marciana-memory", version = "0.13.0", features = ["sail"] }
+lakecat-core = "0.4.0"
+marciana-catalog = { path = "../marciana-catalog", version = "0.13.1" }
+querygraph-memory = { path = "../marciana-memory", version = "0.13.1", features = ["sail"] }
 serde_json = { workspace = true }
 serde = { workspace = true }
 sha2 = "0.10"

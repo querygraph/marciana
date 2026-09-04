@@ -7,8 +7,8 @@ maintain competing pins.
 ## Extraction baseline
 
 `querygraph-memory` has been transplanted into
-`crates/marciana-memory` with its behavior-preserving history. The 0.13.0
-release resolves TypeSec 0.14.0, Grust 0.13.0, and LakeCat 0.3.0 from crates.io;
+`crates/marciana-memory` with its behavior-preserving history. The 0.13.1
+release resolves TypeSec 0.14.0, Grust 0.13.0, and LakeCat 0.4.0 from crates.io;
 the lockfile records the exact registry checksums and no sibling checkout is
 required.
 
@@ -17,7 +17,7 @@ required.
 | Marciana | API, wire schema, proposal/binding schema, composite source-scope schema, job/outcome schema, database schema range | Git-pinned native governed `improve` baseline plus validation-only Rust four-verb request contracts; vault-backed facade execution remains scheduled in `MARCIANA2.md` |
 | TypeSec | Contract version, conformance fixture version, exact release or revision | Released 0.14.0 (Dorsoduro), including vault-authorized ranked candidate materialization and signed semantic decision receipts |
 | Grust | Core/backend version and guarded-commit capability | Released 0.13.0 (Prawn) graph, Sail, Turso, Cypher, SQL-core, and memory crates |
-| LakeCat | Governed-proof schema and exact release or revision | Released 0.3.0 core crate and qglake bundle |
+| LakeCat | Governed-proof schema and exact release or revision | Released 0.4.0 core crate and qglake bundle |
 | Sail | Exact reachable QueryGraph revision and Arrow input/output schema | QueryGraph Sail graph revision recorded below; source and refreshed production live gates pass |
 | QueryGraph | Supported route/wire baseline and exact version or revision | Exact reachable revision `efd6245` consumes standalone Marciana; a fresh clone passes its active 71-test suite, doctests, and strict Clippy |
 | Clients | Rust/Python/JavaScript fixture versions | Shared `compat/fixtures/api_remember_v1.json`, Python client `0.1.0` (Pydantic `>=2.7,<3`), and TypeScript client `0.1.0` (Node ESM, TypeScript `^5.7`) are independently buildable; coordinated release publication remains pending |
