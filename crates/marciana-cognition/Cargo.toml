@@ -12,23 +12,23 @@ test-support = []
 [dependencies]
 async-trait = { workspace = true }
 chrono = { version = "0.4", features = ["serde"] }
-grust = { package = "grust-graph", version = "0.12.1", features = ["sail"] }
+grust = { package = "grust-graph", version = "0.13.0", features = ["sail"] }
 lakecat-core = "0.3.0"
-marciana-catalog = { path = "../marciana-catalog", version = "0.12.1" }
-querygraph-memory = { path = "../marciana-memory", version = "0.12.1", features = ["sail"] }
+marciana-catalog = { path = "../marciana-catalog", version = "0.13.0" }
+querygraph-memory = { path = "../marciana-memory", version = "0.13.0", features = ["sail"] }
 serde_json = { workspace = true }
 serde = { workspace = true }
 sha2 = "0.10"
 tokio = { workspace = true }
-typesec-core = "0.13.1"
-typesec-integrations = "0.13.1"
-typesec-memory = "0.13.1"
+typesec-core = "0.14.0"
+typesec-integrations = "0.14.0"
+typesec-memory = "0.14.0"
 thiserror = { workspace = true }
 
 [dev-dependencies]
 async-trait = { workspace = true }
 criterion = { workspace = true }
-typesec-core = "0.13.1"
+typesec-core = "0.14.0"
 
 [[bench]]
 name = "cognition"

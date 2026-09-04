@@ -4,6 +4,13 @@ All notable changes to Marciana are documented in this file.
 
 ## Unreleased
 
+## 0.13.0 — 2026-09-04
+
+- Align the workspace with Grust 0.13.0 (Prawn) and TypeSec 0.14.0
+  (Dorsoduro): `grust-core`, `grust-graph`, `grust-memory`, `grust-turso`,
+  `grust-sail`, and every `typesec-*` requirement now track the released
+  lockstep lines; intra-workspace requirements move to 0.13.0.
+
 - Pin the refreshed Sail candidate to the exact reachable QueryGraph graph
   revision carrying upstream performance PR #2400's head, while preserving the
   explicit production-binary live gate and distinguishing an open PR from a

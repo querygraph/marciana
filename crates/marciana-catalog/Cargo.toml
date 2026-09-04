@@ -8,7 +8,7 @@ repository.workspace = true
 description = "Marciana adapters for LakeCat-governed cognition sources"
 [dependencies]
 lakecat-core = "0.3.0"
-querygraph-memory = { path = "../marciana-memory", version = "0.12.1" }
+querygraph-memory = { path = "../marciana-memory", version = "0.13.0" }
 thiserror = { workspace = true }
 
 [dev-dependencies]
